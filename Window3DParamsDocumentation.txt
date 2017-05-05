@@ -1,0 +1,26 @@
+Window 3D Parameters Documentation. These parameters are specified in wormguides/util/subsceneparameters/parameters.txt.
+
+WAIT_TIME_MILLI             -> wait time (in ms) before displaying the next time point in movie-playing mode
+INITIAL_ZOOM                -> initial zoom of the subscene in the range [0.0, 24.75] - the higher this number, the
+                                farther away the embro is
+INITIAL_TRANSLATE_X         -> initial translation (in px) of the camera along the x-axis
+INITIAL_TRANSLATE_Y         -> intiial translation (in px) of the camera along the y-axis
+CAMERA_INITIAL_DISTANCE     -> initial distance the camera is away from the subscene
+CAMERA_NEAR_CLIP            -> distance of the far clipping plane of the camera in the eye coordinate space, from the
+                                eye
+CAMERA_FAR_CLIP             -> distance of the near clipping plane of the camera in the eye coordinate space, from the
+                                eye
+BILLBOARD_SCALE             -> scale for the note billboards for visibility and legibility in the subscene
+SIZE_SCALE                  -> scale for the radii of the spherical cells
+UNIFORM_RADIUS              -> the radius of spherical cells in Uniform Size mode
+LABEL_SPRITE_Y_OFFSET       -> vertical offset (in px) of labels from sprites, so they are not rendered on top of
+                                each other
+DEFAULT_OTHERS_OPACITY      -> initial opacity/visibility in the range [0.0, 1.0] of the "other" subscene entities
+VISIBILITY_CUTOFF           -> opacity/visibility in the range [0.0, 1.0] of the "other" subscene entities under which
+                                they are not rendered at all
+SELECTABILITY_VISIBILITY_CUTOFF     -> opacity/visibility in the range [0.0, 1.0] of the "other" subscene entities
+                                        under which they are disabled (not selectable)
+STORY_OVERLAY_PANE_WIDTH    -> width (in px) of the story overlay pane in the upper-right-hand corner of the 3D
+                                window
+NOTE_SPRITE_TEXT_WIDTH      -> wrapping width (in px) of note sprites
+NOTE_BILLBOARD_TEXT_WIDTH   -> wrapping width (in px) of note billboards
