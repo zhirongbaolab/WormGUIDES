@@ -89,7 +89,7 @@ import static wormguides.loaders.ImageLoader.getPlusIcon;
 import static wormguides.models.colorrule.SearchOption.CELL_NUCLEUS;
 
 public class SulstonTreePane extends ScrollPane {
-    //TODO decouple rendering as separate class from WG app specific interaction
+    //TODO decouple rendering as separate class from WG app specific interaction -as
     // gui stuff
     private static final int TIME_LABEL_OFFSET_X = 20;
     private static final int ZOOM_BUTTON_SIZE = 30;
