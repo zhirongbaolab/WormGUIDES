@@ -485,6 +485,21 @@ public class SearchLayer {
         return addColorRule(STRUCTURE_BY_SCENE_NAME, searched, color, new ArrayList<>());
     }
 
+
+    /**
+     * Adds a color rule for a collection of multicellular structures to the currently active rules list. Adding a rule
+     * does not rebuild the subscene. In order for any changes to be visible, the calling class must set the
+     * 'rebuildSubsceneFlag' to true or set a property that triggers a subscene rebuild.
+     *
+     * @param header
+     * @param structures
+     * @param color
+     * @return
+     */
+    public void addStructureRuleByHeaderName(final String header, final List<String> structures, final Color color) {
+        //TODO add the new rule type creation call here
+    }
+
     /**
      * Adds a color rule to the currently active rules list. Adding a rule does not rebuild the subscene. In order
      * for any changes to be visible, the calling class must set the 'rebuildSubsceneFlag' to true or set a property

@@ -154,9 +154,8 @@ public class StructuresLayer {
                                 nodeQueue.addAll(treeItem.getChildren());
                             }
                         }
-                        for (String structure : structuresToAdd) {
-                            addStructureRule(structure, selectedColor);
-                        }
+
+                        addStructureRule(selectedNode.getText(), structuresToAdd, selectedColor);
                     }
                     clearStructureTreeNodeSelection();
                 }
@@ -178,6 +177,25 @@ public class StructuresLayer {
      */
     private void clearStructureTreeNodeSelection() {
         allStructuresTreeView.getSelectionModel().clearSelection();
+    }
+
+    /**
+     * Utilizes the search layer to add a structure rule for the list of structures
+     *
+     * @param header
+     * @param structures
+     * @param color
+     */
+    private void addStructureRule(String header, List<String> structures, final Color color) {
+        if (header == null || structures == null || color == null) return;
+
+        // remove any names that aren't in the scene elements list
+        List<String> sceneNames = sceneElementsList.getAllSceneNames();
+        for (String structName : structures) {
+            if (!sceneNames.contains(structName)) structures.remove(structName);
+        }
+
+        searchLayer.addStructureRuleByHeaderName(header, structures, color);
     }
 
     /**
