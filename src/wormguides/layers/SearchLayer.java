@@ -1,9 +1,5 @@
 /*
- * Bao Lab 2016
- */
-
-/*
- * Bao Lab 2016
+ * Bao Lab 2017
  */
 
 package wormguides.layers;
@@ -58,6 +54,7 @@ import static search.SearchType.FUNCTIONAL;
 import static search.SearchType.GENE;
 import static search.SearchType.LINEAGE;
 import static search.SearchType.MULTICELLULAR_STRUCTURE_CELLS;
+import static search.SearchType.STRUCTURES_BY_HEADING;
 import static search.SearchType.STRUCTURE_BY_SCENE_NAME;
 import static search.SearchUtil.getAncestorsList;
 import static search.SearchUtil.getCellsInMulticellularStructure;
@@ -485,19 +482,20 @@ public class SearchLayer {
         return addColorRule(STRUCTURE_BY_SCENE_NAME, searched, color, new ArrayList<>());
     }
 
-
     /**
      * Adds a color rule for a collection of multicellular structures to the currently active rules list. Adding a rule
      * does not rebuild the subscene. In order for any changes to be visible, the calling class must set the
      * 'rebuildSubsceneFlag' to true or set a property that triggers a subscene rebuild.
      *
-     * @param header
-     * @param structures
+     * @param heading
+     *         the structures heading
      * @param color
-     * @return
+     *         the color to apply to all structures under the heading
+     *
+     * @return the color rule
      */
-    public void addStructureRuleByHeaderName(final String header, final List<String> structures, final Color color) {
-        //TODO add the new rule type creation call here
+    public Rule addStructureRuleByHeaderName(final String heading, final Color color) {
+        return addColorRule(STRUCTURES_BY_HEADING, heading, color, new ArrayList<>());
     }
 
     /**
@@ -565,7 +563,7 @@ public class SearchLayer {
     }
 
     private String createRuleLabel(String searched, final SearchType searchType) {
-        searched = searched.trim().toLowerCase();
+        searched = searched.trim();
         StringBuilder labelBuilder = new StringBuilder();
         if (searchType != null) {
             if (searchType == LINEAGE) {
@@ -876,10 +874,31 @@ public class SearchLayer {
                                     casesLists.makeTerminalCase(
                                             searchedCell,
                                             funcName,
-                                            connectome.queryConnectivity(funcName, true, false, false, false, false),
-                                            connectome.queryConnectivity(funcName, false, true, false, false, false),
-                                            connectome.queryConnectivity(funcName, false, false, true, false, false),
-                                            connectome.queryConnectivity(funcName, false, false, false, true, false),
+                                            connectome.queryConnectivity(
+                                                    funcName,
+                                                    true,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    false),
+                                            connectome.queryConnectivity(funcName,
+                                                    false,
+                                                    true,
+                                                    false,
+                                                    false,
+                                                    false),
+                                            connectome.queryConnectivity(funcName,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    false,
+                                                    false),
+                                            connectome.queryConnectivity(funcName,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    false),
                                             productionInfo.getNuclearInfo(),
                                             productionInfo.getCellShapeData(searchedCell));
                                 }

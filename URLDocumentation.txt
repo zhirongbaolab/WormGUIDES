@@ -11,6 +11,7 @@ Description	->	"-d"
 Gene		->	"-g"
 Multicellular Structure Cells	->	"-m"	* added later
 Structure by Scene Name	        ->	"-M"	* added later
+Structures by Heading           ->  "-H"    * added later
 Connectome	->	"-c"	* added later
 Neighbor	->	"-b"	* added later
 

@@ -104,7 +104,6 @@ import static javafx.scene.layout.AnchorPane.setRightAnchor;
 import static javafx.scene.layout.AnchorPane.setTopAnchor;
 import static javafx.scene.paint.Color.BLACK;
 import static javafx.scene.paint.Color.GRAY;
-import static javafx.scene.paint.Color.web;
 import static javafx.stage.Modality.NONE;
 import static javafx.stage.StageStyle.UNDECORATED;
 
@@ -127,7 +126,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
     private static final String UNLINEAGED_START = "Nuc";
     private static final String ROOT = "ROOT";
-    private static final String FILL_COLOR_HEX = "#272727";
 
     // Panels stuff
     @FXML
@@ -1269,7 +1267,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 mainStage.heightProperty().get(),
                 true,
                 BALANCED);
-        subscene.setFill(web(FILL_COLOR_HEX));
 
         rulesList = observableArrayList();
         searchResultsList = observableArrayList();

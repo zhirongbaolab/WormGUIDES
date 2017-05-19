@@ -155,6 +155,7 @@ import static wormguides.util.subsceneparameters.Parameters.getNoteSpriteTextWid
 import static wormguides.util.subsceneparameters.Parameters.getSelectabilityVisibilityCutoff;
 import static wormguides.util.subsceneparameters.Parameters.getSizeScale;
 import static wormguides.util.subsceneparameters.Parameters.getStoryOverlayPaneWidth;
+import static wormguides.util.subsceneparameters.Parameters.getSubsceneBackgroundColorHex;
 import static wormguides.util.subsceneparameters.Parameters.getUniformRadius;
 import static wormguides.util.subsceneparameters.Parameters.getVisibilityCutoff;
 import static wormguides.util.subsceneparameters.Parameters.getWaitTimeMilli;
@@ -181,8 +182,7 @@ public class Window3DController {
     private static final double CANNONICAL_ORIENTATION_Y = -166.0;
     private static final double CANNONICAL_ORIENTATION_Z = 24.0;
     private static final String CS = ", ";
-    private static final String FILL_COLOR_HEX = "#272727",
-            ACTIVE_LABEL_COLOR_HEX = "#ffff66",
+    private static final String ACTIVE_LABEL_COLOR_HEX = "#ffff66",
             SPRITE_COLOR_HEX = "#ffffff",
             TRANSIENT_LABEL_COLOR_HEX = "#f0f0f0";
 
@@ -502,6 +502,7 @@ public class Window3DController {
         this.subscene = requireNonNull(subscene);
         buildCamera();
         parentPane.getChildren().add(this.subscene);
+        this.subscene.setFill(web(getSubsceneBackgroundColorHex()));
 
         isInSearchMode = false;
 
@@ -1783,7 +1784,7 @@ public class Window3DController {
                 }
 
             } else {
-                // if not in search, consult active list of rules
+                // if not in search (flashlight mode), consult active list of rules
                 final List<Color> colors = new ArrayList<>();
                 for (Rule rule : rulesList) {
                     if (rule.appliesToCellNucleus(cellName)) {
@@ -1899,10 +1900,7 @@ public class Window3DController {
                             // this is the check for whether this is an explicit structure rule
                             if (rule.appliesToStructureWithSceneName(sceneElement.getSceneName())) {
                                 colors.add(rule.getColor());
-                            }
-                            // commented out 12/28/2016 --> this condition will color a mutlicellular structure
-                            // if a single cell in struct has a rule
-                            else {
+                            } else {
                                 colors.addAll(structureCells
                                         .stream()
                                         .filter(rule::appliesToCellBody)
