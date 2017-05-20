@@ -24,3 +24,5 @@ STORY_OVERLAY_PANE_WIDTH    -> width (in px) of the story overlay pane in the up
                                 window
 NOTE_SPRITE_TEXT_WIDTH      -> wrapping width (in px) of note sprites
 NOTE_BILLBOARD_TEXT_WIDTH   -> wrapping width (in px) of note billboards
+SUBSCENE_BACKGROUND_COLOR_HEX       -> 6-digit hex value (prepended with a '#') of the 3D subscene background color
+                                        (eg. #252525)
