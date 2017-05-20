@@ -50,6 +50,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TreeItem;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -83,6 +84,7 @@ import wormguides.models.colorrule.Rule;
 import wormguides.models.subscenegeometry.SceneElement;
 import wormguides.models.subscenegeometry.SceneElementMeshView;
 import wormguides.models.subscenegeometry.SceneElementsList;
+import wormguides.models.subscenegeometry.StructureTreeNode;
 import wormguides.resources.ProductionInfo;
 import wormguides.stories.Note;
 import wormguides.stories.Note.Display;
@@ -337,7 +339,7 @@ public class Window3DController {
     private String moviePath;
     private File frameDir;
 
-//    private Quaternion quaternion;
+    // private Quaternion quaternion;
 
     /** X-scale of the subscene coordinate axis read from ProductionInfo.csv */
     private double xScale;
@@ -356,6 +358,7 @@ public class Window3DController {
             final ProductionInfo productionInfo,
             final Connectome connectome,
             final SceneElementsList sceneElementsList,
+            final TreeItem<StructureTreeNode> structureTreeRoot,
             final StoriesLayer storiesLayer,
             final SearchLayer searchLayer,
             final BooleanProperty bringUpInfoFlag,
@@ -1866,23 +1869,17 @@ public class Window3DController {
                 sceneElement = iter.next();
                 meshView = currentSceneElementMeshes.get(index);
 
-                // in search mode
                 if (isInSearchMode) {
-                    // note: in highlighting, lim4_nerve_ring is parallel with an AB lineage name in meshNames and
-                    // sceneElements respectively
                     if (cellBodyTicked && isMeshSearchedFlags[index]) {
                         meshView.setMaterial(colorHash.getHighlightMaterial());
                     } else {
                         meshView.setMaterial(colorHash.getTranslucentMaterial());
                     }
-
                 } else {
                     // in regular viewing mode
                     final List<String> structureCells = sceneElement.getAllCells();
                     final List<Color> colors = new ArrayList<>();
 
-                    // 12/28/2016 meshes with no cells default to others opacity here because only structure rules
-                    // can color them
                     if (structureCells.isEmpty()) {
                         // check if any rules apply to this no-cell structure
                         for (Rule rule : rulesList) {
@@ -1890,14 +1887,8 @@ public class Window3DController {
                                 colors.add(rule.getColor());
                             }
                         }
-
                     } else {
-                        // process rules that apply to it
                         for (Rule rule : rulesList) {
-                            // cell nuc, cell body rules should not tag multicellular structures that contain
-                            // themselves to avoid ambiguity
-                            // to color multicellular structures, users must add explicit structures rules
-                            // this is the check for whether this is an explicit structure rule
                             if (rule.appliesToStructureWithSceneName(sceneElement.getSceneName())) {
                                 colors.add(rule.getColor());
                             } else {

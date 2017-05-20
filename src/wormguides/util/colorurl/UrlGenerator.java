@@ -138,15 +138,17 @@ public class UrlGenerator {
             if (ruleName.contains("'")) {
                 ruleName = ruleName.substring(0, ruleName.lastIndexOf("'"));
                 ruleName = ruleName.substring(ruleName.indexOf("'") + 1, ruleName.length());
+                ruleName = ruleName.replace(" ", "=");
             }
             builder.append("/").append(ruleName);
 
             // rule from cell search
             // rule from multicellular structure search
             if (rule.isStructureRuleBySceneName()) {
-                // specify a multicellular structure rule that is not
-                // cell-based, but scene name-based
+                // specify a multicellular structure rule that is not cell-based, but scene name-based
                 builder.append("-M");
+            } else if (rule.isStructureRuleByHeading()) {
+                builder.append("-H");
             } else {
                 // search types
                 switch (rule.getSearchType()) {

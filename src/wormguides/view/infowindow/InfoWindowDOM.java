@@ -25,26 +25,27 @@ import static java.util.Collections.sort;
  */
 public class InfoWindowDOM {
 
-    private final static String AMPHID = "amphid";
-    private final static String AMPHID_ANCHOR = "<a href=\"#\" onclick=\"handleAmphidClick()\">Amphid</a>";
-    private final static String DOCTYPE_TAG = "<!DOCTYPE html>";
-    private final static String NL = "\n";
-    private static final String cellShapesIndexName = "Cell Shapes Index";
-    private static final String partsListName = "Parts List";
-    private static final String connectomeName = "Connectome";
-    private static final String cellDeathsName = "Cell Deaths";
-    private static final String productionInfoName = "Experimental Data";
+    private static final String AMPHID = "amphid";
+    private static final String AMPHID_ANCHOR = "<a href=\"#\" onclick=\"handleAmphidClick()\">Amphid</a>";
+    private static final String DOCTYPE_TAG = "<!DOCTYPE html>";
+    private static final String NL = "\n";
+    private static final String HTTP = "http";
+    private static final String SPACE = " ";
+
+    private final String cellShapesIndexName = "Cell Shapes Index";
+    private final String partsListName = "Parts List";
+    private final String connectomeName = "Connectome";
+    private final String cellDeathsName = "Cell Deaths";
+    private final String productionInfoName = "Experimental Data";
     // strings for building the connectome DOM --> synapse types as strings for search logic
-    private final static String s_presynapticDescription = "S presynaptic";
-    private final static String r_postsynapticDescription = "R postsynaptic";
-    private final static String ej_electricalDescription = "EJ electrical";
-    private final static String nmj_neuromuscularDescrpition = "Nmj neuromuscular";
+    private final String s_presynapticDescription = "S presynaptic";
+    private final String r_postsynapticDescription = "R postsynaptic";
+    private final String ej_electricalDescription = "EJ electrical";
+    private final String nmj_neuromuscularDescrpition = "Nmj neuromuscular";
     private final String presynapticPartnersTitle = "Presynaptic: ";
     private final String postsynapticPartnersTitle = "Postsynaptic: ";
     private final String electricalPartnersTitle = "Electrical: ";
     private final String neuromusclarPartnersTitle = "Neuromusclar: ";
-    private final String HTTP = "http";
-    private final String SPACE = " ";
     private HTMLNode html;
     private String name;
 
@@ -109,19 +110,19 @@ public class InfoWindowDOM {
             tr.addChild(new HTMLNode("td", "", "", se.getMarkerName()));
             tr.addChild(new HTMLNode("td", "", "", Integer.toString(se.getStartTime())));
             tr.addChild(new HTMLNode("td", "", "", Integer.toString(se.getEndTime())));
-            
+
             if (se.getComments().contains(HTTP)) {
-            	tr.addChild(new HTMLNode("td", "", "", reformatDataWithAnchors(se.getComments())));
+                tr.addChild(new HTMLNode("td", "", "", reformatDataWithAnchors(se.getComments())));
             } else {
-            	tr.addChild(new HTMLNode("td", "", "", se.getComments()));
+                tr.addChild(new HTMLNode("td", "", "", se.getComments()));
             }
-            
+
             sceneElementsListTable.addChild(tr);
         }
 
         sceneElementsListDiv.addChild(sceneElementsListTable);
         body.addChild(sceneElementsListDiv);
-        
+
         // add link controller
         body.addChild(body.addLinkHandlerScript());
 
@@ -223,12 +224,14 @@ public class InfoWindowDOM {
 
         buildStyleNode();
     }
+
     /**
      * Class constructor to create a DOM for the cell deaths window
      *
      * @param cellDeaths
+     *         the cell deaths
      */
-    public InfoWindowDOM(Object[] cellDeaths) {
+    public InfoWindowDOM(final Object[] cellDeaths) {
         this.html = new HTMLNode("html");
         this.name = cellDeathsName;
 
@@ -260,6 +263,7 @@ public class InfoWindowDOM {
 
         buildStyleNode();
     }
+
     public InfoWindowDOM(ProductionInfo productionInfo) {
         this.html = new HTMLNode("html");
         this.name = productionInfoName;
@@ -309,12 +313,12 @@ public class InfoWindowDOM {
             HTMLNode tr = new HTMLNode("tr");
             for (List<String> aProductionInfoData : productionInfoData) {
                 String data = aProductionInfoData.get(i);
-                
+
                 // check for presence of a link
                 if (data.contains(HTTP)) {
-                	data = reformatDataWithAnchors(data);
+                    data = reformatDataWithAnchors(data);
                 }
-                
+
                 HTMLNode td = new HTMLNode("td", "", "", data);
                 tr.addChild(td);
             }
@@ -324,7 +328,7 @@ public class InfoWindowDOM {
         productionInfoDiv.addChild(productionInfoTable);
 
         body.addChild(productionInfoDiv);
-        
+
         // add link controller
         body.addChild(body.addLinkHandlerScript());
 
@@ -333,6 +337,7 @@ public class InfoWindowDOM {
 
         buildStyleNode();
     }
+
     /**
      * Class constructor to create a DOM for a terminal cell case.
      *
@@ -534,7 +539,7 @@ public class InfoWindowDOM {
         }
 
         // homologues
-        boolean hasHomologues = false;
+        boolean hasHomologues;
         List<List<String>> terminalHomologues = terminalCase.getHomologues();
         HTMLNode homologuesTopContainerDiv = new HTMLNode("div", "homologuesTopContainer", "");
         HTMLNode collapseHomologuesButton = new HTMLNode(
@@ -943,6 +948,7 @@ public class InfoWindowDOM {
         // add style node
         buildStyleNode();
     }
+
     /**
      * Class constructor to create a DOM for a non-terminal cell case.
      *
@@ -1294,6 +1300,7 @@ public class InfoWindowDOM {
         // add style node
         buildStyleNode();
     }
+
     public InfoWindowDOM(AmphidSensillaTerm termCase) {
         this.html = new HTMLNode("html");
         this.name = termCase.getName();
@@ -1501,22 +1508,54 @@ public class InfoWindowDOM {
         }
 
         // default style rules
-        String style = NL + "ul {" + NL + "list-style-type: none;" + NL + "display: block;" + NL + "width: 100%;"
-                + NL + "}" + NL + NL + "li {" + NL + "margin-bottom: 2%;" + NL + "}" + NL + NL + "div {" + NL
-                + "width: 100%;" + NL + "overflow: hidden;" + NL + "}" + NL + "table, th, td {" + NL
-                + "border: 1px solid black;" + NL + "border-collapse: collapse;" + NL + "}" + NL;
+        StringBuilder style = new StringBuilder()
+                .append(NL)
+                .append("ul {")
+                .append(NL)
+                .append("list-style-type: none;")
+                .append(NL)
+                .append("display: block;")
+                .append(NL)
+                .append("width: 100%;")
+                .append(NL)
+                .append("}")
+                .append(NL)
+                .append(NL)
+                .append("li {")
+                .append(NL)
+                .append("margin-bottom: 2%;")
+                .append(NL)
+                .append("}")
+                .append(NL)
+                .append(NL)
+                .append("div {")
+                .append(NL)
+                .append("width: 100%;")
+                .append(NL)
+                .append("overflow: hidden;")
+                .append(NL)
+                .append("}")
+                .append(NL)
+                .append("table, th, td {")
+                .append(NL)
+                .append("border: 1px solid black;")
+                .append(NL)
+                .append("border-collapse: collapse;")
+                .append(NL)
+                .append("}")
+                .append(NL);
         HTMLNode head = null; // saved to add style node as child of head
         if (html.hasChildren()) {
             for (HTMLNode node : html.getChildren()) {
                 if (node.getTag().equals("head")) { // save head
                     head = node;
                 } else if (node.getTag().equals("body")) { // get style
-                    style += findStyleInSubTree(node);
+                    style.append(findStyleInSubTree(node));
                 }
 
             }
         }
-        addStyleNodeToHead(head, style);
+        addStyleNodeToHead(head, style.toString());
     }
 
     /**
@@ -1543,29 +1582,29 @@ public class InfoWindowDOM {
      * @return all of the styles formatted as a string to go into a node in the head
      */
     private String findStyleInSubTree(HTMLNode node) {
-        String style = "";
+        StringBuilder style = new StringBuilder();
         if (node.hasChildren()) {
             for (HTMLNode n : node.getChildren()) {
                 if (n.hasID() && !n.getStyle().equals("")) {
-                    style += styleAsStr(n);
+                    style.append(styleAsStr(n));
                 }
 
                 if (n.hasChildren()) {
                     for (HTMLNode n1 : n.getChildren()) {
-                        style += findStyleInSubTree(n1);
+                        style.append(findStyleInSubTree(n1));
                     }
                 }
             }
 
             if (node.hasID() && !node.getStyle().equals("")) {
-                style += styleAsStr(node);
+                style.append(styleAsStr(node));
             }
         } else {
             if (node.hasID() && !node.getStyle().equals("")) {
-                style += styleAsStr(node);
+                style.append(styleAsStr(node));
             }
         }
-        return style;
+        return style.toString();
     }
 
     /**
@@ -1579,7 +1618,7 @@ public class InfoWindowDOM {
     private String styleAsStr(HTMLNode node) {
         return NL
                 + "#"
-                + node.getID()
+                + node.getId()
                 + " {"
                 + NL
                 + node.getStyle()
@@ -1774,27 +1813,29 @@ public class InfoWindowDOM {
     private String formatNumberOfSynapses(String numberOfSynapses) {
         return "(" + numberOfSynapses + ")";
     }
-    
+
     private String reformatDataWithAnchors(String data) {
-    	int lastIdx = 0;
-    	while (lastIdx != -1) {
-    		lastIdx = data.indexOf(HTTP, lastIdx);
-    		if (lastIdx != -1) {
-    			int endLinkIdx = data.indexOf(SPACE, lastIdx);
-    			if (endLinkIdx == -1) endLinkIdx = data.length();
-    			String linkToReformat = data.substring(lastIdx, endLinkIdx);
-    			String anchor = "<a href=\"#\" name=\""
+        int lastIdx = 0;
+        while (lastIdx != -1) {
+            lastIdx = data.indexOf(HTTP, lastIdx);
+            if (lastIdx != -1) {
+                int endLinkIdx = data.indexOf(SPACE, lastIdx);
+                if (endLinkIdx == -1) {
+                    endLinkIdx = data.length();
+                }
+                String linkToReformat = data.substring(lastIdx, endLinkIdx);
+                String anchor = "<a href=\"#\" name=\""
                         + linkToReformat
                         + "\" onclick=\"handleLink(this)\">"
                         + linkToReformat
                         + "</a>";
-        		data = data.substring(0, lastIdx) + anchor + data.substring(endLinkIdx);
-        		lastIdx += anchor.length();
-    		}
-    	}
-    	
+                data = data.substring(0, lastIdx) + anchor + data.substring(endLinkIdx);
+                lastIdx += anchor.length();
+            }
+        }
+
 //    	System.out.println(data);
-    	return data;
+        return data;
     }
 
     public HTMLNode getHTML() {

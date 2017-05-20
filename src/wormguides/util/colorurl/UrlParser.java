@@ -91,6 +91,10 @@ public class UrlParser {
                 if (sb.indexOf("-M") > -1) {
                     types.add("-M");
                 }
+                // structure heading-based
+                if (sb.indexOf("-H") > -1) {
+                    types.add("-H");
+                }
                 // connectome
                 if (sb.indexOf("-c") > -1) {
                     types.add("-c");
@@ -177,7 +181,14 @@ public class UrlParser {
                             options);
                 }
                 if (types.contains("-M")) {
-                    searchLayer.addStructureRuleBySceneName(name.replace("=", " "), web(colorHex, alpha));
+                    searchLayer.addStructureRuleBySceneName(
+                            name.replace("=", " "),
+                            web(colorHex, alpha));
+                }
+                if (types.contains("-H")) {
+                    searchLayer.addStructureRuleByHeading(
+                            name.replace("=", " "),
+                            web(colorHex, alpha));
                 }
                 if (types.contains("-c")) {
                     searchLayer.addColorRule(CONNECTOME, name, web(colorHex, alpha), options);
@@ -356,9 +367,9 @@ public class UrlParser {
                     requireNonNull(rotateXAngleProperty).set(rx);
                     requireNonNull(rotateYAngleProperty).set(ry);
                     requireNonNull(rotateZAngleProperty).set(rz);
-                } catch (NumberFormatException nfe) {
+                } catch (Exception e) {
                     System.out.println("error in parsing rotation variables");
-                    nfe.printStackTrace();
+                    e.printStackTrace();
                 }
                 continue;
             }
@@ -369,41 +380,41 @@ public class UrlParser {
                     case "time":
                         try {
                             newTime = parseInt(tokens[1]);
-                        } catch (NumberFormatException nfe) {
+                        } catch (Exception e) {
                             System.out.println("error in parsing time variable");
-                            nfe.printStackTrace();
+                            e.printStackTrace();
                         }
                         break;
                     case "tX":
                         try {
                             requireNonNull(translateXProperty).set(parseDouble(tokens[1]));
-                        } catch (NumberFormatException nfe) {
+                        } catch (Exception e) {
                             System.out.println("error in parsing x translation");
-                            nfe.printStackTrace();
+                            e.printStackTrace();
                         }
                         break;
                     case "tY":
                         try {
                             requireNonNull(translateYProperty).set(parseDouble(tokens[1]));
-                        } catch (NumberFormatException nfe) {
+                        } catch (Exception e) {
                             System.out.println("error in parsing y translation");
-                            nfe.printStackTrace();
+                            e.printStackTrace();
                         }
                         break;
                     case "scale":
                         try {
                             requireNonNull(zoomProperty).set(parseDouble(tokens[1]));
-                        } catch (NumberFormatException nfe) {
+                        } catch (Exception e) {
                             System.out.println("error in parsing scale variable");
-                            nfe.printStackTrace();
+                            e.printStackTrace();
                         }
                         break;
                     case "dim":
                         try {
                             requireNonNull(othersOpacityProperty).set(parseDouble(tokens[1]));
-                        } catch (NumberFormatException nfe) {
+                        } catch (Exception e) {
                             System.out.println("error in parsing dim variable");
-                            nfe.printStackTrace();
+                            e.printStackTrace();
                         }
                         break;
                 }

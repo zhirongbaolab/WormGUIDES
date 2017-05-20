@@ -34,6 +34,7 @@ import static java.util.stream.Collectors.toList;
 import static javafx.application.Platform.runLater;
 import static javafx.stage.Modality.NONE;
 
+import static search.SearchType.GENE;
 import static search.SearchType.STRUCTURES_BY_HEADING;
 import static search.SearchType.STRUCTURE_BY_SCENE_NAME;
 import static wormguides.models.LineageTree.isAncestor;
@@ -248,14 +249,21 @@ public class Rule {
     }
 
     /**
-     * @return true if the rule should color a multicellular structure, false otherwise.
+     * @return true if the rule should color a multicellular structure, false otherwise
      */
     public boolean isStructureRuleBySceneName() {
         return searchType == STRUCTURE_BY_SCENE_NAME;
     }
 
+    /**
+     * @return true if the rule is a structure heading rule, false otherwise
+     */
     public boolean isStructureRuleByHeading() {
         return searchType == STRUCTURES_BY_HEADING;
+    }
+
+    public boolean isGeneRule() {
+        return searchType == GENE;
     }
 
     /**

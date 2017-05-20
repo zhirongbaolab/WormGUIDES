@@ -449,7 +449,7 @@
                                                                         </Label>
                                                                         <AnchorPane maxHeight="1.7976931348623157E308" minHeight="230.0" VBox.vgrow="ALWAYS">
                                                                             <children>
-                                                                                <TreeView fx:id="allStructuresTreeView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                <TreeView fx:id="structuresTreeView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                                             </children>
                                                                         </AnchorPane>
                                                                         <Region maxHeight="-Infinity" minHeight="-Infinity" prefHeight="5.0" />

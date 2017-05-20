@@ -519,7 +519,6 @@ public class StoryEditorController extends AnchorPane implements Initializable {
      *         true when structure options should be disabled, false otherwise
      */
     private void setDisableStructureOptions(final boolean disable) {
-        // TODO add disable options to substructure toggles (currently always disabled)
         structuresComboBox.setDisable(disable);
         substructureLabel.setDisable(disable);
     }

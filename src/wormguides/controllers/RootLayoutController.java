@@ -215,7 +215,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
     @FXML
     private ListView<String> structuresSearchListView;
     @FXML
-    private TreeView<StructureTreeNode> allStructuresTreeView;
+    private TreeView<StructureTreeNode> structuresTreeView;
     @FXML
     private Button addStructureRuleBtn;
     @FXML
@@ -730,6 +730,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 productionInfo,
                 connectome,
                 sceneElementsList,
+                structuresLayer.getStructuresTreeRoot(),
                 storiesLayer,
                 searchLayer,
                 bringUpInfoFlag,
@@ -1037,10 +1038,13 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 selectedEntityNameProperty,
                 structuresSearchField,
                 structuresSearchListView,
-                allStructuresTreeView,
+                structuresTreeView,
                 addStructureRuleBtn,
                 structureRuleColorPicker,
                 rebuildSubsceneFlag);
+        if (searchLayer != null) {
+            searchLayer.setStructureTreeRoot(structuresLayer.getStructuresTreeRoot());
+        }
     }
 
     private void initStoriesLayer() {
