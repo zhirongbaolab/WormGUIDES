@@ -1,16 +1,14 @@
 /*
- * Bao Lab 2016
- */
-
-/*
- * Bao Lab 2016
+ * Bao Lab 2017
  */
 
 package wormguides.layers;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -26,6 +24,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.TreeItem;
 import javafx.scene.paint.Color;
 
 import acetree.LineageData;
@@ -37,6 +36,7 @@ import wormguides.models.cellcase.CasesLists;
 import wormguides.models.colorrule.Rule;
 import wormguides.models.colorrule.SearchOption;
 import wormguides.models.subscenegeometry.SceneElementsList;
+import wormguides.models.subscenegeometry.StructureTreeNode;
 import wormguides.resources.ProductionInfo;
 import wormguides.util.GeneSearchService;
 
@@ -58,6 +58,7 @@ import static search.SearchType.FUNCTIONAL;
 import static search.SearchType.GENE;
 import static search.SearchType.LINEAGE;
 import static search.SearchType.MULTICELLULAR_STRUCTURE_CELLS;
+import static search.SearchType.STRUCTURES_BY_HEADING;
 import static search.SearchType.STRUCTURE_BY_SCENE_NAME;
 import static search.SearchUtil.getAncestorsList;
 import static search.SearchUtil.getCellsInMulticellularStructure;
@@ -110,6 +111,7 @@ public class SearchLayer {
     private CasesLists casesLists;
     private ProductionInfo productionInfo;
     private WiringService wiringService;
+    private TreeItem<StructureTreeNode> structureTreeRoot;
 
     public SearchLayer(
             final ObservableList<Rule> rulesList,
@@ -201,6 +203,7 @@ public class SearchLayer {
             searchResultsList.clear();
             geneSearchService.resetSearchedGene();
         });
+
         geneSearchService.setOnSucceeded(event -> {
             showLoadingService.cancel();
             searchResultsList.clear();
@@ -211,7 +214,9 @@ public class SearchLayer {
             // set the cells for gene-based rules if not already set
             final String searchedQuoted = "'" + searchedGene + "'";
             rulesList.stream()
-                    .filter(rule -> !rule.areCellsSet() && rule.getSearchedText().contains(searchedQuoted))
+                    .filter(rule -> rule.isGeneRule()
+                            && !rule.areCellsSet()
+                            && rule.getSearchedText().contains(searchedQuoted))
                     .forEach(rule -> rule.setCells(geneSearchService.getValue()));
         });
 
@@ -278,6 +283,10 @@ public class SearchLayer {
         systematicRadioButton.setSelected(true);
     }
 
+    public void setStructureTreeRoot(final TreeItem<StructureTreeNode> root) {
+        structureTreeRoot = requireNonNull(root);
+    }
+
     /**
      * Adds a giant connectome rule that contains all the cell results retrieved based on the input query parameters
      *
@@ -303,10 +312,10 @@ public class SearchLayer {
             final boolean isPostsynapticTicked,
             final boolean isElectricalTicked,
             final boolean isNeuromuscularTicked) {
+
         final StringBuilder sb = createLabelForConnectomeRule(
                 funcName,
                 isPresynapticTicked, isPostsynapticTicked, isElectricalTicked, isNeuromuscularTicked);
-
         final Rule rule = new Rule(rebuildSubsceneFlag, sb.toString(), color, CONNECTOME, CELL_NUCLEUS);
         rule.setCells(connectome.queryConnectivity(
                 funcName,
@@ -430,33 +439,6 @@ public class SearchLayer {
         addColorRule(FUNCTIONAL, "da4", web("0xe6b34d"), CELL_NUCLEUS);
         addColorRule(FUNCTIONAL, "da5", web("0xe6b34d"), CELL_NUCLEUS);
 
-        // 12/28/2016 --> added because mutlicellular structures are not colored via individual cell rules in this
-        // version
-        // TODO
-        /*
-         * I'm unclear as to how the rules here are percolated to the actual rules this that's displayed. I know that
-          * the
-         * blank story does URL parsing to set the 4 default rules, but this is less known to me. I added these rules
-          * below
-         * and saw no difference and to test whether or not it was code that I had written today to cause the
-         * problem, I added
-         * a second rule to those above. I added another rule for siav with the same syntax and gave it a different
-         * color ond
-         * it didn't result in another siav rule in the display panel so if you remember how these rules listed above
-          * actually
-         * end up being active rules, we need those applied to these rules below to have the same default view in
-         * this version
-         * 
-         * For the blank story template to look the same as it was before, we need to add explicit structure rules
-         * that have the
-         * colors of the original view because in this version, only structure rules can color multicellular
-         * structures. I know
-         * that the 4 default rules under the story that it is initialized with are made via that URL string so if
-         * you could add
-         * the explicit structures rules that would be great. I figured that would be faster than me figuring out the
-          * syntax of
-         * the URLs and trying to make them myself because I have very little knowledge of how those work currently.
-         */
         addStructureRuleBySceneName("lim4_bundle_left", web("0xe6ccff"));
         addStructureRuleBySceneName("lim4_bundle_left", web("0x99b3ff"));
         addStructureRuleBySceneName("lim4_bundle_right", web("0xe6ccff"));
@@ -483,6 +465,62 @@ public class SearchLayer {
      */
     public Rule addStructureRuleBySceneName(final String searched, final Color color) {
         return addColorRule(STRUCTURE_BY_SCENE_NAME, searched, color, new ArrayList<>());
+    }
+
+    /**
+     * Adds a color rule for a collection of multicellular structures under a heading in the structures tree in the
+     * Find Structures tab. All the structures under sub-headings are affected by the rule as well. Adding a rule does
+     * not rebuild the subscene. In order for any changes to be visible, the calling class must set the
+     * 'rebuildSubsceneFlag' to true or set a property that triggers a subscene rebuild.
+     *
+     * @param heading
+     *         the structures heading
+     * @param color
+     *         the color to apply to all structures under the heading
+     *
+     * @return the color rule, null if there was no heading
+     */
+    public Rule addStructureRuleByHeading(final String heading, final Color color) {
+        final Rule rule = addColorRule(STRUCTURES_BY_HEADING, heading, color, new ArrayList<>());
+
+        final List<String> structuresToAdd = new ArrayList<>();
+        final Queue<TreeItem<StructureTreeNode>> nodeQueue = new LinkedList<>();
+        nodeQueue.add(structureTreeRoot);
+
+        // find the node with the desired heading
+        TreeItem<StructureTreeNode> headingNode = null;
+
+        TreeItem<StructureTreeNode> treeItem;
+        StructureTreeNode node;
+        while (!nodeQueue.isEmpty()) {
+            treeItem = nodeQueue.remove();
+            node = treeItem.getValue();
+            if (node.isHeading()) {
+                if (node.getText().equalsIgnoreCase(heading)) {
+                    headingNode = treeItem;
+                    break;
+                } else {
+                    nodeQueue.addAll(treeItem.getChildren());
+                }
+            }
+        }
+
+        // get all structures under this heading (structures in sub-headings are included as well)
+        if (headingNode != null) {
+            nodeQueue.clear();
+            nodeQueue.add(headingNode);
+            while (!nodeQueue.isEmpty()) {
+                treeItem = nodeQueue.remove();
+                node = treeItem.getValue();
+                if (node.isHeading()) {
+                    nodeQueue.addAll(treeItem.getChildren());
+                } else {
+                    structuresToAdd.add(node.getText());
+                }
+            }
+            rule.setCells(structuresToAdd);
+        }
+        return rule;
     }
 
     /**
@@ -550,7 +588,7 @@ public class SearchLayer {
     }
 
     private String createRuleLabel(String searched, final SearchType searchType) {
-        searched = searched.trim().toLowerCase();
+        searched = searched.trim();
         StringBuilder labelBuilder = new StringBuilder();
         if (searchType != null) {
             if (searchType == LINEAGE) {
@@ -861,10 +899,34 @@ public class SearchLayer {
                                     casesLists.makeTerminalCase(
                                             searchedCell,
                                             funcName,
-                                            connectome.queryConnectivity(funcName, true, false, false, false, false),
-                                            connectome.queryConnectivity(funcName, false, true, false, false, false),
-                                            connectome.queryConnectivity(funcName, false, false, true, false, false),
-                                            connectome.queryConnectivity(funcName, false, false, false, true, false),
+                                            connectome.queryConnectivity(
+                                                    funcName,
+                                                    true,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    false),
+                                            connectome.queryConnectivity(
+                                                    funcName,
+                                                    false,
+                                                    true,
+                                                    false,
+                                                    false,
+                                                    false),
+                                            connectome.queryConnectivity(
+                                                    funcName,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    false,
+                                                    false),
+                                            connectome.queryConnectivity(
+                                                    funcName,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    false),
                                             productionInfo.getNuclearInfo(),
                                             productionInfo.getCellShapeData(searchedCell));
                                 }

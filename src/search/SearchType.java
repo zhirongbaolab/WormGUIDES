@@ -1,9 +1,5 @@
 /*
- * Bao Lab 2016
- */
-
-/*
- * Bao Lab 2016
+ * Bao Lab 2017
  */
 
 package search;
@@ -35,8 +31,11 @@ public enum SearchType {
     /** Search for cells contained in specified multicellular structure(s) */
     MULTICELLULAR_STRUCTURE_CELLS("Multicellular Structure Cells"),
 
-    /** Search structure(s) with a specified scene name */
+    /** Search for structure(s) with a specified scene name */
     STRUCTURE_BY_SCENE_NAME("Structure Scene Name"),
+
+    /** Search for structure(s) under a specified heading */
+    STRUCTURES_BY_HEADING("Structures Heading"),
 
     /** Search for the neighboring cells of the cell with a specified lineage name */
     NEIGHBOR("Neighbor");
