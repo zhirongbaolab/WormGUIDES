@@ -102,7 +102,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 import static javafx.application.Platform.runLater;
-import static javafx.scene.CacheHint.QUALITY;
 import static javafx.scene.Cursor.CLOSED_HAND;
 import static javafx.scene.Cursor.DEFAULT;
 import static javafx.scene.Cursor.HAND;
@@ -142,6 +141,7 @@ import static wormguides.stories.Note.Display.CALLOUT_UPPER_RIGHT;
 import static wormguides.stories.Note.Display.OVERLAY;
 import static wormguides.stories.Note.Display.SPRITE;
 import static wormguides.util.AppFont.getBillboardFont;
+import static wormguides.util.AppFont.getOrientationIndicatorFont;
 import static wormguides.util.AppFont.getSpriteAndOverlayFont;
 import static wormguides.util.subsceneparameters.Parameters.getBillboardScale;
 import static wormguides.util.subsceneparameters.Parameters.getCameraFarClip;
@@ -728,17 +728,16 @@ public class Window3DController {
         final Group middleTransformGroup = new Group();
 
         // set up the orientation indicator in bottom right corner
-        Text t = makeNoteBillboardText("A     P");
+        Text t = makeOrientationIndicatorText("A     P");
         t.setTranslateX(-10);
         middleTransformGroup.getChildren().add(t);
 
-        t = makeNoteBillboardText("R     L");
-        t.setTranslateX(-52);
-        t.setTranslateY(42);
+        t = makeOrientationIndicatorText("R     L");
+        t.setTranslateX(-10);
         t.setRotate(90);
         middleTransformGroup.getChildren().add(t);
 
-        t = makeNoteBillboardText("V    D");
+        t = makeOrientationIndicatorText("V    D");
         t.setTranslateX(5);
         t.setTranslateZ(10);
         t.getTransforms().add(new Rotate(90, new Point3D(0, 1, 0)));
@@ -2245,22 +2244,24 @@ public class Window3DController {
                         // cell attachment
                         final Sphere sphere = getSubsceneSphereWithName(note.getCellName());
                         if (sphere != null) {
-//                            double offset = 5;
-//                            if (!uniformSize) {
-//                                offset = sphere.getRadius() + 2;
-//                            }
+                            double offset = 5;
+                            if (!uniformSize) {
+                                offset = sphere.getRadius() + 2;
+                            }
                             noteGraphic.getTransforms().addAll(sphere.getTransforms());
-//                            noteGraphic.getTransforms().addAll(new Scale(getBillboardScale(), getBillboardScale()));
+                            noteGraphic.getTransforms().addAll(
+                                    new Translate(offset, offset),
+                                    new Scale(getBillboardScale(), getBillboardScale()));
                         }
                     } else if (note.attachedToStructure() && defaultEmbryoFlag) {
                         // structure attachment
                         final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
                         if (meshView != null) {
+                            double offset = 5;
                             noteGraphic.getTransforms().addAll(meshView.getTransforms());
-//                            double offset = 5;
-//                            noteGraphic.getTransforms().addAll(
-//                                    new Translate(offset, offset),
-//                                    new Scale(getBillboardScale(), getBillboardScale()));
+                            noteGraphic.getTransforms().addAll(
+                                    new Translate(offset, offset),
+                                    new Scale(getBillboardScale(), getBillboardScale()));
                         }
                     }
                 }
@@ -2270,7 +2271,7 @@ public class Window3DController {
                 final Display display = note.getTagDisplay();
                 if (display != null) {
                     switch (display) {
-                        case CALLOUT_UPPER_LEFT: // all callouts call to sprite case
+                        case CALLOUT_UPPER_LEFT: // all callouts fall to sprite case
                         case CALLOUT_UPPER_RIGHT:
                         case CALLOUT_LOWER_LEFT:
                         case CALLOUT_LOWER_RIGHT:
@@ -2348,6 +2349,23 @@ public class Window3DController {
     private Text makeNoteSpriteText(final String title) {
         final Text text = makeNoteOverlayText(title);
         text.setWrappingWidth(getNoteSpriteTextWidth());
+        return text;
+    }
+
+    /**
+     * Creates the text for the orientation indicator
+     *
+     * @param string
+     *         the indicator string ("R    L", "A    P", or "V    D")
+     *
+     * @return the text
+     */
+    private Text makeOrientationIndicatorText(final String string) {
+        final Text text = new Text(string);
+        text.setFont(getOrientationIndicatorFont());
+        text.setSmooth(false);
+        text.setFontSmoothingType(LCD);
+        text.setFill(web(SPRITE_COLOR_HEX));
         return text;
     }
 

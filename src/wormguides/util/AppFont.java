@@ -27,6 +27,8 @@ public class AppFont {
 
     private static final Font BILLBOARD_FONT = font(SYSTEM, SEMI_BOLD, 12);
 
+    private static final Font ORIENTATION_INDICATOR_FONT = font(SYSTEM, SEMI_BOLD, 12);
+
     private static final Font SPRITE_AND_OVERLAY_FONT = font(SYSTEM, BOLD, 16);
 
     public static Font getSpriteAndOverlayFont() {
@@ -35,6 +37,10 @@ public class AppFont {
 
     public static Font getBillboardFont() {
         return BILLBOARD_FONT;
+    }
+
+    public static Font getOrientationIndicatorFont() {
+        return ORIENTATION_INDICATOR_FONT;
     }
 
     public static Font getFont() {
