@@ -534,8 +534,8 @@ public class Note {
     /**
      * Tells whether a note is without scope. Such a note is not displayed. Not having scope is defined by any of the
      * following combinations:
-     * 1. time is not specified for the CELLTIME or TIME attachment types
-     * 2. cell name is not specified for the CELLTIME or CELL attachment types
+     * 1. time is not specified for a TIME attachment
+     * 2. cell name is not specified for a CELL attachment
      * 3. no tag display methods is specified
      *
      * @return true if the note is without scope, false otherwise
@@ -544,7 +544,6 @@ public class Note {
         return tagDisplay.equals(Display.BLANK)
                 || !tagDisplay.equals(OVERLAY)
                 && (attachmentType.equals(CELL) && !isEntitySpecified());
-
     }
 
     public boolean hasLocationError() {
@@ -587,12 +586,11 @@ public class Note {
      * @param time
      *         time to check
      *
-     * @return true if note is visible at input time, or in sprite cell/celltime mode, false otherwise
+     * @return true if note is visible at input time, or in sprite cell mode, false otherwise
      */
     public boolean mayExistAtTime(int time) {
         if (!isWithoutScope()) {
-            // If start and end times are not set
-            // then note exists at all times
+            // if start and end times are not set, then note exists at all times
             if (!isTimeSpecified()) {
                 return true;
             }

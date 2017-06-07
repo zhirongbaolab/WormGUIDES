@@ -540,9 +540,7 @@ public class Window3DController {
         this.zoomProperty.set(getInitialZoom());
         this.zoomProperty.addListener((observable, oldValue, newValue) -> {
             xform.setScale(zoomProperty.get());
-            repositionSpritesAndLabels();
-            repositionCallouts();
-            repositionNoteBillboardFronts();
+            repositionNotes();
         });
         xform.setScale(zoomProperty.get());
 
@@ -914,9 +912,7 @@ public class Window3DController {
             xform.setTranslateY(translateY);
             translateXProperty.set(translateX);
             translateYProperty.set(translateY);
-            repositionSpritesAndLabels();
-            repositionCallouts();
-            repositionNoteBillboardFronts();
+            repositionNotes();
 
         } else {
             if (event.isPrimaryButtonDown()) {
@@ -930,9 +926,7 @@ public class Window3DController {
                         (rotateYAngleProperty.get() + mouseDeltaX * modifierFactor * modifier * 2.0)
                                 % 360 + 540) % 360 - 180);
 
-                repositionSpritesAndLabels();
-                repositionCallouts();
-                repositionNoteBillboardFronts();
+                repositionNotes();
             }
         }
     }
@@ -1136,7 +1130,8 @@ public class Window3DController {
         contextMenuController.setColorNeighborsButtonListener(event -> {
             contextMenuStage.hide();
             // color neighboring cell bodies, multicellular structures, as well as nuclei
-            searchLayer.addColorRule(NEIGHBOR, name, WHITE, CELL_NUCLEUS, CELL_BODY).showEditStage(parentStage);
+            searchLayer.addColorRule(NEIGHBOR, name, WHITE, CELL_NUCLEUS, CELL_BODY)
+                    .showEditStage(parentStage);
         });
 
         contextMenuStage.setX(sceneX);
@@ -1146,22 +1141,13 @@ public class Window3DController {
         ((Stage) contextMenuStage.getScene().getWindow()).toFront();
     }
 
-    private void repositionNoteBillboardFronts() {
-        for (Node billboard : billboardFrontEntityMap.keySet()) {
-            final Node entity = billboardFrontEntityMap.get(billboard);
-            if (entity != null) {
-                final Bounds b = entity.getBoundsInParent();
-                if (b != null) {
-                    billboard.getTransforms().clear();
-                    double x = b.getMaxX();
-                    double y = b.getMaxY() + b.getHeight() / 2;
-                    double z = b.getMaxZ();
-                    billboard.getTransforms().addAll(
-                            new Translate(x, y, z),
-                            new Scale(getBillboardScale(), getBillboardScale()));
-                }
-            }
-        }
+    /**
+     * Repositions sprites, labels, callouts, and front-facing billboards
+     */
+    private void repositionNotes() {
+        repositionSpritesAndLabels();
+        repositionCallouts();
+        repositionFrontFacingBillboards();
     }
 
     /**
@@ -1501,6 +1487,29 @@ public class Window3DController {
         transforms.add(translation);
     }
 
+    /**
+     * Repositions front-facing billboards to the right-hand side of the entities they are attached to. The
+     * billboard resides on y- and z-coordinates that are the averages of the maximum and minimum y and z values of
+     * the entity's bounds in the subscene.
+     */
+    private void repositionFrontFacingBillboards() {
+        for (Node billboard : billboardFrontEntityMap.keySet()) {
+            final Node entity = billboardFrontEntityMap.get(billboard);
+            if (entity != null) {
+                billboard.getTransforms().clear();
+                final Bounds b = entity.getBoundsInParent();
+                if (b != null) {
+                    billboard.getTransforms().clear();
+                    double x = b.getMaxX();
+                    double y = (b.getMinY() + b.getMaxY()) / 2;
+                    double z = (b.getMinZ() + b.getMaxZ()) / 2;
+                    billboard.getTransforms().add(new Translate(x, y, z));
+                    billboard.getTransforms().add(new Scale(getBillboardScale(), getBillboardScale()));
+                }
+            }
+        }
+    }
+
     private int getIndexByCellName(final String name) {
         for (int i = 0; i < cellNames.size(); i++) {
             if (cellNames.get(i).equals(name)) {
@@ -1731,12 +1740,12 @@ public class Window3DController {
         }
 
         if (!noteGraphics.isEmpty()) {
-            rootEntitiesGroup.getChildren().addAll(noteGraphics);
+            // insert note graphics to the beginning of the group so they can be rendered last (otherwise, the notes
+            // will not be completely visible behind semi-opaque entities)
+            rootEntitiesGroup.getChildren().addAll(0, noteGraphics);
         }
 
-        repositionSpritesAndLabels();
-        repositionCallouts();
-        repositionNoteBillboardFronts();
+        repositionNotes();
     }
 
     /**
@@ -2179,7 +2188,7 @@ public class Window3DController {
                         final VBox box = new VBox(3);
                         box.setPrefWidth(getNoteSpriteTextWidth());
                         box.getChildren().add(noteGraphic);
-                        // add inivisible location marker to scene at location specified by note
+                        // add     inivisible location marker to scene at location specified by note
                         final Sphere marker = createLocationMarker(note.getX(), note.getY(), note.getZ());
                         rootEntitiesGroup.getChildren().add(marker);
                         entitySpriteMap.put(marker, box);
@@ -2217,51 +2226,41 @@ public class Window3DController {
                     } else if (note.attachedToCell()) {
                         billboardFrontEntityMap.put(noteGraphic, getSubsceneSphereWithName(note.getCellName()));
                     } else if (note.attachedToStructure() && defaultEmbryoFlag) {
-                        for (int i = 0; i < currentSceneElements.size(); i++) {
-                            if (currentSceneElements.get(i)
-                                    .getSceneName()
-                                    .equalsIgnoreCase(note.getCellName())) {
-                                billboardFrontEntityMap.put(noteGraphic, currentSceneElementMeshes.get(i));
-                            }
+                        final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
+                        if (meshView != null) {
+                            billboardFrontEntityMap.put(noteGraphic, meshView);
                         }
                     }
 
                 } else if (note.isBillboard()) {
-                    // location attachment
+                    // TODO non-front-facing billboard positioning has to be fixed (they currently move with the
+                    // entities they are attached to, but are offset far away - need to find the cause of this offset)
                     if (note.attachedToLocation()) {
+                        // location attachment
                         noteGraphic.getTransforms().addAll(rotateX, rotateY, rotateZ);
                         noteGraphic.getTransforms().addAll(
                                 new Translate(note.getX(), note.getY(), note.getZ()),
                                 new Scale(getBillboardScale(), getBillboardScale()));
-                    }
-                    // cell attachment
-                    else if (note.attachedToCell()) {
-                        Sphere sphere;
-                        for (int i = 0; i < cellNames.size(); i++) {
-                            sphere = spheres.get(i);
-                            if (cellNames.get(i).equalsIgnoreCase(note.getCellName()) && sphere != null) {
-                                double offset = 5;
-                                if (!uniformSize) {
-                                    offset = sphere.getRadius() + 2;
-                                }
-                                noteGraphic.getTransforms().addAll(sphere.getTransforms());
-                                noteGraphic.getTransforms().addAll(
-                                        new Translate(offset, offset),
-                                        new Scale(getBillboardScale(), getBillboardScale()));
-                            }
+                    } else if (note.attachedToCell()) {
+                        // cell attachment
+                        final Sphere sphere = getSubsceneSphereWithName(note.getCellName());
+                        if (sphere != null) {
+//                            double offset = 5;
+//                            if (!uniformSize) {
+//                                offset = sphere.getRadius() + 2;
+//                            }
+                            noteGraphic.getTransforms().addAll(sphere.getTransforms());
+//                            noteGraphic.getTransforms().addAll(new Scale(getBillboardScale(), getBillboardScale()));
                         }
                     } else if (note.attachedToStructure() && defaultEmbryoFlag) {
                         // structure attachment
-                        for (int i = 0; i < currentSceneElements.size(); i++) {
-                            if (currentSceneElements.get(i)
-                                    .getSceneName()
-                                    .equalsIgnoreCase(note.getCellName())) {
-                                noteGraphic.getTransforms().addAll(currentSceneElementMeshes.get(i).getTransforms());
-                                double offset = 5;
-                                noteGraphic.getTransforms().addAll(
-                                        new Translate(offset, offset),
-                                        new Scale(getBillboardScale(), getBillboardScale()));
-                            }
+                        final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
+                        if (meshView != null) {
+                            noteGraphic.getTransforms().addAll(meshView.getTransforms());
+//                            double offset = 5;
+//                            noteGraphic.getTransforms().addAll(
+//                                    new Translate(offset, offset),
+//                                    new Scale(getBillboardScale(), getBillboardScale()));
                         }
                     }
                 }
@@ -2357,9 +2356,7 @@ public class Window3DController {
         text.setWrappingWidth(getNoteBillboardTextWidth());
         text.setFont(getBillboardFont());
         text.setSmooth(false);
-        text.setStrokeWidth(2);
         text.setFontSmoothingType(LCD);
-        text.setCacheHint(QUALITY);
         text.setFill(web(SPRITE_COLOR_HEX));
         return text;
     }
@@ -2853,9 +2850,7 @@ public class Window3DController {
     private final class SubsceneSizeListener implements ChangeListener<Number> {
         @Override
         public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-            repositionSpritesAndLabels();
-            repositionCallouts();
-            repositionNoteBillboardFronts();
+            repositionNotes();
         }
     }
 
