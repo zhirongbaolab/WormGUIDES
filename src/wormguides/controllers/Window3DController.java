@@ -739,7 +739,7 @@ public class Window3DController {
 
         t = makeOrientationIndicatorText("V    D");
         t.setTranslateX(5);
-        t.setTranslateZ(10);
+        t.setTranslateZ(15);
         t.getTransforms().add(new Rotate(90, new Point3D(0, 1, 0)));
         middleTransformGroup.getChildren().add(t);
 
@@ -1503,7 +1503,6 @@ public class Window3DController {
                     double y = (b.getMinY() + b.getMaxY()) / 2;
                     double z = (b.getMinZ() + b.getMaxZ()) / 2;
                     billboard.getTransforms().add(new Translate(x, y, z));
-                    billboard.getTransforms().add(new Scale(getBillboardScale(), getBillboardScale()));
                 }
             }
         }
@@ -2237,9 +2236,7 @@ public class Window3DController {
                     if (note.attachedToLocation()) {
                         // location attachment
                         noteGraphic.getTransforms().addAll(rotateX, rotateY, rotateZ);
-                        noteGraphic.getTransforms().addAll(
-                                new Translate(note.getX(), note.getY(), note.getZ()),
-                                new Scale(getBillboardScale(), getBillboardScale()));
+                        noteGraphic.getTransforms().add(new Translate(note.getX(), note.getY(), note.getZ()));
                     } else if (note.attachedToCell()) {
                         // cell attachment
                         final Sphere sphere = getSubsceneSphereWithName(note.getCellName());
@@ -2249,9 +2246,7 @@ public class Window3DController {
                                 offset = sphere.getRadius() + 2;
                             }
                             noteGraphic.getTransforms().addAll(sphere.getTransforms());
-                            noteGraphic.getTransforms().addAll(
-                                    new Translate(offset, offset),
-                                    new Scale(getBillboardScale(), getBillboardScale()));
+//                            noteGraphic.getTransforms().add(new Translate(offset, offset));
                         }
                     } else if (note.attachedToStructure() && defaultEmbryoFlag) {
                         // structure attachment
@@ -2259,9 +2254,7 @@ public class Window3DController {
                         if (meshView != null) {
                             double offset = 5;
                             noteGraphic.getTransforms().addAll(meshView.getTransforms());
-                            noteGraphic.getTransforms().addAll(
-                                    new Translate(offset, offset),
-                                    new Scale(getBillboardScale(), getBillboardScale()));
+//                            noteGraphic.getTransforms().add(new Translate(offset, offset));
                         }
                     }
                 }
@@ -2376,6 +2369,7 @@ public class Window3DController {
         text.setSmooth(false);
         text.setFontSmoothingType(LCD);
         text.setFill(web(SPRITE_COLOR_HEX));
+        text.getTransforms().add(new Scale(getBillboardScale(), getBillboardScale()));
         return text;
     }
 
