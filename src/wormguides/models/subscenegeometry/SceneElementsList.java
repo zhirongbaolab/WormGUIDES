@@ -26,7 +26,6 @@ import static java.lang.Integer.MIN_VALUE;
 import static java.lang.Integer.parseInt;
 import static java.util.Collections.sort;
 
-import static partslist.PartsList.getFunctionalNameByLineageName;
 import static wormguides.loaders.GeometryLoader.getEffectiveStartTime;
 
 /**
@@ -157,10 +156,6 @@ public class SceneElementsList {
                             startTime = effectiveStartTime > startTime ? effectiveStartTime : startTime;
                             // use the earlier one of the config start time and the effective lineage start time
                             endTime = effectiveEndTime < endTime ? effectiveEndTime : endTime;
-                            final String functionalName;
-                            if ((functionalName = getFunctionalNameByLineageName(name)) != null) {
-                                name = functionalName;
-                            }
                         }
 
                         final SceneElement element = new SceneElement(

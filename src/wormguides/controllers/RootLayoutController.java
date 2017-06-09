@@ -1303,7 +1303,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 for (Node node : contextMenuStage.getScene().getRoot().getChildrenUnmodifiable()) {
                     node.setStyle("-fx-focus-color: -fx-outer-border; -fx-faint-focus-color: transparent;");
                 }
-                contextMenuController.setInfoButtonListener(event -> contextMenuStage.hide());
+                contextMenuController.setMoreInfoButtonListener(event -> contextMenuStage.hide());
 
             } catch (IOException e) {
                 System.out.println("Error in initializing context menu");

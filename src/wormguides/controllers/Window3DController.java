@@ -128,6 +128,8 @@ import static javafx.scene.transform.Rotate.Z_AXIS;
 import static com.sun.javafx.scene.CameraHelper.project;
 import static javax.imageio.ImageIO.write;
 import static partslist.PartsList.getFunctionalNameByLineageName;
+import static partslist.PartsList.getLineageNamesByFunctionalName;
+import static partslist.PartsList.isFunctionalName;
 import static search.SearchType.LINEAGE;
 import static search.SearchType.NEIGHBOR;
 import static search.SearchUtil.getFirstOccurenceOf;
@@ -238,7 +240,7 @@ public class Window3DController {
     private final int endTime;
     private final DoubleProperty zoomProperty;
 
-    // subscene click cell selection stuff
+    // Cell clicking/selection stuff
     private final IntegerProperty selectedIndex;
     private final StringProperty selectedNameProperty;
     private final StringProperty selectedNameLabeledProperty;
@@ -466,6 +468,7 @@ public class Window3DController {
         this.selectedNameLabeledProperty.addListener((observable, oldValue, newValue) -> {
             if (!newValue.isEmpty()) {
                 String lineageName = newValue;
+
                 this.selectedNameProperty.set(lineageName);
 
                 if (!allLabels.contains(lineageName)) {
@@ -785,7 +788,8 @@ public class Window3DController {
 
     /**
      * Inserts a transient label into the sprites pane for the specified entity if the entity is not an 'other' entity
-     * that is less than 10% opaque.
+     * that has an opacity less than the cutoff (specified as a parameter in
+     * /wormguides/util/subsceneparameters/parameters.txt)
      *
      * @param name
      *         the name that appears on the transient label
@@ -940,8 +944,8 @@ public class Window3DController {
 
         final Node node = event.getPickResult().getIntersectedNode();
 
-        // Nucleus
         if (node instanceof Sphere) {
+            // Nucleus
             Sphere picked = (Sphere) node;
             int index = getPickedSphereIndex(picked);
             String name = normalizeName(cellNames.get(index));
@@ -979,24 +983,27 @@ public class Window3DController {
                     }
                 }
             }
-        }
 
-        // Structure
-        else if (node instanceof SceneElementMeshView) {
+        } else if (node instanceof SceneElementMeshView) {
+            // Structure
             boolean found = false; // this will indicate whether this meshview is a scene element
             SceneElementMeshView curr;
             for (int i = 0; i < currentSceneElementMeshes.size(); i++) {
                 curr = currentSceneElementMeshes.get(i);
                 if (curr.equals(node)) {
                     found = true;
-                    SceneElement clickedSceneElement = currentSceneElements.get(i);
+                    final SceneElement clickedSceneElement = currentSceneElements.get(i);
                     String name = normalizeName(clickedSceneElement.getSceneName());
 
+                    // if scene element is the cell body of a spherical nucleus, then use its lineage name
+                    if (isFunctionalName(name)) {
+                        name = getLineageNamesByFunctionalName(name).get(0);
+                    }
                     selectedNameProperty.set(name);
 
-                    // right click
                     if (event.getButton() == SECONDARY
                             || (event.getButton() == PRIMARY && (event.isMetaDown() || event.isControlDown()))) {
+                        // right click
                         if (sceneElementsList.isStructureSceneName(name)) {
                             final String functionalName;
                             if ((functionalName = getFunctionalNameByLineageName(name)) != null) {
@@ -1022,6 +1029,7 @@ public class Window3DController {
                             highlightActiveCellLabel(entity);
                         }
                     }
+                    break;
                 }
             }
 
@@ -1106,12 +1114,13 @@ public class Window3DController {
 
         contextMenuController.setName(name);
         contextMenuController.setColorButtonText(isStructure);
+        // disable 'more info' option for multicellular structures
         if (isStructure) {
             contextMenuController.disableInfoButton(isMulticellularStructure);
         }
 
-        String funcName = getFunctionalNameByLineageName(name);
-        if (funcName == null) {
+        final String functionalName = getFunctionalNameByLineageName(name);
+        if (functionalName == null) {
             contextMenuController.disableTerminalCaseFunctions(true);
         } else {
             contextMenuController.disableTerminalCaseFunctions(false);
@@ -1836,7 +1845,6 @@ public class Window3DController {
                     spritesPane.setCursor(HAND);
                     // make label appear
                     if (!currentLabels.contains(cellName.toLowerCase())) {
-                        // get cell body version of sphere, if there is one
                         insertTransientLabel(cellName, getEntityWithName(cellName));
                     }
                 });
@@ -2033,23 +2041,23 @@ public class Window3DController {
     }
 
     /**
-     * @return The 3D entity with input name. Priority is given to meshes (if a mesh and a cell have the same name,
-     * then the mesh is returned).
+     * @return The 3D entity with input name. Priority is given to nuclei (if a mesh and a nucleus have the same name,
+     * then the nucleus sphere is returned).
      */
     private Shape3D getEntityWithName(final String name) {
+        // sphere label
+        for (int i = 0; i < cellNames.size(); i++) {
+            if (spheres.get(i) != null && cellNames.get(i).equalsIgnoreCase(name)) {
+                return spheres.get(i);
+            }
+        }
+        // mesh view label
         if (defaultEmbryoFlag) {
-            // mesh view label
             for (int i = 0; i < currentSceneElements.size(); i++) {
                 if (normalizeName(currentSceneElements.get(i).getSceneName()).equalsIgnoreCase(name)
                         && currentSceneElementMeshes.get(i) != null) {
                     return currentSceneElementMeshes.get(i);
                 }
-            }
-        }
-        // sphere label
-        for (int i = 0; i < cellNames.size(); i++) {
-            if (spheres.get(i) != null && cellNames.get(i).equalsIgnoreCase(name)) {
-                return spheres.get(i);
             }
         }
         return null;
@@ -2241,10 +2249,10 @@ public class Window3DController {
                         // cell attachment
                         final Sphere sphere = getSubsceneSphereWithName(note.getCellName());
                         if (sphere != null) {
-                            double offset = 5;
-                            if (!uniformSize) {
-                                offset = sphere.getRadius() + 2;
-                            }
+//                            double offset = 5;
+//                            if (!uniformSize) {
+//                                offset = sphere.getRadius() + 2;
+//                            }
                             noteGraphic.getTransforms().addAll(sphere.getTransforms());
 //                            noteGraphic.getTransforms().add(new Translate(offset, offset));
                         }

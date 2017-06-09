@@ -25,7 +25,7 @@ public class AppFont {
 
     private static final Font BOLDER_FONT = font(SYSTEM, EXTRA_BOLD, 14);
 
-    private static final Font BILLBOARD_FONT = font(SYSTEM, SEMI_BOLD, 12);
+    private static final Font BILLBOARD_FONT = font(SYSTEM, SEMI_BOLD, 11);
 
     private static final Font ORIENTATION_INDICATOR_FONT = font(SYSTEM, SEMI_BOLD, 12);
 
