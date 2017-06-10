@@ -26,6 +26,7 @@ import static java.lang.Integer.MIN_VALUE;
 import static java.lang.Integer.parseInt;
 import static java.util.Collections.sort;
 
+import static partslist.PartsList.getFunctionalNameByLineageName;
 import static wormguides.loaders.GeometryLoader.getEffectiveStartTime;
 
 /**
@@ -55,7 +56,7 @@ public class SceneElementsList {
 
     public SceneElementsList(final LineageData lineageData) {
         elementsList = new ArrayList<>();
-        root = new TreeItem<>(new StructureTreeNode(true, "root"));
+        root = new TreeItem<>(new StructureTreeNode(true, "root", "root"));
         nameCellsMap = new HashMap<>();
         nameCommentsMap = new HashMap<>();
         nameToMarkerMap = new HashMap<>();
@@ -114,12 +115,13 @@ public class SceneElementsList {
                 name = tokens[DESCRIPTION_INDEX];
                 if (isCategoryLine(tokens)) {
                     // add cetegory to tree
-                    if (name.equalsIgnoreCase(currentCategoryNode.getValue().getText())) {
+                    if (name.equalsIgnoreCase(currentCategoryNode.getValue().getNodeText())) {
                         // the ending of a category
                         currentCategoryNode = currentCategoryNode.getParent();
                     } else {
                         final TreeItem<StructureTreeNode> newTreeNode = new TreeItem<>(new StructureTreeNode(
                                 true,
+                                name,
                                 name));
                         currentCategoryNode.getChildren().add(newTreeNode);
                         currentCategoryNode = newTreeNode;
@@ -179,9 +181,19 @@ public class SceneElementsList {
                         if (!element.getComments().isEmpty()) {
                             nameCommentsMap.put(element.getSceneName().toLowerCase(), element.getComments());
                         }
+
+                        // TODO fix
                         // insert structure into tree
-                        currentCategoryNode.getChildren().add(
-                                new TreeItem<>(new StructureTreeNode(false, element.getSceneName())));
+                        // use the functional name instead of the lineage name for the tree node text that is visible
+                        String functionalName = getFunctionalNameByLineageName(name);
+                        if (functionalName == null) {
+                            functionalName = name;
+                        }
+                        currentCategoryNode.getChildren().add(new TreeItem<>(new StructureTreeNode(
+                                false,
+                                functionalName,
+                                element.getSceneName()
+                                )));
                     } catch (NumberFormatException e) {
                         System.out.println("error in reading scene element time for line " + line);
                     }

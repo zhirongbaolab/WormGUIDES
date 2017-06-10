@@ -20,23 +20,41 @@ public class StructureTreeNode {
     private final String nodeText;
 
     /**
+     * Scene name of the element. This is the lineage name for elements that are cell bodies with a corresponding
+     * nuclei.
+     */
+    private final String sceneName;
+
+    /**
      * Constructure
      *
      * @param isCategory
-     *         true if the tree node is a category heading, false otherwise
+     *         true if this tree node is a category heading node, false otherwise
      * @param nodeText
-     *         the value shown on the structure tree node, whether it is the category name or structure name
+     *         the text shown on the structure tree node in the tree view. This is either the category name or
+     *         the shown structure name
+     * @param sceneName
+     *         the scene name  of the element. This is the lineage name for elements that are cell bodies with a
+     *         correponding nuclei
      */
-    public StructureTreeNode(final boolean isCategory, final String nodeText) {
+    public StructureTreeNode(final boolean isCategory, final String nodeText, final String sceneName) {
         this.isHeading = isCategory;
         this.nodeText = requireNonNull(nodeText);
+        this.sceneName = requireNonNull(sceneName);
     }
 
     /**
      * @return the text in the structure tree node
      */
-    public String getText() {
+    public String getNodeText() {
         return nodeText;
+    }
+
+    /**
+     * @return the scene name of the element specified by this tree node
+     */
+    public String getSceneName() {
+        return sceneName;
     }
 
     /**

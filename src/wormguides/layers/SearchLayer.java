@@ -414,6 +414,10 @@ public class SearchLayer {
         return searched;
     }
 
+    /**
+     * Adds the app's internal color rules. These rules are used when the active story does not have its own color
+     * scheme.
+     */
     public void addDefaultInternalColorRules() {
         addColorRule(FUNCTIONAL, "ash", DARKSEAGREEN, CELL_BODY);
         addColorRule(FUNCTIONAL, "rib", web("0x663366"), CELL_BODY);
@@ -496,7 +500,7 @@ public class SearchLayer {
             treeItem = nodeQueue.remove();
             node = treeItem.getValue();
             if (node.isHeading()) {
-                if (node.getText().equalsIgnoreCase(heading)) {
+                if (node.getNodeText().equalsIgnoreCase(heading)) {
                     headingNode = treeItem;
                     break;
                 } else {
@@ -515,7 +519,7 @@ public class SearchLayer {
                 if (node.isHeading()) {
                     nodeQueue.addAll(treeItem.getChildren());
                 } else {
-                    structuresToAdd.add(node.getText());
+                    structuresToAdd.add(node.getSceneName());
                 }
             }
             rule.setCells(structuresToAdd);

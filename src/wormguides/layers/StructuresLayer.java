@@ -25,6 +25,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
+import partslist.PartsList;
 import wormguides.models.colorrule.Rule;
 import wormguides.models.subscenegeometry.SceneElementsList;
 import wormguides.models.subscenegeometry.StructureTreeNode;
@@ -36,7 +37,9 @@ import static javafx.collections.FXCollections.observableArrayList;
 import static javafx.scene.control.ContentDisplay.GRAPHIC_ONLY;
 import static javafx.scene.paint.Color.WHITE;
 
+import static partslist.PartsList.getFunctionalNameByLineageName;
 import static partslist.PartsList.getLineageNamesByFunctionalName;
+import static partslist.PartsList.isLineageName;
 import static wormguides.util.AppFont.getBolderFont;
 import static wormguides.util.AppFont.getFont;
 
@@ -118,7 +121,7 @@ public class StructuresLayer {
                         final StructureTreeNode selectedNode = newValue.getValue();
                         if (selectedNode.isLeafNode()) {
                             searchField.clear();
-                            selectedStructureNameProperty.set(selectedNode.getText());
+                            selectedStructureNameProperty.set(selectedNode.getSceneName());
                         }
                     }
                 });
@@ -133,10 +136,10 @@ public class StructuresLayer {
                 final StructureTreeNode selectedNode = selectedItem.getValue();
                 if (selectedNode != null) {
                     if (selectedNode.isLeafNode()) {
-                        addStructureRule(selectedNode.getText(), selectedColor);
+                        addStructureRule(selectedNode.getSceneName(), selectedColor);
                     } else {
                         final Rule headingRule = searchLayer.addStructureRuleByHeading(
-                                selectedNode.getText(),
+                                selectedNode.getNodeText(),
                                 selectedColor);
                     }
                     clearStructureTreeNodeSelection();
@@ -177,11 +180,14 @@ public class StructuresLayer {
         if (name == null || color == null) {
             return;
         }
-        // check for validity of name
         name = name.trim();
-        if (sceneElementsList.getAllSceneNames().contains(name)) {
-            searchLayer.addStructureRuleBySceneName(name, color);
+
+        // the scene name may be a functional name - use the lineage name so the rule can be recognized by the cell
+        // bodies (whose scene names are the lineage names)
+        if (isLineageName(name)) {
+            name = getFunctionalNameByLineageName(name);
         }
+        searchLayer.addStructureRuleBySceneName(name, color);
     }
 
     /**
@@ -199,17 +205,17 @@ public class StructuresLayer {
         final String[] terms = searched.toLowerCase().split(" ");
         searchStructuresResultsList.clear();
 
+        String nameLower;
         for (String name : sceneElementsList.getAllSceneNames()) {
-
             if (!searchStructuresResultsList.contains(name)) {
-                // search in structure scene names
-                final String nameLower = name.toLowerCase();
+                nameLower = name.toLowerCase();
 
                 boolean appliesToName = false;
                 boolean appliesToCell = false;
                 boolean appliesToMarker = false;
                 boolean appliesToComment = false;
 
+                // search in structure scene names
                 for (String term : terms) {
                     if (nameLower.contains(term)) {
                         appliesToName = true;
@@ -260,7 +266,12 @@ public class StructuresLayer {
                 }
 
                 if (appliesToName || appliesToCell || appliesToMarker || appliesToComment) {
-                    searchStructuresResultsList.add(name);
+                    // use functional name in structure search results instead of lineage names
+                    String functionalName = PartsList.getFunctionalNameByLineageName(name);
+                    if (functionalName == null) {
+                        functionalName = name;
+                    }
+                    searchStructuresResultsList.add(functionalName);
                 }
             }
         }
@@ -306,11 +317,11 @@ public class StructuresLayer {
      */
     private class StructureCellGraphic extends HBox {
 
-        private Label label;
+        private final Label label;
 
         public StructureCellGraphic(final StructureTreeNode treeNode) {
             super();
-            label = new Label(requireNonNull(treeNode).getText());
+            label = new Label(requireNonNull(treeNode).getNodeText());
             if (treeNode.isLeafNode()) {
                 label.setFont(getBolderFont());
             } else {
