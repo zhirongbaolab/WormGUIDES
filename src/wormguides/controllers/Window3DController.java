@@ -1800,6 +1800,7 @@ public class Window3DController {
                     material = colorHash.getHighlightMaterial();
                 } else {
                     material = colorHash.getTranslucentMaterial();
+                    sphere.setDisable(true);
                 }
 
             } else {
@@ -1889,6 +1890,7 @@ public class Window3DController {
                         meshView.setMaterial(colorHash.getHighlightMaterial());
                     } else {
                         meshView.setMaterial(colorHash.getTranslucentMaterial());
+                        meshView.setDisable(true);
                     }
                 } else {
                     // in regular viewing mode
@@ -2456,7 +2458,7 @@ public class Window3DController {
     private void consultSearchResultsList() {
         isCellSearchedFlags = new boolean[cellNames.size()];
         if (defaultEmbryoFlag) {
-            isMeshSearchedFlags = new boolean[meshNames.size()];
+            isMeshSearchedFlags = new boolean[sceneElementsAtCurrentTime.size()];
         }
 
         // cells
@@ -2467,25 +2469,11 @@ public class Window3DController {
         // meshes
         if (defaultEmbryoFlag) {
             SceneElement sceneElement;
-            for (int i = 0; i < meshNames.size(); i++) {
+            String sceneName;
+            for (int i = 0; i < sceneElementsAtCurrentTime.size(); i++) {
                 sceneElement = sceneElementsAtCurrentTime.get(i);
-
-                // ** NOT IN THIS VERSION
-                /*
-                 * commented out 12/28/2016 --> multicellular search on Find Cells tab shouldn't highlight the
-				 * multicellular structures themselves
-				 */
-                if (sceneElement.isMulticellular()) {
-                    isMeshSearchedFlags[i] = false;
-                    for (String cell : sceneElement.getAllCells()) {
-                        if (localSearchResults.contains(cell)) {
-                            isMeshSearchedFlags[i] = true;
-                            break;
-                        }
-                    }
-                } else {
-                    isMeshSearchedFlags[i] = localSearchResults.contains(meshNames.get(i));
-                }
+                sceneName = sceneElement.getSceneName();
+                isMeshSearchedFlags[i] = localSearchResults.contains(sceneName);
             }
         }
     }
