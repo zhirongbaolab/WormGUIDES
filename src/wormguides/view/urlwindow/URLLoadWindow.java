@@ -22,7 +22,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import wormguides.loaders.ImageLoader;
+import wormguides.loaders.IconImageLoader;
 
 import static wormguides.util.AppFont.getFont;
 
@@ -56,7 +56,7 @@ public class URLLoadWindow extends AnchorPane {
         Tooltip tt = new Tooltip("paste");
         Button pasteBtn = new Button();
         pasteBtn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        pasteBtn.setGraphic(ImageLoader.getPasteIcon());
+        pasteBtn.setGraphic(IconImageLoader.getPasteIcon());
         pasteBtn.maxWidthProperty().bind(field.heightProperty());
         pasteBtn.prefWidthProperty().bind(field.heightProperty());
         pasteBtn.minWidthProperty().bind(field.heightProperty());

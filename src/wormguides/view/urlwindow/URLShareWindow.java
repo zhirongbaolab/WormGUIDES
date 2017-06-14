@@ -17,7 +17,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import wormguides.loaders.ImageLoader;
+import wormguides.loaders.IconImageLoader;
 import wormguides.models.colorrule.Rule;
 
 import static java.awt.Toolkit.getDefaultToolkit;
@@ -98,7 +98,7 @@ public class URLShareWindow extends AnchorPane {
         androidCopyBtn.setTooltip(tooltip);
         androidCopyBtn.setStyle("-fx-focus-color: -fx-outer-border; -fx-faint-focus-color: transparent;");
         androidCopyBtn.setContentDisplay(GRAPHIC_ONLY);
-        androidCopyBtn.setGraphic(ImageLoader.getCopyIcon());
+        androidCopyBtn.setGraphic(IconImageLoader.getCopyIcon());
         androidCopyBtn.setOnAction(event -> {
             final StringSelection ss = new StringSelection(urlField.getText());
             cb.setContents(ss, null);

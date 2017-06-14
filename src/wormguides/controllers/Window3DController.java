@@ -19,8 +19,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-import javax.imageio.ImageIO;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -32,7 +30,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -51,6 +48,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -102,6 +100,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 import static javafx.application.Platform.runLater;
+import static javafx.embed.swing.SwingFXUtils.fromFXImage;
 import static javafx.scene.Cursor.CLOSED_HAND;
 import static javafx.scene.Cursor.DEFAULT;
 import static javafx.scene.Cursor.HAND;
@@ -134,6 +133,7 @@ import static search.SearchType.LINEAGE;
 import static search.SearchType.NEIGHBOR;
 import static search.SearchUtil.getFirstOccurenceOf;
 import static search.SearchUtil.getLastOccurenceOf;
+import static wormguides.loaders.NoteImageLoader.createImageView;
 import static wormguides.models.colorrule.SearchOption.CELL_BODY;
 import static wormguides.models.colorrule.SearchOption.CELL_NUCLEUS;
 import static wormguides.stories.Note.Display.CALLOUT_LOWER_LEFT;
@@ -154,6 +154,7 @@ import static wormguides.util.subsceneparameters.Parameters.getInitialTranslateX
 import static wormguides.util.subsceneparameters.Parameters.getInitialTranslateY;
 import static wormguides.util.subsceneparameters.Parameters.getInitialZoom;
 import static wormguides.util.subsceneparameters.Parameters.getLabelSpriteYOffset;
+import static wormguides.util.subsceneparameters.Parameters.getNoteBillboardImageScale;
 import static wormguides.util.subsceneparameters.Parameters.getNoteBillboardTextWidth;
 import static wormguides.util.subsceneparameters.Parameters.getNoteSpriteTextWidth;
 import static wormguides.util.subsceneparameters.Parameters.getSelectabilityVisibilityCutoff;
@@ -258,25 +259,27 @@ public class Window3DController {
     // Story elements stuff
     private final StoriesLayer storiesLayer;
     /** Map of current note graphics to their note objects */
-    private final HashMap<Node, Note> currentGraphicNoteMap;
+    private final Map<Node, Note> currentGraphicsToNotesMap;
     /** Map of current notes to their scene elements */
-    private final HashMap<Note, SceneElementMeshView> currentNoteMeshMap;
+    private final Map<Note, SceneElementMeshView> currentNotesToMeshesMap;
     /** Map of note sprites attached to cell, or cell and timeProperty */
-    private final HashMap<Node, VBox> entitySpriteMap;
-    /** Map of front-facing billboards attached to cell, or cell and timeProperty */
-    private final HashMap<Node, Node> billboardFrontEntityMap;
+    private final Map<Node, VBox> entitySpriteMap;
+    /** Map of front-facing billboards attached to their entities */
+    private final Map<Text, Node> billboardFrontEntityMap;
+    /** Map of image views to their entities */
+    private final Map<ImageView, Node> billboardImageEntityMap;
     /** Map of a cell entity to its label */
     private final Map<Node, Text> entityLabelMap;
     /** Map of upper left note callouts attached to a cell/structure */
-    private final HashMap<Node, List<Text>> entityCalloutULMap;
+    private final Map<Node, List<Text>> entityCalloutULMap;
     /** Map of upper right note callouts attached to a cell/structure */
-    private final HashMap<Node, List<Text>> entityCalloutURMap;
+    private final Map<Node, List<Text>> entityCalloutURMap;
     /** Map of lower left note callouts attached to a cell/structure */
-    private final HashMap<Node, List<Text>> entityCalloutLLMap;
+    private final Map<Node, List<Text>> entityCalloutLLMap;
     /** Map of lower right note callouts attached to a cell/structure */
-    private final HashMap<Node, List<Text>> entityCalloutLRMap;
+    private final Map<Node, List<Text>> entityCalloutLRMap;
     /* Map of all callout Texts to their Lines */
-    private final HashMap<Text, Line> calloutLineMap;
+    private final Map<Text, Line> calloutLineMap;
     // orientation indicator
     private final Cylinder orientationIndicator;
     private final ProductionInfo productionInfo;
@@ -592,8 +595,9 @@ public class Window3DController {
         }
 
         currentNotes = new ArrayList<>();
-        currentGraphicNoteMap = new HashMap<>();
-        currentNoteMeshMap = new HashMap<>();
+        currentGraphicsToNotesMap = new HashMap<>();
+        currentNotesToMeshesMap = new HashMap<>();
+        billboardImageEntityMap = new HashMap<>();
         entitySpriteMap = new HashMap<>();
         billboardFrontEntityMap = new HashMap<>();
         entityCalloutULMap = new HashMap<>();
@@ -1036,9 +1040,9 @@ public class Window3DController {
             // if the node isn't a SceneElement
             if (!found) {
                 // note structure
-                currentNoteMeshMap.keySet()
+                currentNotesToMeshesMap.keySet()
                         .stream()
-                        .filter(note -> currentNoteMeshMap.get(note).equals(node))
+                        .filter(note -> currentNotesToMeshesMap.get(note).equals(node))
                         .forEachOrdered(note -> selectedNameProperty.set(note.getTagName()));
             }
         } else {
@@ -1155,7 +1159,7 @@ public class Window3DController {
     private void repositionNotes() {
         repositionSpritesAndLabels();
         repositionCallouts();
-        repositionFrontFacingBillboards();
+        repositionFrontFacingBillboardsAndImages();
     }
 
     /**
@@ -1496,12 +1500,13 @@ public class Window3DController {
     }
 
     /**
-     * Repositions front-facing billboards to the right-hand side of the entities they are attached to. The
-     * billboard resides on y- and z-coordinates that are the averages of the maximum and minimum y and z values of
-     * the entity's bounds in the subscene.
+     * Repositions front-facing billboards and image billboards to the right-hand side of the entities they are attached
+     * to. The billboard resides on y- and z-coordinates that are the averages of the maximum and minimum y and z
+     * values of the entity's bounds in the subscene.
      */
-    private void repositionFrontFacingBillboards() {
-        for (Node billboard : billboardFrontEntityMap.keySet()) {
+    private void repositionFrontFacingBillboardsAndImages() {
+        // billboards with text
+        for (Text billboard : billboardFrontEntityMap.keySet()) {
             final Node entity = billboardFrontEntityMap.get(billboard);
             if (entity != null) {
                 billboard.getTransforms().clear();
@@ -1512,6 +1517,26 @@ public class Window3DController {
                     double y = (b.getMinY() + b.getMaxY()) / 2;
                     double z = (b.getMinZ() + b.getMaxZ()) / 2;
                     billboard.getTransforms().add(new Translate(x, y, z));
+                }
+            }
+        }
+        // image billboards
+        for (ImageView image : billboardImageEntityMap.keySet()) {
+            final Node entity = billboardImageEntityMap.get(image);
+            if (entity != null) {
+                image.getTransforms().clear();
+                final Bounds b = entity.getBoundsInParent();
+                if (b != null) {
+                    image.getTransforms().clear();
+                    double x = b.getMaxX();
+                    double y = (b.getMinY() + b.getMaxY()) / 2;
+                    double z = (b.getMinZ() + b.getMaxZ()) / 2;
+                    image.getTransforms().add(new Translate(x, y, z));
+                    // scale all note billboard images down instead of inserting smaller images to preserve
+                    // the image quality
+                    image.getTransforms().add(new Scale(
+                            getNoteBillboardImageScale(),
+                            getNoteBillboardImageScale()));
                 }
             }
         }
@@ -1627,14 +1652,17 @@ public class Window3DController {
         // Notes are indexed starting from 1 (1 + offset is shown to the user)
         if (storiesLayer != null) {
             currentNotes.clear();
-            currentNoteMeshMap.clear();
-            currentGraphicNoteMap.clear();
+            currentGraphicsToNotesMap.clear();
+            currentNotesToMeshesMap.clear();
+
             entitySpriteMap.clear();
             entityCalloutULMap.clear();
             entityCalloutLLMap.clear();
             entityCalloutURMap.clear();
             entityCalloutLRMap.clear();
+
             billboardFrontEntityMap.clear();
+            billboardImageEntityMap.clear();
 
             currentNotes = storiesLayer.getNotesAtTime(requestedTime);
 
@@ -1658,7 +1686,7 @@ public class Window3DController {
                                         -offsetX * xScale,
                                         -offsetY * yScale,
                                         -offsetZ * zScale));
-                                currentNoteMeshMap.put(note, mesh);
+                                currentNotesToMeshesMap.put(note, mesh);
                             }
                         }
                     }
@@ -1870,9 +1898,9 @@ public class Window3DController {
     private void addSceneElementGeometries(final List<Shape3D> entities) {
         if (defaultEmbryoFlag) {
             // add scene elements from notes
-            entities.addAll(currentNoteMeshMap.keySet()
+            entities.addAll(currentNotesToMeshesMap.keySet()
                     .stream()
-                    .map(currentNoteMeshMap::get)
+                    .map(currentNotesToMeshesMap::get)
                     .collect(toList()));
 
             // consult rules/search results
@@ -2103,7 +2131,7 @@ public class Window3DController {
             if (note.isVisible()) {
                 // map notes to their sphere/mesh view
                 final Node noteGraphic = makeNoteGraphic(note);
-                currentGraphicNoteMap.put(noteGraphic, note);
+                currentGraphicsToNotesMap.put(noteGraphic, note);
 
                 noteGraphic.setOnMouseEntered(event -> spritesPane.setCursor(HAND));
                 noteGraphic.setOnMouseExited(event -> spritesPane.setCursor(DEFAULT));
@@ -2202,6 +2230,7 @@ public class Window3DController {
                         entitySpriteMap.put(marker, box);
                         // add vbox to sprites pane
                         spritesPane.getChildren().add(box);
+
                     } else {
                         Node subsceneEntity = null;
                         if (note.attachedToCell()) {
@@ -2227,22 +2256,55 @@ public class Window3DController {
                     }
 
                 } else if (note.isBillboardFront()) {
-                    if (note.attachedToLocation()) {
-                        final Sphere marker = createLocationMarker(note.getX(), note.getY(), note.getZ());
-                        rootEntitiesGroup.getChildren().add(marker);
-                        billboardFrontEntityMap.put(noteGraphic, marker);
-                    } else if (note.attachedToCell()) {
-                        billboardFrontEntityMap.put(noteGraphic, getSubsceneSphereWithName(note.getCellName()));
-                    } else if (note.attachedToStructure() && defaultEmbryoFlag) {
-                        final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
-                        if (meshView != null) {
-                            billboardFrontEntityMap.put(noteGraphic, meshView);
+                    if (noteGraphic instanceof Text) {
+                        if (note.attachedToLocation()) {
+                            final Sphere marker = createLocationMarker(note.getX(), note.getY(), note.getZ());
+                            rootEntitiesGroup.getChildren().add(marker);
+                            billboardFrontEntityMap.put(
+                                    (Text) noteGraphic,
+                                    marker);
+                        } else if (note.attachedToCell()) {
+                            billboardFrontEntityMap.put(
+                                    (Text) noteGraphic,
+                                    getSubsceneSphereWithName(note.getCellName()));
+                        } else if (note.attachedToStructure() && defaultEmbryoFlag) {
+                            final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
+                            if (meshView != null) {
+                                billboardFrontEntityMap.put(
+                                        (Text) noteGraphic,
+                                        meshView);
+                            }
+                        }
+                    }
+
+                } else if (note.isBillboardImage()) {
+                    if (noteGraphic != null && noteGraphic instanceof ImageView) {
+                        // no need to do anything with the note graphic text since it will not be shown
+                        // only the image view is shown
+                        if (note.attachedToLocation()) {
+                            final Sphere marker = createLocationMarker(note.getX(), note.getY(), note.getZ());
+                            rootEntitiesGroup.getChildren().add(marker);
+                            billboardImageEntityMap.put(
+                                    (ImageView) noteGraphic,
+                                    marker);
+                        } else if (note.attachedToCell()) {
+                            billboardImageEntityMap.put(
+                                    (ImageView) noteGraphic,
+                                    getSubsceneSphereWithName(note.getCellName()));
+                        } else if (note.attachedToStructure() && defaultEmbryoFlag) {
+                            final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
+                            if (meshView != null) {
+                                billboardImageEntityMap.put(
+                                        (ImageView) noteGraphic,
+                                        meshView);
+                            }
                         }
                     }
 
                 } else if (note.isBillboard()) {
-                    // TODO non-front-facing billboard positioning has to be fixed (they currently move with the
-                    // entities they are attached to, but are offset far away - need to find the cause of this offset)
+                    // TODO non-front-facing billboard positioning has to be fixed (see below)
+                    // they currently move with the entities they are attached to, but are offset far away - need to
+                    // find the cause of this offset)
                     if (note.attachedToLocation()) {
                         // location attachment
                         noteGraphic.getTransforms().addAll(rotateX, rotateY, rotateZ);
@@ -2280,6 +2342,7 @@ public class Window3DController {
                         case CALLOUT_LOWER_RIGHT:
                         case SPRITE: // do nothing
                             break;
+                        case IMAGE: // fall to billboard case
                         case BILLBOARD_FRONT: // fall to billboard case
                         case BILLBOARD:
                             list.add(noteGraphic);
@@ -2395,7 +2458,15 @@ public class Window3DController {
         return sphere;
     }
 
-    private Text makeNoteGraphic(final Note note) {
+    /**
+     * Creates the graphic for a note, whether the graphic is a text or an image view
+     *
+     * @param note
+     *         the note to create the graphic for
+     *
+     * @return the note graphic
+     */
+    private Node makeNoteGraphic(final Note note) {
         String title = note.getTagName();
         if (note.isExpandedInScene()) {
             title += ": " + note.getTagContents();
@@ -2403,7 +2474,7 @@ public class Window3DController {
             title += " [more...]";
         }
 
-        Text node = null;
+        Node node = null;
         if (note.getTagDisplay() != null) {
             switch (note.getTagDisplay()) {
                 case CALLOUT_UPPER_LEFT: // fall to sprite case
@@ -2424,6 +2495,10 @@ public class Window3DController {
 
                 case BILLBOARD_FRONT:
                     node = makeNoteBillboardText(title);
+                    break;
+
+                case IMAGE:
+                    node = createImageView(note.getResourceLocation());
                     break;
 
                 case OVERLAY: // fall to default case
@@ -2528,8 +2603,8 @@ public class Window3DController {
                             File file = new File(frameDirPath + "movieFrame" + count++ + ".JPEG");
 
                             if (file != null) {
-                                RenderedImage renderedImage = SwingFXUtils.fromFXImage(screenCapture, null);
-                                ImageIO.write(renderedImage, "JPEG", file);
+                                RenderedImage renderedImage = fromFXImage(screenCapture, null);
+                                write(renderedImage, "JPEG", file);
                                 movieFiles.addElement(file);
                             }
                         } catch (Exception e) {
@@ -2557,7 +2632,12 @@ public class Window3DController {
         }
 
         if (javaPictures.size() > 0) {
-            new JpegImagesToMovie((int) subscene.getWidth(), (int) subscene.getHeight(), 2, movieName, javaPictures);
+            new JpegImagesToMovie(
+                    (int) subscene.getWidth(),
+                    (int) subscene.getHeight(),
+                    2,
+                    movieName,
+                    javaPictures);
 
             // move the movie to the originally specified location
             final File movJustMade = new File(movieName);
@@ -2594,9 +2674,8 @@ public class Window3DController {
         //write the image to a file
         try {
             final File file = fileChooser.showSaveDialog(fileChooserStage);
-
             if (file != null) {
-                final RenderedImage renderedImage = SwingFXUtils.fromFXImage(screenCapture, null);
+                final RenderedImage renderedImage = fromFXImage(screenCapture, null);
                 write(renderedImage, "png", file);
             }
         } catch (IOException e) {
@@ -2779,7 +2858,7 @@ public class Window3DController {
                 final Node result = event.getPickResult().getIntersectedNode();
                 if (result instanceof Text) {
                     final Text picked = (Text) result;
-                    final Note note = currentGraphicNoteMap.get(picked);
+                    final Note note = currentGraphicsToNotesMap.get(picked);
                     if (note != null) {
                         note.setExpandedInScene(!note.isExpandedInScene());
                         if (note.isExpandedInScene()) {
@@ -2849,11 +2928,9 @@ public class Window3DController {
     }
 
     /**
-     * This class is the {@link ChangeListener} that listens changes in the
-     * height or width of the modelAnchorPane in which the subscene lives. When
-     * the size changes, front-facing billboards and sprites (notes and labels)
-     * are repositioned to align with their appropriate positions (whether it is
-     * a location to an entity).
+     * This class is the {@link ChangeListener} that listens changes in the height or width of the modelAnchorPane in
+     * which the subscene lives. When the size changes, front-facing billboards and sprites (notes and labels) are
+     * repositioned to align with their appropriate positions (whether it is a location to an entity).
      */
     private final class SubsceneSizeListener implements ChangeListener<Number> {
         @Override

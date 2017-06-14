@@ -36,7 +36,8 @@ public class Parameters {
     private static final String STORY_OVERLAY_PANE_WIDTH_KEY = "STORY_OVERLAY_PANE_WIDTH";
     private static final String NOTE_SPRITE_TEXT_WIDTH_KEY = "NOTE_SPRITE_TEXT_WIDTH";
     private static final String NOTE_BILLBOARD_TEXT_WIDTH_KEY = "NOTE_BILLBOARD_TEXT_WIDTH";
-    private static final String SUBSCENE_BACKGROUND_COLOR_HEX = "SUBSCENE_BACKGROUND_COLOR_HEX";
+    private static final String NOTE_IMAGE_SCALE_KEY = "NOTE_IMAGE_SCALE";
+    private static final String SUBSCENE_BACKGROUND_COLOR_HEX_KEY = "SUBSCENE_BACKGROUND_COLOR_HEX";
 
     // values
     /** Waiting time between rendering consecutive frames while movie is playing */
@@ -83,6 +84,9 @@ public class Parameters {
     /** Wrapping width (in pixels) of the note billboards */
     private static double noteBillboardTextWidth;
 
+    /** Scale for note billboard images */
+    private static double noteBillboardImageScale;
+
     /** Background color (in hex) of the 3D subscene */
     private static String subsceneBackgroundColorHex;
 
@@ -106,7 +110,8 @@ public class Parameters {
             storyOverlayPaneWidth = parseDouble(param_map.get(STORY_OVERLAY_PANE_WIDTH_KEY));
             noteSpriteTextWidth = parseDouble(param_map.get(NOTE_SPRITE_TEXT_WIDTH_KEY));
             noteBillboardTextWidth = parseDouble(param_map.get(NOTE_BILLBOARD_TEXT_WIDTH_KEY));
-            subsceneBackgroundColorHex = param_map.get(SUBSCENE_BACKGROUND_COLOR_HEX);
+            noteBillboardImageScale = parseDouble(param_map.get(NOTE_IMAGE_SCALE_KEY));
+            subsceneBackgroundColorHex = param_map.get(SUBSCENE_BACKGROUND_COLOR_HEX_KEY);
         } catch (Exception e) {
             System.out.println("Error in parsing parameters file at " + PARAMETERS_FILE_PATH);
             e.printStackTrace();
@@ -179,6 +184,10 @@ public class Parameters {
 
     public static double getNoteBillboardTextWidth() {
         return noteBillboardTextWidth;
+    }
+
+    public static double getNoteBillboardImageScale() {
+        return  noteBillboardImageScale;
     }
 
     public static String getSubsceneBackgroundColorHex() {

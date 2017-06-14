@@ -23,7 +23,7 @@ import static java.time.Instant.now;
 
 import static javafx.application.Platform.setImplicitExit;
 
-import static wormguides.loaders.ImageLoader.loadImages;
+import static wormguides.loaders.IconImageLoader.loadImages;
 
 /**
  * Driver class for the WormGUIDES desktop application

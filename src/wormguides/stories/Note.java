@@ -30,6 +30,7 @@ import static wormguides.stories.Note.Display.CALLOUT_LOWER_LEFT;
 import static wormguides.stories.Note.Display.CALLOUT_LOWER_RIGHT;
 import static wormguides.stories.Note.Display.CALLOUT_UPPER_LEFT;
 import static wormguides.stories.Note.Display.CALLOUT_UPPER_RIGHT;
+import static wormguides.stories.Note.Display.IMAGE;
 import static wormguides.stories.Note.Display.OVERLAY;
 import static wormguides.stories.Note.Display.SPRITE;
 
@@ -634,6 +635,10 @@ public class Note {
         return tagDisplay == BILLBOARD_FRONT;
     }
 
+    public boolean isBillboardImage() {
+        return tagDisplay == IMAGE;
+    }
+
     public String toString() {
         return "Note["
                 + "@Name='" + tagName + "' "
@@ -700,16 +705,21 @@ public class Note {
 
         /**
          * Display as a 3D billboard that rotates and translates with the entity that the note is attached to
-         * (defined by
-         * {@link Attachment})
+         * (defined by the {@link Attachment})
          */
         BILLBOARD("billboard"),
 
         /**
          * Display as a front-facing billboard that translates with the entity that the note is attached to (defined by
-         * {@link Attachment})
+         * the {@link Attachment})
          */
         BILLBOARD_FRONT("billboard front"),
+
+        /**
+         * Display as a front-facing billboard image that translates with the entity that the note is attached to
+         * (defined by the {@link Attachment})
+         */
+        IMAGE("image"),
 
         /**
          * Display as a sprite that moves with the entity that the note is attached to (defined by
