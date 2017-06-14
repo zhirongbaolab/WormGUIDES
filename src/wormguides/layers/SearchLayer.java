@@ -61,6 +61,7 @@ import static search.SearchType.MULTICELLULAR_STRUCTURE_CELLS;
 import static search.SearchType.STRUCTURES_BY_HEADING;
 import static search.SearchType.STRUCTURE_BY_SCENE_NAME;
 import static search.SearchUtil.getAncestorsList;
+import static search.SearchUtil.getCellBodiesList;
 import static search.SearchUtil.getCellsInMulticellularStructure;
 import static search.SearchUtil.getCellsWithConnectivity;
 import static search.SearchUtil.getCellsWithFunctionalDescription;
@@ -182,6 +183,7 @@ public class SearchLayer {
                                 (SearchType) searchTypeToggleGroup.getSelectedToggle().getUserData(),
                                 getSearchedText(),
                                 cellNucleusCheckBox.isSelected(),
+                                cellBodyCheckBox.isSelected(),
                                 descendantCheckBox.isSelected(),
                                 ancestorCheckBox.isSelected()));
                         return null;
@@ -414,6 +416,10 @@ public class SearchLayer {
         return searched;
     }
 
+    /**
+     * Adds the app's internal color rules. These rules are used when the active story does not have its own color
+     * scheme.
+     */
     public void addDefaultInternalColorRules() {
         addColorRule(FUNCTIONAL, "ash", DARKSEAGREEN, CELL_BODY);
         addColorRule(FUNCTIONAL, "rib", web("0x663366"), CELL_BODY);
@@ -496,7 +502,7 @@ public class SearchLayer {
             treeItem = nodeQueue.remove();
             node = treeItem.getValue();
             if (node.isHeading()) {
-                if (node.getText().equalsIgnoreCase(heading)) {
+                if (node.getNodeText().equalsIgnoreCase(heading)) {
                     headingNode = treeItem;
                     break;
                 } else {
@@ -515,7 +521,7 @@ public class SearchLayer {
                 if (node.isHeading()) {
                     nodeQueue.addAll(treeItem.getChildren());
                 } else {
-                    structuresToAdd.add(node.getText());
+                    structuresToAdd.add(node.getSceneName());
                 }
             }
             rule.setCells(structuresToAdd);
@@ -764,6 +770,7 @@ public class SearchLayer {
             final SearchType searchType,
             String searchedTerm,
             final boolean isCellNucleusFetched,
+            final boolean isCellBodyFetched,
             final boolean areDescendantsFetched,
             final boolean areAncestorsFetched) {
 
@@ -779,45 +786,61 @@ public class SearchLayer {
                     getDescendantsList(cells, searchedText)
                             .stream()
                             .filter(name -> !cellsForListView.contains(name))
-                            .forEachOrdered(cellsForListView::add);
+                            .forEach(cellsForListView::add);
                 }
                 if (areAncestorsFetched) {
                     getAncestorsList(cells, searchedText)
                             .stream()
                             .filter(name -> !cellsForListView.contains(name))
-                            .forEachOrdered(cellsForListView::add);
+                            .forEach(cellsForListView::add);
                 }
                 if (isCellNucleusFetched) {
                     cellsForListView.addAll(cells);
+                } else if (isCellBodyFetched) {
+                    cellsForListView.addAll(getCellBodiesList(cells));
                 }
+
                 sort(cellsForListView);
                 appendFunctionalToLineageNames(cellsForListView);
             }
         }
     }
 
+    /**
+     * Sets the databases that are queried during a search
+     *
+     * @param lineageData
+     *         the lineage data
+     * @param sceneElementsList
+     *         the list of scene elements
+     * @param connectome
+     *         the connectome
+     * @param casesList
+     *         the list of cell cases
+     * @param productionInfo
+     *         the production info
+     */
     public void initDatabases(
-            final LineageData inputLineageData,
-            final SceneElementsList inputSceneElementsList,
-            final Connectome inputConnectome,
-            final CasesLists inputCasesLists,
-            final ProductionInfo inputProductionInfo) {
+            final LineageData lineageData,
+            final SceneElementsList sceneElementsList,
+            final Connectome connectome,
+            final CasesLists casesList,
+            final ProductionInfo productionInfo) {
 
-        SearchUtil.initDatabases(inputLineageData, inputSceneElementsList, inputConnectome, inputCasesLists);
+        SearchUtil.initDatabases(lineageData, sceneElementsList, connectome, casesList);
 
-        if (inputConnectome != null) {
-            connectome = inputConnectome;
+        if (connectome != null) {
+            this.connectome = connectome;
         }
-        if (inputCasesLists != null) {
-            casesLists = inputCasesLists;
+        if (casesList != null) {
+            this.casesLists = casesList;
         }
-        if (inputProductionInfo != null) {
-            productionInfo = inputProductionInfo;
+        if (productionInfo != null) {
+            this.productionInfo = productionInfo;
         }
-
     }
 
-    public boolean hasCellCase(String cellName) {
+    public boolean hasCellCase(final String cellName) {
         return casesLists != null && casesLists.hasCellCase(cellName);
     }
 

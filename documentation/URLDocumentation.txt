@@ -1,0 +1,61 @@
+Note:	The Android and web URLs are currently equivalent.
+Note:	URLs are generated using the UTF8 values.
+Note:	The "* added later" parameters are only added to parsing, not to URL generation. 
+		User-facing URL generation currently follows the original API.
+		Internal URL generation supports the new parameters.
+
+Search Type:
+Lineage 	->	"-s"
+Functional 	->	"-n"
+Description	->	"-d"
+Gene		->	"-g"
+Multicellular Structure Cells	->	"-m"	* added later
+Structure by Scene Name	        ->	"-M"	* added later
+Structures by Heading           ->  "-H"    * added later
+Connectome	->	"-c"	* added later
+Neighbor	->	"-b"	* added later
+
+Systematic, Proper		->	-s-n
+Description, Proper		->	-d-n
+Description, Systematic	->	-d-s
+All						->	-d-s-n
+
+Note:	The documentation says that "-g" corresponds to gene search, but iOS only registers a text as
+		a gene search if there are no modifiers.
+Note:	Currently on the desktop version, we toggle each search type by itself. Multiple search types
+		can be toggled on the iOS version.
+
+
+Modifier:
+Cell Nucleus			->	"$"
+Descendant				->	"<" (%3E in UTF8)
+Ancestor				->	">" (%3C in UTF8)
+Cell Body				->	"@"	* added later
+
+Ex.
+Cell, Descendant		->	"<$" 	(%3E$)
+Cell, Ancestor			->	"$>" 	($%3C)
+Descendant, Ancestor	->	"<>"	(%3E%3C)
+All						->	"<$>" 	(%3E$%3C)
+
+Note:	The "$" is not used in the Android version. There is ambiguity in whether or not the cell
+		modifier is implicitly selected.
+
+
+Color:
+The RGB hex is appended to the search term, type, and options with a "+" (eg. "avg-n$@+#ffb41919"). The last 6 hex
+digits and the values of red, green, and blue, in that order. Each pair of digits represents the intensity of each of
+the three colors, in the integer range [0, 255]. The last pair of hex digits represents the alpha value. That value,
+increased by 1, then divided by 256, is the explicit alpha value in the decimal range [0, 1].
+
+Example URLs:
+Old API: "http://scene.wormguides.org/wormguides/testurlscript?/
+	set/ash-n$+#ff8fbc8f/rib-n$+#ff663366/avg-n$+#ffb41919/dd-n+#ff4a24c1/da-n+#ffc56002/
+	dd-n$+#ffb30a95/da-n$+#ffe6b34d/rivl-n+#ffc14d0e/rivr-n+#ffdbdd15/siavl-n+#ff50b428/
+	siavr-n+#ff278edb/sibdl-n+#ff6350dd/sibdr-n+#ffc95aa9/
+	view/timeProperty=400/rX=0.0/rY=0.0/rZ=0.0/tX=0.0/tY=0.0/scale=0.8461538461538461/dim=0.2/Android/"
+
+Internal (new) API: "http://scene.wormguides.org/wormguides/testurlscript?/
+    set/ash-n$@+#ff8fbc8f/rib-n$@+#ff663366/avg-n$@+#ffb41919/dd-n@+#4a24c1ff/da-n@+#ffc56002/
+    dd-n$+#ffb30a95/da-n$+#ffe6b34d/rivl-n@+#ffffb366/rivr-n@+#ffffe6b3/sibd-n@+#ffe6ccff/siav-n@+#ff8099ff/
+    view/time=393/rX=51.625/rY=-2.125/rZ=0.0/tX=0.0/tY=0.0/scale=2.25/dim=0.25/Android/"

@@ -68,7 +68,7 @@ import wormguides.layers.DisplayLayer;
 import wormguides.layers.SearchLayer;
 import wormguides.layers.StoriesLayer;
 import wormguides.layers.StructuresLayer;
-import wormguides.loaders.ImageLoader;
+import wormguides.loaders.IconImageLoader;
 import wormguides.models.LineageTree;
 import wormguides.models.cellcase.CasesLists;
 import wormguides.models.colorrule.Rule;
@@ -951,13 +951,13 @@ public class RootLayoutController extends BorderPane implements Initializable {
      * Sets the icons for the GUI buttons
      */
     private void setIcons() {
-        backwardButton.setGraphic(ImageLoader.getBackwardIcon());
-        forwardButton.setGraphic(ImageLoader.getForwardIcon());
-        zoomInButton.setGraphic(new ImageView(ImageLoader.getPlusIcon()));
-        zoomOutButton.setGraphic(new ImageView(ImageLoader.getMinusIcon()));
+        backwardButton.setGraphic(IconImageLoader.getBackwardIcon());
+        forwardButton.setGraphic(IconImageLoader.getForwardIcon());
+        zoomInButton.setGraphic(new ImageView(IconImageLoader.getPlusIcon()));
+        zoomOutButton.setGraphic(new ImageView(IconImageLoader.getMinusIcon()));
 
-        playIcon = ImageLoader.getPlayIcon();
-        pauseIcon = ImageLoader.getPauseIcon();
+        playIcon = IconImageLoader.getPlayIcon();
+        pauseIcon = IconImageLoader.getPauseIcon();
         playButton.setGraphic(playIcon);
         playButton.setOnAction(event -> {
             playingMovieFlag.set(!playingMovieFlag.get());
@@ -1303,7 +1303,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 for (Node node : contextMenuStage.getScene().getRoot().getChildrenUnmodifiable()) {
                     node.setStyle("-fx-focus-color: -fx-outer-border; -fx-faint-focus-color: transparent;");
                 }
-                contextMenuController.setInfoButtonListener(event -> contextMenuStage.hide());
+                contextMenuController.setMoreInfoButtonListener(event -> contextMenuStage.hide());
 
             } catch (IOException e) {
                 System.out.println("Error in initializing context menu");

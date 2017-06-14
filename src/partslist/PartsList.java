@@ -81,8 +81,8 @@ public class PartsList {
      */
     public static boolean isFunctionalName(final String name) {
         final String trimmed = name.trim();
-        for (String funcName : functionalNames) {
-            if (funcName.equalsIgnoreCase(trimmed)) {
+        for (String functionalName : functionalNames) {
+            if (functionalName.equalsIgnoreCase(trimmed)) {
                 return true;
             }
         }

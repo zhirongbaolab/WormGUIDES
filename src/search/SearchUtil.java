@@ -174,7 +174,7 @@ public class SearchUtil {
                     .stream()
                     .filter(SceneElement::isMulticellular)
                     .filter(se -> isMulticellularStructureSearched(se.getSceneName(), searched))
-                    .forEach(se -> se.getAllCells().forEach(cellsSet::add));
+                    .forEach(se -> cellsSet.addAll(se.getAllCells()));
         }
         final List<String> cells = new ArrayList<>(cellsSet);
         sort(cells);
@@ -396,6 +396,32 @@ public class SearchUtil {
     }
 
     /**
+     * Retrieves all the scene elements that are the cell bodies of a list of cells
+     *
+     * @param cells
+     *         the list of cells that may or may not have corresponding cell bodies
+     *
+     * @return the cell bodies of the cells in the list
+     */
+    public static List<String> getCellBodiesList(final List<String> cells) {
+        final List<String> cellBodies = new ArrayList<>();
+        if (sceneElementsList != null
+                && cells != null
+                && !cells.isEmpty()) {
+            final List<String> cellsLowerCase = new ArrayList<>();
+            for (String cell : cells) {
+                cellsLowerCase.add(cell.toLowerCase());
+            }
+            for (String sceneName : sceneElementsList.getAllSceneNames()) {
+                if (cellsLowerCase.contains(sceneName.toLowerCase())) {
+                    cellBodies.add(sceneName);
+                }
+            }
+        }
+        return cellBodies;
+    }
+
+    /**
      * Retrieves the terminal descendants for a cell. This is called by {@link NonTerminalCellCase}.
      *
      * @param queryCell
@@ -426,25 +452,25 @@ public class SearchUtil {
     public static List<String> getDescendantsList(final List<String> cells, final String searchedText) {
         final Set<String> descendantsSet = new HashSet<>();
 
-        if (cells == null) {
-            return new ArrayList<>();
-        }
-
-        // special cases for 'ab' and 'p0' because the input list of cells would be empty
-        final String searched = searchedText.trim().toLowerCase();
-        if (cells.isEmpty()) {
-            if (searched.equals("ab")) {
-                cells.add("ab");
-            } else if (searched.equals("p0")) {
-                cells.add("p0");
+        if (cells != null) {
+            // special cases for 'ab' and 'p0' because the input list of cells would be empty
+            final String searched = searchedText.trim().toLowerCase();
+            if (cells.isEmpty()) {
+                if (searched.equals("ab")) {
+                    cells.add("ab");
+                } else if (searched.equals("p0")) {
+                    cells.add("p0");
+                }
             }
+
+            for (String cell : cells) {
+                activeLineageNames.stream()
+                        .filter(name -> isDescendant(name, cell))
+                        .forEach(descendantsSet::add);
+            }
+            return new ArrayList<>(descendantsSet);
         }
 
-        for (String cell : cells) {
-            activeLineageNames.stream()
-                    .filter(name -> isDescendant(name, cell))
-                    .forEach(descendantsSet::add);
-        }
         return new ArrayList<>(descendantsSet);
     }
 

@@ -733,6 +733,9 @@ public class StoryEditorController extends AnchorPane implements Initializable {
                     billboardRadioBtn.setSelected(true);
                     setDisableCalloutOffsetOptions(true);
                     break;
+                case BILLBOARD:
+                    resetToggle(displayToggle);
+                    setDisableCalloutOffsetOptions(true);
                 case CALLOUT_UPPER_LEFT:
                     calloutUpperLeftRadioBtn.setSelected(true);
                     setDisableCalloutOffsetOptions(false);

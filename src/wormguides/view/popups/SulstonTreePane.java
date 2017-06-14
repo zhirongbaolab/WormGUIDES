@@ -84,8 +84,8 @@ import static javax.imageio.ImageIO.write;
 import static partslist.PartsList.getFunctionalNameByLineageName;
 import static search.SearchType.LINEAGE;
 import static search.SearchType.NEIGHBOR;
-import static wormguides.loaders.ImageLoader.getMinusIcon;
-import static wormguides.loaders.ImageLoader.getPlusIcon;
+import static wormguides.loaders.IconImageLoader.getMinusIcon;
+import static wormguides.loaders.IconImageLoader.getPlusIcon;
 import static wormguides.models.colorrule.SearchOption.CELL_NUCLEUS;
 
 public class SulstonTreePane extends ScrollPane {

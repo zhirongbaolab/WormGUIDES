@@ -520,16 +520,17 @@ public class StoriesLayer {
         int time = MIN_VALUE;
         if (note != null) {
             if (note.attachedToCell() || note.attachedToStructure()) {
+                // if note is attached to an entity, get the start and end times of the entity and get the overlap of
+                // that timespan with the note's explicit time range (if it has one)
                 int entityStartTime;
                 int entityEndTime;
-
-                final String cellName = note.getCellName();
+                final String entityName = note.getCellName();
                 if (note.attachedToCell()) {
-                    entityStartTime = lineageData.getFirstOccurrenceOf(cellName);
-                    entityEndTime = lineageData.getLastOccurrenceOf(cellName);
+                    entityStartTime = lineageData.getFirstOccurrenceOf(entityName);
+                    entityEndTime = lineageData.getLastOccurrenceOf(entityName);
                 } else {
-                    entityStartTime = sceneElementsList.getFirstOccurrenceOf(cellName);
-                    entityEndTime = sceneElementsList.getLastOccurrenceOf(cellName);
+                    entityStartTime = sceneElementsList.getFirstOccurrenceOf(entityName);
+                    entityEndTime = sceneElementsList.getLastOccurrenceOf(entityName);
                 }
 
                 // attached to cell/structure and time is specified
@@ -673,7 +674,6 @@ public class StoriesLayer {
         stories.stream()
                 .filter(Story::isActive)
                 .forEachOrdered(story -> notes.addAll(story.getPossibleNotesAtTime(time)));
-
         if (!notes.isEmpty()) {
             final Iterator<Note> iter = notes.iterator();
             Note note;

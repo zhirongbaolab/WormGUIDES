@@ -34,6 +34,8 @@ import static java.util.stream.Collectors.toList;
 import static javafx.application.Platform.runLater;
 import static javafx.stage.Modality.NONE;
 
+import static partslist.PartsList.getFunctionalNameByLineageName;
+import static partslist.PartsList.isLineageName;
 import static search.SearchType.GENE;
 import static search.SearchType.STRUCTURES_BY_HEADING;
 import static search.SearchType.STRUCTURE_BY_SCENE_NAME;
@@ -440,10 +442,15 @@ public class Rule {
      * @return true if the rule is visible and it applies to multicellcular structure with the specified name, false
      * otherwise
      */
-    public boolean appliesToStructureWithSceneName(final String name) {
+    public boolean appliesToStructureWithSceneName(String name) {
         if (visible && (isStructureRuleBySceneName() || isStructureRuleByHeading())) {
             final String structureName = text.substring(1, text.lastIndexOf("'"));
             if (isStructureRuleBySceneName()) {
+                if (isLineageName(name)) {
+                    // translate the rule's lineage name to its functional name because the rule itself uses
+                    // functional names for legibility
+                    name = getFunctionalNameByLineageName(name);
+                }
                 return structureName.equalsIgnoreCase(name.trim());
             } else if (isStructureRuleByHeading()) {
                 for (String structure : cells) {

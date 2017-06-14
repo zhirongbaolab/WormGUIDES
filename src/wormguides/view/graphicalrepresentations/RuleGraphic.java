@@ -26,10 +26,10 @@ import static javafx.scene.layout.Priority.ALWAYS;
 import static javafx.scene.layout.Priority.SOMETIMES;
 import static javafx.scene.paint.Color.LIGHTGREY;
 
-import static wormguides.loaders.ImageLoader.getCloseIcon;
-import static wormguides.loaders.ImageLoader.getEditIcon;
-import static wormguides.loaders.ImageLoader.getEyeIcon;
-import static wormguides.loaders.ImageLoader.getEyeInvertIcon;
+import static wormguides.loaders.IconImageLoader.getCloseIcon;
+import static wormguides.loaders.IconImageLoader.getEditIcon;
+import static wormguides.loaders.IconImageLoader.getEyeIcon;
+import static wormguides.loaders.IconImageLoader.getEyeInvertIcon;
 import static wormguides.util.AppFont.getFont;
 
 /**
