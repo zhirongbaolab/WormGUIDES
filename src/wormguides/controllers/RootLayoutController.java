@@ -68,7 +68,7 @@ import wormguides.layers.DisplayLayer;
 import wormguides.layers.SearchLayer;
 import wormguides.layers.StoriesLayer;
 import wormguides.layers.StructuresLayer;
-import wormguides.loaders.ImageLoader;
+import wormguides.loaders.IconImageLoader;
 import wormguides.models.LineageTree;
 import wormguides.models.cellcase.CasesLists;
 import wormguides.models.colorrule.Rule;
@@ -104,7 +104,6 @@ import static javafx.scene.layout.AnchorPane.setRightAnchor;
 import static javafx.scene.layout.AnchorPane.setTopAnchor;
 import static javafx.scene.paint.Color.BLACK;
 import static javafx.scene.paint.Color.GRAY;
-import static javafx.scene.paint.Color.web;
 import static javafx.stage.Modality.NONE;
 import static javafx.stage.StageStyle.UNDECORATED;
 
@@ -127,7 +126,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
     private static final String UNLINEAGED_START = "Nuc";
     private static final String ROOT = "ROOT";
-    private static final String FILL_COLOR_HEX = "#272727";
 
     // Panels stuff
     @FXML
@@ -217,7 +215,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
     @FXML
     private ListView<String> structuresSearchListView;
     @FXML
-    private TreeView<StructureTreeNode> allStructuresTreeView;
+    private TreeView<StructureTreeNode> structuresTreeView;
     @FXML
     private Button addStructureRuleBtn;
     @FXML
@@ -732,6 +730,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 productionInfo,
                 connectome,
                 sceneElementsList,
+                structuresLayer.getStructuresTreeRoot(),
                 storiesLayer,
                 searchLayer,
                 bringUpInfoFlag,
@@ -952,13 +951,13 @@ public class RootLayoutController extends BorderPane implements Initializable {
      * Sets the icons for the GUI buttons
      */
     private void setIcons() {
-        backwardButton.setGraphic(ImageLoader.getBackwardIcon());
-        forwardButton.setGraphic(ImageLoader.getForwardIcon());
-        zoomInButton.setGraphic(new ImageView(ImageLoader.getPlusIcon()));
-        zoomOutButton.setGraphic(new ImageView(ImageLoader.getMinusIcon()));
+        backwardButton.setGraphic(IconImageLoader.getBackwardIcon());
+        forwardButton.setGraphic(IconImageLoader.getForwardIcon());
+        zoomInButton.setGraphic(new ImageView(IconImageLoader.getPlusIcon()));
+        zoomOutButton.setGraphic(new ImageView(IconImageLoader.getMinusIcon()));
 
-        playIcon = ImageLoader.getPlayIcon();
-        pauseIcon = ImageLoader.getPauseIcon();
+        playIcon = IconImageLoader.getPlayIcon();
+        pauseIcon = IconImageLoader.getPauseIcon();
         playButton.setGraphic(playIcon);
         playButton.setOnAction(event -> {
             playingMovieFlag.set(!playingMovieFlag.get());
@@ -1039,10 +1038,13 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 selectedEntityNameProperty,
                 structuresSearchField,
                 structuresSearchListView,
-                allStructuresTreeView,
+                structuresTreeView,
                 addStructureRuleBtn,
                 structureRuleColorPicker,
                 rebuildSubsceneFlag);
+        if (searchLayer != null) {
+            searchLayer.setStructureTreeRoot(structuresLayer.getStructuresTreeRoot());
+        }
     }
 
     private void initStoriesLayer() {
@@ -1269,7 +1271,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 mainStage.heightProperty().get(),
                 true,
                 BALANCED);
-        subscene.setFill(web(FILL_COLOR_HEX));
 
         rulesList = observableArrayList();
         searchResultsList = observableArrayList();
@@ -1302,7 +1303,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 for (Node node : contextMenuStage.getScene().getRoot().getChildrenUnmodifiable()) {
                     node.setStyle("-fx-focus-color: -fx-outer-border; -fx-faint-focus-color: transparent;");
                 }
-                contextMenuController.setInfoButtonListener(event -> contextMenuStage.hide());
+                contextMenuController.setMoreInfoButtonListener(event -> contextMenuStage.hide());
 
             } catch (IOException e) {
                 System.out.println("Error in initializing context menu");

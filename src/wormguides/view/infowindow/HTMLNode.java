@@ -14,13 +14,13 @@ public class HTMLNode {
     private final static String NEW_LINE = "\n";
 
     private String tag;
-    private String ID;
+    private String id;
     private String style;
     private String innerHTML;
 
     // for type checking
     private boolean isContainer;
-    private boolean hasID;
+    private boolean hasId;
     private boolean isImage;
     private boolean isStyle;
     private boolean isButton;
@@ -38,7 +38,7 @@ public class HTMLNode {
     private ArrayList<HTMLNode> children;
 
     /**
-     * container node with no ID - e.g. head, body, ul
+     * container node with no id - e.g. head, body, ul
      *
      * @param tag
      *         the type of node
@@ -47,13 +47,13 @@ public class HTMLNode {
         this.tag = tag;
 
         this.isContainer = true;
-        this.hasID = false;
+        this.hasId = false;
         this.isImage = false;
         this.isStyle = false;
         this.isButton = false;
         this.isScript = false;
 
-        this.ID = null;
+        this.id = null;
         this.style = null;
         this.innerHTML = null;
         this.imgSrc = null;
@@ -64,22 +64,22 @@ public class HTMLNode {
     }
 
     /**
-     * Container node with ID - e.g. <div>
+     * Container node with id - e.g. <div>
      *
      * @param tag
      *         the type of node
      * @param ID
-     *         the ID corresponding to this node
+     *         the id corresponding to this node
      * @param style
      *         the style associated with this nodes
      */
     public HTMLNode(String tag, String ID, String style) {
         this.tag = tag;
-        this.ID = ID;
+        this.id = ID;
         this.style = style;
 
         this.isContainer = true;
-        this.hasID = true;
+        this.hasId = true;
         this.isImage = false;
         this.isStyle = false;
         this.isButton = false;
@@ -99,7 +99,7 @@ public class HTMLNode {
      * @param tag
      *         the type of node
      * @param ID
-     *         the ID corresponding to this node
+     *         the id corresponding to this node
      * @param style
      *         the style associated with this node
      * @param innerHTML
@@ -107,11 +107,11 @@ public class HTMLNode {
      */
     public HTMLNode(String tag, String ID, String style, String innerHTML) {
         this.tag = tag;
-        this.ID = ID;
+        this.id = ID;
         this.style = style;
         this.innerHTML = innerHTML;
 
-        this.hasID = true;
+        this.hasId = true;
         this.isContainer = false;
         this.isImage = false;
         this.isStyle = false;
@@ -138,7 +138,7 @@ public class HTMLNode {
 
         this.isImage = isImage;
         this.isContainer = false;
-        this.hasID = false;
+        this.hasId = false;
         this.isStyle = false;
         this.isButton = false;
         this.isScript = false;
@@ -162,12 +162,12 @@ public class HTMLNode {
         this.innerHTML = style;
 
         if (type.equals("text/css")) {
-            this.ID = type; // we'll use the ID var for type="text/css"
+            this.id = type; // we'll use the id var for type="text/css"
         }
 
         this.isStyle = true;
         this.isContainer = false;
-        this.hasID = false;
+        this.hasId = false;
         this.isImage = false;
         this.isButton = false;
         this.isScript = false;
@@ -187,7 +187,7 @@ public class HTMLNode {
      * @param onclick
      *         the function to call onclick
      * @param ID
-     *         the ID associated with this node
+     *         the id associated with this node
      * @param style
      *         the style associated with this node
      * @param buttonText
@@ -198,13 +198,13 @@ public class HTMLNode {
     public HTMLNode(String tag, String onclick, String ID, String style, String buttonText, boolean button) {
         this.tag = tag;
         this.onclick = onclick;
-        this.ID = ID;
+        this.id = ID;
         this.style = style;
         this.innerHTML = buttonText;
 
         this.isButton = button;
         this.isContainer = false;
-        this.hasID = true;
+        this.hasId = true;
         this.isImage = false;
         this.isStyle = false;
         this.isScript = false;
@@ -230,7 +230,7 @@ public class HTMLNode {
 
         this.isScript = isScript;
         this.isContainer = false;
-        this.hasID = false;
+        this.hasId = false;
         this.isImage = false;
         this.isStyle = false;
 
@@ -268,7 +268,7 @@ public class HTMLNode {
      */
     private String formatNode(HTMLNode node) {
         /*
-         * TODO - container without ID --> <head> - container with ID --> div -
+         * TODO - container without id --> <head> - container with id --> div -
 		 * format with children
 		 */
 
@@ -276,54 +276,124 @@ public class HTMLNode {
             return null;
         }
 
-        String nodeStr = "";
+        StringBuilder nodeStr = new StringBuilder();
         if (node.isContainer()) { // e.g. <head>, <div>
-
             if (!node.hasID()) { // e.g. <head>
-                nodeStr = NEW_LINE + "<" + node.getTag() + ">";
+                nodeStr = new StringBuilder()
+                        .append(NEW_LINE)
+                        .append("<")
+                        .append(node.getTag())
+                        .append(">");
             } else { // e.g. <div>
-                nodeStr = NEW_LINE + "<" + node.getTag() + " id=\"" + node.getID() + "\">";
+                nodeStr = new StringBuilder()
+                        .append(NEW_LINE)
+                        .append("<")
+                        .append(node.getTag())
+                        .append(" id=\"")
+                        .append(node.getId())
+                        .append("\">");
             }
 
             // add children to node
             if (node.hasChildren()) {
                 for (HTMLNode n : node.getChildren()) {
-                    nodeStr += formatNode(n);
+                    nodeStr.append(formatNode(n));
                 }
             }
 
             if (!node.getTag().equals("br")) {
-                nodeStr += (NEW_LINE + "</" + node.getTag() + ">");
+                nodeStr.append(NEW_LINE)
+                        .append("</")
+                        .append(node.getTag())
+                        .append(">");
             }
 
         } else if (!node.isContainer() && !node.isImage() && !node.isButton() && !node.isScript()) { // e.g.
             // <p
             // id...
-            if (!node.getID().equals("")) {
-                nodeStr = NEW_LINE + "<" + node.getTag() + " id=\"" + node.getID() + "\">" + NEW_LINE
-                        + node.getInnerHTML() + NEW_LINE + "</" + node.getTag() + ">";
+            if (!node.getId().equals("")) {
+                nodeStr = new StringBuilder()
+                        .append(NEW_LINE)
+                        .append("<")
+                        .append(node.getTag())
+                        .append(" id=\"")
+                        .append(node.getId())
+                        .append("\">")
+                        .append(NEW_LINE)
+                        .append(node.getInnerHTML())
+                        .append(NEW_LINE)
+                        .append("</")
+                        .append(node.getTag())
+                        .append(">");
             } else {
-                nodeStr = NEW_LINE + "<" + node.getTag() + ">" + NEW_LINE + node.getInnerHTML() + NEW_LINE + "</"
-                        + node.getTag() + ">";
+                nodeStr = new StringBuilder()
+                        .append(NEW_LINE)
+                        .append("<")
+                        .append(node.getTag())
+                        .append(">")
+                        .append(NEW_LINE)
+                        .append(node.getInnerHTML())
+                        .append(NEW_LINE)
+                        .append("</")
+                        .append(node.getTag())
+                        .append(">");
             }
 
         } else if (node.isImage()) { // e.g. <img id...
-            nodeStr = NEW_LINE + "<" + node.getTag() + " src=\"" + node.getImgSrc() + "\" alt=\"" + node.getImgSrc()
-                    + "\">";
+            nodeStr = new StringBuilder()
+                    .append(NEW_LINE)
+                    .append("<")
+                    .append(node.getTag())
+                    .append(" src=\"")
+                    .append(node.getImgSrc())
+                    .append("\" alt=\"")
+                    .append(node.getImgSrc())
+                    .append("\">");
         } else if (node.isStyle()) {
-            nodeStr = NEW_LINE + "<" + node.getTag() + " type=\"" + node.getID() + "\">" + NEW_LINE + NEW_LINE
-                    + node.getStyle() + NEW_LINE + "</" + node.getTag() + ">";
+            nodeStr = new StringBuilder()
+                    .append(NEW_LINE)
+                    .append("<")
+                    .append(node.getTag())
+                    .append(" type=\"")
+                    .append(node.getId())
+                    .append("\">")
+                    .append(NEW_LINE)
+                    .append(NEW_LINE)
+                    .append(node.getStyle())
+                    .append(NEW_LINE)
+                    .append("</")
+                    .append(node.getTag())
+                    .append(">");
         } else if (node.isButton()) { // using imgSrc for onlick and innerHTML
             // for button text
-            nodeStr = NEW_LINE + "<" + node.getTag() + " onclick=\"" + node.getOnclick() + "()\"" + " id=\""
-                    + node.getID() + "\">" + node.innerHTML + "</" + node.getTag() + ">";
+            nodeStr = new StringBuilder()
+                    .append(NEW_LINE)
+                    .append("<")
+                    .append(node.getTag())
+                    .append(" onclick=\"")
+                    .append(node.getOnclick())
+                    .append("()\"")
+                    .append(" id=\"")
+                    .append(node.getId())
+                    .append("\">")
+                    .append(node.innerHTML)
+                    .append("</")
+                    .append(node.getTag())
+                    .append(">");
         } else if (node.isScript()) {
-            nodeStr =
-                    NEW_LINE + "<" + node.getTag() + ">" + NEW_LINE + node.getScript() + NEW_LINE + "</" + node.getTag()
-                            + ">";
+            nodeStr = new StringBuilder()
+                    .append(NEW_LINE)
+                    .append("<")
+                    .append(node.getTag())
+                    .append(">")
+                    .append(NEW_LINE)
+                    .append(node.getScript())
+                    .append(NEW_LINE)
+                    .append("</")
+                    .append(node.getTag())
+                    .append(">");
         }
-
-        return nodeStr;
+        return nodeStr.toString();
     }
 
     /**
@@ -339,18 +409,44 @@ public class HTMLNode {
         String functionName = "function " + this.getOnclick() + "() {";
 
         String divToCollapseID = this.getOnclick().substring(0, this.getOnclick().indexOf("Collapse"));
-        String script = functionName + NEW_LINE + "    if (document.getElementById('" + this.getID()
-                + "').innerHTML == \"+\") {" + NEW_LINE + "        document.getElementById('" + this.getID()
-                + "').innerHTML = \"-\";" + NEW_LINE + "        document.getElementById('" + divToCollapseID
-                + "').style.height = '20%'; " + NEW_LINE + "        document.getElementById('" + divToCollapseID
-                + "').style.visibility = 'visible'; " + NEW_LINE + "    } else {" + NEW_LINE
-                + "        document.getElementById('" + this.getID() + "').innerHTML = \"+\";" + NEW_LINE
-                + "        document.getElementById(\"" + divToCollapseID + "\").style.height = '0px'; " + NEW_LINE
-                + "        document.getElementById('" + divToCollapseID + "').style.visibility = 'hidden'; " + NEW_LINE
-                + "    }" + NEW_LINE + "}";
-
-		/*
-		 * 
+        final StringBuilder scriptStringBruilder = new StringBuilder();
+        scriptStringBruilder.append(functionName)
+                .append(NEW_LINE)
+                .append("    if (document.getElementById('")
+                .append(this.getId())
+                .append("').innerHTML == \"+\") {")
+                .append(NEW_LINE)
+                .append("        document.getElementById('")
+                .append(this.getId())
+                .append("').innerHTML = \"-\";")
+                .append(NEW_LINE)
+                .append("        document.getElementById('")
+                .append(divToCollapseID)
+                .append("').style.height = '20%'; ")
+                .append(NEW_LINE)
+                .append("        document.getElementById('")
+                .append(divToCollapseID)
+                .append("').style.visibility = 'visible'; ")
+                .append(NEW_LINE)
+                .append("    } else {")
+                .append(NEW_LINE)
+                .append("        document.getElementById('")
+                .append(this.getId())
+                .append("').innerHTML = \"+\";")
+                .append(NEW_LINE)
+                .append("        document.getElementById(\"")
+                .append(divToCollapseID)
+                .append("\").style.height = '0px'; ")
+                .append(NEW_LINE)
+                .append("        document.getElementById('")
+                .append(divToCollapseID)
+                .append("').style.visibility = 'hidden'; ")
+                .append(NEW_LINE)
+                .append("    }")
+                .append(NEW_LINE)
+                .append("}");
+        /*
+         *
 		 * function function________Collapse() { if
 		 * (document.getElementById('functionCollapseButton').innerHTML == "+")
 		 * { document.getElementById('functionCollapseButton').innerHTML = "-";
@@ -362,7 +458,7 @@ public class HTMLNode {
 		 * document.getElementById('functionWORMATLAS').style.visibility =
 		 * 'hidden'; } }
 		 */
-        return new HTMLNode("script", script, true);
+        return new HTMLNode("script", scriptStringBruilder.toString(), true);
     }
 
     /**
@@ -374,26 +470,45 @@ public class HTMLNode {
         if (!this.isButton()) {
             return null;
         }
-
-        String script = "function homologuesCollapse() {" + NEW_LINE
-                + "if (document.getElementById('homologuesCollapseButton').innerHTML == \"+\") {" + NEW_LINE
-                + "document.getElementById('homologuesCollapseButton').innerHTML = \"-\";" + NEW_LINE
-                + "document.getElementById('homologues').style.height = '20%';" + NEW_LINE
-                + "document.getElementById('homologues').style.visibility = 'visible'; " + NEW_LINE
-                + "document.getElementById('homologuesLR').style.height = '20%';" + NEW_LINE
-                + "document.getElementById('homologuesLR').style.visibility = 'visible';" + NEW_LINE
-                + "document.getElementById('homologuesOther').style.height = '20%';" + NEW_LINE
-                + "document.getElementById('homologuesOther').style.visibility = 'visible';" + NEW_LINE + "} else {"
-                + NEW_LINE + "document.getElementById('homologuesCollapseButton').innerHTML = \"+\";" + NEW_LINE
-                + "document.getElementById('homologues').style.height = '0px'; " + NEW_LINE
-                + "document.getElementById('homologues').style.visibility = 'hidden';" + NEW_LINE
-                + "document.getElementById('homologuesLR').style.height = '0px';" + NEW_LINE
-                + "document.getElementById('homologuesLR').style.visibility = 'hidden';" + NEW_LINE
-                + "document.getElementById('homologuesOther').style.height = '0px';" + NEW_LINE
-                + "document.getElementById('homologuesOther').style.visibility = 'hidden';" + NEW_LINE + "}" + NEW_LINE
-                + "}";
-
-        return new HTMLNode("script", script, true);
+        final StringBuilder scriptStringBuilder = new StringBuilder();
+        scriptStringBuilder.append("function homologuesCollapse() {")
+                .append(NEW_LINE)
+                .append("if (document.getElementById('homologuesCollapseButton').innerHTML == \"+\") {")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologuesCollapseButton').innerHTML = \"-\";")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologues').style.height = '20%';")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologues').style.visibility = 'visible'; ")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologuesLR').style.height = '20%';")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologuesLR').style.visibility = 'visible';")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologuesOther').style.height = '20%';")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologuesOther').style.visibility = 'visible';")
+                .append(NEW_LINE)
+                .append("} else {")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologuesCollapseButton').innerHTML = \"+\";")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologues').style.height = '0px'; ")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologues').style.visibility = 'hidden';")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologuesLR').style.height = '0px';")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologuesLR').style.visibility = 'hidden';")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologuesOther').style.height = '0px';")
+                .append(NEW_LINE)
+                .append("document.getElementById('homologuesOther').style.visibility = 'hidden';")
+                .append(NEW_LINE)
+                .append("}")
+                .append(NEW_LINE)
+                .append("}");
+        return new HTMLNode("script", scriptStringBuilder.toString(), true);
     }
 
     /**
@@ -441,9 +556,9 @@ public class HTMLNode {
         return "";
     }
 
-    public String getID() {
-        if (this.ID != null) {
-            return this.ID;
+    public String getId() {
+        if (this.id != null) {
+            return this.id;
         }
 
         return "";
@@ -507,7 +622,7 @@ public class HTMLNode {
     }
 
     public boolean hasID() {
-        return this.hasID;
+        return this.hasId;
     }
 
     public boolean isImage() {

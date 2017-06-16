@@ -1,5 +1,5 @@
 /*
- * Bao Lab 2016
+ * Bao Lab 2017
  */
 
 package wormguides.controllers;
@@ -16,33 +16,45 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.converter.NumberStringConverter;
 
+import static java.lang.Double.parseDouble;
+import static java.util.Objects.requireNonNull;
+
 public class RotationController extends AnchorPane implements Initializable {
-    private final static double ZERO = 0.;
+
     private final static String DoublePropStr = "DoubleProperty [value: ";
+
     @FXML
     private Slider xRotationSlider;
+
     @FXML
     private Slider yRotationSlider;
+
     @FXML
     private Slider zRotationSlider;
+
     @FXML
     private TextField rotateXAngleField;
+
     @FXML
     private TextField rotateYAngleField;
+
     @FXML
     private TextField rotateZAngleField;
+
     private DoubleProperty xRotationAngle;
+
     private DoubleProperty yRotationAngle;
+
     private DoubleProperty zRotationAngle;
 
     public RotationController(
-            DoubleProperty xRotationAngle, DoubleProperty yRotationAngle,
+            DoubleProperty xRotationAngle,
+            DoubleProperty yRotationAngle,
             DoubleProperty zRotationAngle) {
         super();
-
-        this.xRotationAngle = xRotationAngle;
-        this.yRotationAngle = yRotationAngle;
-        this.zRotationAngle = zRotationAngle;
+        this.xRotationAngle = requireNonNull(xRotationAngle);
+        this.yRotationAngle = requireNonNull(yRotationAngle);
+        this.zRotationAngle = requireNonNull(zRotationAngle);
     }
 
     @Override
@@ -112,14 +124,13 @@ public class RotationController extends AnchorPane implements Initializable {
                 }
 
                 try {
-                    double rotateXAngleVal = Double.parseDouble(newValue);
+                    double rotateXAngleVal = parseDouble(newValue);
 
                     if (rotateXAngleVal > -360. && rotateXAngleVal < 360.) {
                         xRotationAngle.set(rotateXAngleVal);
                     }
                 } catch (Exception e) {
-                    xRotationAngle.set(ZERO);
-//						 e.printStackTrace();
+                    xRotationAngle.set(0);
                 }
             }
         };
@@ -134,14 +145,13 @@ public class RotationController extends AnchorPane implements Initializable {
                 }
 
                 try {
-                    double rotateYAngleVal = Double.parseDouble(newValue);
+                    double rotateYAngleVal = parseDouble(newValue);
 
                     if (rotateYAngleVal > -360. && rotateYAngleVal < 360.) {
                         yRotationAngle.set(rotateYAngleVal);
                     }
                 } catch (Exception e) {
-                    yRotationAngle.set(ZERO);
-                    // e.printStackTrace();
+                    yRotationAngle.set(0);
                 }
             }
         };
@@ -156,14 +166,13 @@ public class RotationController extends AnchorPane implements Initializable {
                 }
 
                 try {
-                    double rotateZAngleVal = Double.parseDouble(newValue);
+                    double rotateZAngleVal = parseDouble(newValue);
 
                     if (rotateZAngleVal > -360. && rotateZAngleVal < 360.) {
                         zRotationAngle.set(rotateZAngleVal);
                     }
                 } catch (Exception e) {
-                    zRotationAngle.set(ZERO);
-                    // e.printStackTrace();
+                    zRotationAngle.set(0);
                 }
             }
         };

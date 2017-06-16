@@ -33,8 +33,7 @@ Make sure environment variables point to the bin directory of the jdk (usually f
 If Eclipse cannot open, try to modify the eclipse.ini configuration file in the main eclipse directory<br>
 Change the required java version in the argument -Dosgi.requiredJavaVersion from 1.7 to 1.8<br>
 Make sure the -vm argument points to the correct javaw.exe for your Java 1.8+ version<br><br>
-
-#####Project Setup:
+Project Setup:
 Select File > Import > Existing Projects into Workspace<br>
 Choose the Git directory you cloned and hit Finish<br><br>
 

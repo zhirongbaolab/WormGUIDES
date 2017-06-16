@@ -36,6 +36,7 @@ import wormguides.models.cellcase.TerminalCellCase;
 import wormguides.models.colorrule.Rule;
 import wormguides.resources.ProductionInfo;
 
+import static java.lang.Thread.sleep;
 import static java.util.Objects.requireNonNull;
 
 import static javafx.application.Platform.runLater;
@@ -105,7 +106,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     private Connectome connectome;
 
     /**
-     * Constructur for ContextMenuController
+     * Controller constructor
      *
      * @param parentStage
      *         the parent stage (or popup window) that the context menu lives
@@ -172,7 +173,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                                 loadingMenuItem.setText(loading);
                             });
                             try {
-                                Thread.sleep(WAIT_TIME_MILLI);
+                                sleep(WAIT_TIME_MILLI);
                                 count++;
                                 if (count < 0) {
                                     count = 0;
@@ -213,10 +214,34 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                                     cases.makeTerminalCase(
                                             cellName,
                                             funcName,
-                                            connectome.queryConnectivity(funcName, true, false, false, false, false),
-                                            connectome.queryConnectivity(funcName, false, true, false, false, false),
-                                            connectome.queryConnectivity(funcName, false, false, true, false, false),
-                                            connectome.queryConnectivity(funcName, false, false, false, true, false),
+                                            connectome.queryConnectivity(
+                                                    funcName,
+                                                    true,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    false),
+                                            connectome.queryConnectivity(
+                                                    funcName,
+                                                    false,
+                                                    true,
+                                                    false,
+                                                    false,
+                                                    false),
+                                            connectome.queryConnectivity(
+                                                    funcName,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    false,
+                                                    false),
+                                            connectome.queryConnectivity(
+                                                    funcName,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    false),
                                             productionInfo.getNuclearInfo(),
                                             productionInfo.getCellShapeData(cellName));
                                 }
@@ -285,16 +310,40 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                                 // these calls return functional names
                                 results.add(
                                         PRE_SYN_INDEX,
-                                        connectome.queryConnectivity(funcName, true, false, false, false, false));
+                                        connectome.queryConnectivity(
+                                                funcName,
+                                                true,
+                                                false,
+                                                false,
+                                                false,
+                                                false));
                                 results.add(
                                         POST_SYN_INDEX,
-                                        connectome.queryConnectivity(funcName, false, true, false, false, false));
+                                        connectome.queryConnectivity(
+                                                funcName,
+                                                false,
+                                                true,
+                                                false,
+                                                false,
+                                                false));
                                 results.add(
                                         ELECTR_INDEX,
-                                        connectome.queryConnectivity(funcName, false, false, true, false, false));
+                                        connectome.queryConnectivity(
+                                                funcName,
+                                                false,
+                                                false,
+                                                true,
+                                                false,
+                                                false));
                                 results.add(
                                         NEURO_INDEX,
-                                        connectome.queryConnectivity(funcName, false, false, false, true, false));
+                                        connectome.queryConnectivity(
+                                                funcName,
+                                                false,
+                                                false,
+                                                false,
+                                                true,
+                                                false));
                             }
                             return results;
                         }
@@ -322,10 +371,34 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                     rule.showEditStage(this.parentStage);
                 });
 
-                populateWiredToMenu(results.get(PRE_SYN_INDEX), preSyn, true, false, false, false);
-                populateWiredToMenu(results.get(POST_SYN_INDEX), postSyn, false, true, false, false);
-                populateWiredToMenu(results.get(ELECTR_INDEX), electr, false, false, true, false);
-                populateWiredToMenu(results.get(NEURO_INDEX), neuro, false, false, false, false);
+                populateWiredToMenu(
+                        results.get(PRE_SYN_INDEX),
+                        preSyn,
+                        true,
+                        false,
+                        false,
+                        false);
+                populateWiredToMenu(
+                        results.get(POST_SYN_INDEX),
+                        postSyn,
+                        false,
+                        true,
+                        false,
+                        false);
+                populateWiredToMenu(
+                        results.get(ELECTR_INDEX),
+                        electr,
+                        false,
+                        false,
+                        true,
+                        false);
+                populateWiredToMenu(
+                        results.get(NEURO_INDEX),
+                        neuro,
+                        false,
+                        false,
+                        false,
+                        false);
             } else {
                 wiredToMenu.getItems().clear();
                 wiredToMenu.getItems().add(new MenuItem("None"));
@@ -341,7 +414,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
      * @param handler
      *         the handler (provided by RootLayoutController) that handles the 'more info' button click action
      */
-    public void setInfoButtonListener(EventHandler<MouseEvent> handler) {
+    public void setMoreInfoButtonListener(final EventHandler<MouseEvent> handler) {
         info.setOnMouseClicked(handler);
     }
 
@@ -584,8 +657,8 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     }
 
     /**
-     * Toggles the BooleanProperty bringUpInfoProperty so that the cell info window is displayed.
-     * ContextMenuController listens for changes in this toggle.
+     * Toggles the BooleanProperty bringUpInfoProperty so that the cell info window is displayed. The controller for
+     * the context menu listens for changes in this toggle.
      */
     @FXML
     public void showInfoAction() {

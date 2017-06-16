@@ -34,6 +34,10 @@ import static java.util.stream.Collectors.toList;
 import static javafx.application.Platform.runLater;
 import static javafx.stage.Modality.NONE;
 
+import static partslist.PartsList.getFunctionalNameByLineageName;
+import static partslist.PartsList.isLineageName;
+import static search.SearchType.GENE;
+import static search.SearchType.STRUCTURES_BY_HEADING;
 import static search.SearchType.STRUCTURE_BY_SCENE_NAME;
 import static wormguides.models.LineageTree.isAncestor;
 import static wormguides.models.LineageTree.isDescendant;
@@ -232,7 +236,7 @@ public class Rule {
             final String textLowerCase = text.toLowerCase();
             if (textLowerCase.contains("functional") || textLowerCase.contains("description")) {
                 editController.disableDescendantOption();
-            } else if (isStructureRuleBySceneName()) {
+            } else if (isStructureRuleBySceneName() || isStructureRuleByHeading()) {
                 editController.disableOptionsForStructureRule();
             }
 
@@ -247,10 +251,21 @@ public class Rule {
     }
 
     /**
-     * @return true if the rule should color a multicellular structure, false otherwise.
+     * @return true if the rule should color a multicellular structure, false otherwise
      */
     public boolean isStructureRuleBySceneName() {
         return searchType == STRUCTURE_BY_SCENE_NAME;
+    }
+
+    /**
+     * @return true if the rule is a structure heading rule, false otherwise
+     */
+    public boolean isStructureRuleByHeading() {
+        return searchType == STRUCTURES_BY_HEADING;
+    }
+
+    public boolean isGeneRule() {
+        return searchType == GENE;
     }
 
     /**
@@ -424,15 +439,27 @@ public class Rule {
      * @param name
      *         scene name of multicellular structure
      *
-     * @return true if the rule is visible and it applies to multicellcular structure with specified name, false
+     * @return true if the rule is visible and it applies to multicellcular structure with the specified name, false
      * otherwise
      */
-    public boolean appliesToStructureWithSceneName(final String name) {
-        if (isStructureRuleBySceneName()) {
+    public boolean appliesToStructureWithSceneName(String name) {
+        if (visible && (isStructureRuleBySceneName() || isStructureRuleByHeading())) {
             final String structureName = text.substring(1, text.lastIndexOf("'"));
-            return visible
-                    && searchType == STRUCTURE_BY_SCENE_NAME
-                    && structureName.equalsIgnoreCase(name.trim());
+            if (isStructureRuleBySceneName()) {
+                if (isLineageName(name)) {
+                    // translate the rule's lineage name to its functional name because the rule itself uses
+                    // functional names for legibility
+                    name = getFunctionalNameByLineageName(name);
+                }
+                return structureName.equalsIgnoreCase(name.trim());
+            } else if (isStructureRuleByHeading()) {
+                for (String structure : cells) {
+                    if (structure.equalsIgnoreCase(name.trim())) {
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
         return false;
     }

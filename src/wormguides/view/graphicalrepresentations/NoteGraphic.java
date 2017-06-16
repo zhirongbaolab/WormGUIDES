@@ -29,8 +29,8 @@ import static javafx.scene.paint.Color.WHITE;
 import static javafx.scene.text.FontSmoothingType.LCD;
 
 import static wormguides.layers.StoriesLayer.colorTexts;
-import static wormguides.loaders.ImageLoader.getEyeIcon;
-import static wormguides.loaders.ImageLoader.getEyeInvertIcon;
+import static wormguides.loaders.IconImageLoader.getEyeIcon;
+import static wormguides.loaders.IconImageLoader.getEyeInvertIcon;
 import static wormguides.util.AppFont.getBolderFont;
 import static wormguides.util.AppFont.getFont;
 import static wormguides.view.graphicalrepresentations.RuleGraphic.UI_SIDE_LENGTH;

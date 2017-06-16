@@ -30,6 +30,7 @@ import static wormguides.stories.Note.Display.CALLOUT_LOWER_LEFT;
 import static wormguides.stories.Note.Display.CALLOUT_LOWER_RIGHT;
 import static wormguides.stories.Note.Display.CALLOUT_UPPER_LEFT;
 import static wormguides.stories.Note.Display.CALLOUT_UPPER_RIGHT;
+import static wormguides.stories.Note.Display.IMAGE;
 import static wormguides.stories.Note.Display.OVERLAY;
 import static wormguides.stories.Note.Display.SPRITE;
 
@@ -534,8 +535,8 @@ public class Note {
     /**
      * Tells whether a note is without scope. Such a note is not displayed. Not having scope is defined by any of the
      * following combinations:
-     * 1. time is not specified for the CELLTIME or TIME attachment types
-     * 2. cell name is not specified for the CELLTIME or CELL attachment types
+     * 1. time is not specified for a TIME attachment
+     * 2. cell name is not specified for a CELL attachment
      * 3. no tag display methods is specified
      *
      * @return true if the note is without scope, false otherwise
@@ -544,7 +545,6 @@ public class Note {
         return tagDisplay.equals(Display.BLANK)
                 || !tagDisplay.equals(OVERLAY)
                 && (attachmentType.equals(CELL) && !isEntitySpecified());
-
     }
 
     public boolean hasLocationError() {
@@ -587,12 +587,11 @@ public class Note {
      * @param time
      *         time to check
      *
-     * @return true if note is visible at input time, or in sprite cell/celltime mode, false otherwise
+     * @return true if note is visible at input time, or in sprite cell mode, false otherwise
      */
     public boolean mayExistAtTime(int time) {
         if (!isWithoutScope()) {
-            // If start and end times are not set
-            // then note exists at all times
+            // if start and end times are not set, then note exists at all times
             if (!isTimeSpecified()) {
                 return true;
             }
@@ -634,6 +633,10 @@ public class Note {
 
     public boolean isBillboardFront() {
         return tagDisplay == BILLBOARD_FRONT;
+    }
+
+    public boolean isBillboardImage() {
+        return tagDisplay == IMAGE;
     }
 
     public String toString() {
@@ -702,16 +705,21 @@ public class Note {
 
         /**
          * Display as a 3D billboard that rotates and translates with the entity that the note is attached to
-         * (defined by
-         * {@link Attachment})
+         * (defined by the {@link Attachment})
          */
         BILLBOARD("billboard"),
 
         /**
          * Display as a front-facing billboard that translates with the entity that the note is attached to (defined by
-         * {@link Attachment})
+         * the {@link Attachment})
          */
         BILLBOARD_FRONT("billboard front"),
+
+        /**
+         * Display as a front-facing billboard image that translates with the entity that the note is attached to
+         * (defined by the {@link Attachment})
+         */
+        IMAGE("image"),
 
         /**
          * Display as a sprite that moves with the entity that the note is attached to (defined by
