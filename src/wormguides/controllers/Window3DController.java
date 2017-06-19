@@ -430,6 +430,9 @@ public class Window3DController {
 
         this.defaultEmbryoFlag = defaultEmbryoFlag;
 
+        /** Sets listener properties for the timeProperty variable. Updates time. If in movie capture mode,
+         * a screenshot is captured per frame. Thus, movies are only captured during play mode
+         */
         this.timeProperty = requireNonNull(timeProperty);
         this.timeProperty.addListener((observable, oldValue, newValue) -> {
             final int newTime = newValue.intValue();
@@ -2637,6 +2640,14 @@ public class Window3DController {
         return true;
     }
 
+    /**
+     * Converts saved frames of development in "play" mode to a single video file
+     * Notes:
+     * - The outputted video has the dimensions of the subscene width and height at capture time (if the
+     *   window is resized during capture, these parameters will be their values at the time "Stop Capture..."
+     *   is pressed)
+     * - The frame rate is set at 6 frames/sec
+     */
     public void convertImagesToMovie() {
         captureVideo.set(false);
         javaPictures.clear();
