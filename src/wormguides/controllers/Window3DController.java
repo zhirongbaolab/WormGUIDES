@@ -343,6 +343,7 @@ public class Window3DController {
     private String movieName;
     private String moviePath;
     private File frameDir;
+    private String frameDirPath;
 
     // private Quaternion quaternion;
 
@@ -429,6 +430,9 @@ public class Window3DController {
 
         this.defaultEmbryoFlag = defaultEmbryoFlag;
 
+        /** Sets listener properties for the timeProperty variable. Updates time. If in movie capture mode,
+         * a screenshot is captured per frame. Thus, movies are only captured during play mode
+         */
         this.timeProperty = requireNonNull(timeProperty);
         this.timeProperty.addListener((observable, oldValue, newValue) -> {
             final int newTime = newValue.intValue();
@@ -440,6 +444,22 @@ public class Window3DController {
             } else if (newTime > endTime) {
                 timeProperty.set(endTime);
             }
+
+            if (captureVideo.get()) {
+                WritableImage screenCapture = subscene.snapshot(new SnapshotParameters(), null);
+                try {
+                    File file = new File(frameDirPath + "movieFrame" + count++ + ".JPEG");
+
+                    if (file != null) {
+                        RenderedImage renderedImage = fromFXImage(screenCapture, null);
+                        write(renderedImage, "JPEG", file);
+                        movieFiles.addElement(file);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Could not write frame of movie to file.");
+                }
+            }
+
         });
 
         // set orientation indicator frames and rotation from production info
@@ -2555,7 +2575,7 @@ public class Window3DController {
 
     public boolean captureImagesForMovie() {
         movieFiles.clear();
-        count = 0;
+        this.count = 0;
 
         final Stage fileChooserStage = new Stage();
 
@@ -2589,36 +2609,45 @@ public class Window3DController {
             return false;
         }
 
-        String frameDirPath = frameDir.getAbsolutePath() + "/";
+        this.frameDirPath = frameDir.getAbsolutePath() + "/";
 
         captureVideo.set(true);
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (captureVideo.get()) {
-                    runLater(() -> {
-                        WritableImage screenCapture = subscene.snapshot(new SnapshotParameters(), null);
-                        try {
-                            File file = new File(frameDirPath + "movieFrame" + count++ + ".JPEG");
+//        timer = new Timer();
+//        timer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                if (captureVideo.get()) {
+//                    runLater(() -> {
+//                        WritableImage screenCapture = subscene.snapshot(new SnapshotParameters(), null);
+//                        try {
+//                            File file = new File(frameDirPath + "movieFrame" + count++ + ".JPEG");
+//
+//                            if (file != null) {
+//                                RenderedImage renderedImage = fromFXImage(screenCapture, null);
+//                                write(renderedImage, "JPEG", file);
+//                                movieFiles.addElement(file);
+//                            }
+//                        } catch (Exception e) {
+//                            System.out.println("Could not write frame of movie to file.");
+//                        }
+//                    });
+//                } else {
+//                    timer.cancel();
+//                }
+//            }
+//        }, 0, 1000);
 
-                            if (file != null) {
-                                RenderedImage renderedImage = fromFXImage(screenCapture, null);
-                                write(renderedImage, "JPEG", file);
-                                movieFiles.addElement(file);
-                            }
-                        } catch (Exception e) {
-                            System.out.println("Could not write frame of movie to file.");
-                        }
-                    });
-                } else {
-                    timer.cancel();
-                }
-            }
-        }, 0, 1000);
         return true;
     }
 
+    /**
+     * Converts saved frames of development in "play" mode to a single video file
+     * Notes:
+     * - The outputted video has the dimensions of the subscene width and height at capture time (if the
+     *   window is resized during capture, these parameters will be their values at the time "Stop Capture..."
+     *   is pressed)
+     * - The frame rate is set at 6 frames/sec
+     */
     public void convertImagesToMovie() {
         captureVideo.set(false);
         javaPictures.clear();
@@ -2635,7 +2664,7 @@ public class Window3DController {
             new JpegImagesToMovie(
                     (int) subscene.getWidth(),
                     (int) subscene.getHeight(),
-                    2,
+                    6,
                     movieName,
                     javaPictures);
 
