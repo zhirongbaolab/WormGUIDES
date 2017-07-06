@@ -19,6 +19,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
+
+import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -301,7 +303,8 @@ public class Window3DController {
     private LinkedList<Double[]> positions;
     private LinkedList<Double> diameters;
     private List<SceneElement> sceneElementsAtCurrentTime;
-    private List<SceneElementMeshView> currentSceneElementMeshes;
+//    private List<SceneElementMeshView> currentSceneElementMeshes;
+    private List<MeshView> currentSceneElementMeshes;
     private List<SceneElement> currentSceneElements;
     private PerspectiveCamera camera;
     private Xform xform;
@@ -1008,63 +1011,64 @@ public class Window3DController {
                 }
             }
 
-        } else if (node instanceof SceneElementMeshView) {
-            // Structure
-            boolean found = false; // this will indicate whether this meshview is a scene element
-            SceneElementMeshView curr;
-            for (int i = 0; i < currentSceneElementMeshes.size(); i++) {
-                curr = currentSceneElementMeshes.get(i);
-                if (curr.equals(node)) {
-                    found = true;
-                    final SceneElement clickedSceneElement = currentSceneElements.get(i);
-                    String name = normalizeName(clickedSceneElement.getSceneName());
-
-                    // if scene element is the cell body of a spherical nucleus, then use its lineage name
-                    if (isFunctionalName(name)) {
-                        name = getLineageNamesByFunctionalName(name).get(0);
-                    }
-                    selectedNameProperty.set(name);
-
-                    if (event.getButton() == SECONDARY
-                            || (event.getButton() == PRIMARY && (event.isMetaDown() || event.isControlDown()))) {
-                        // right click
-                        if (sceneElementsList.isStructureSceneName(name)) {
-                            final String functionalName;
-                            if ((functionalName = getFunctionalNameByLineageName(name)) != null) {
-                                name = functionalName;
-                            }
-                            showContextMenu(
-                                    name,
-                                    event.getScreenX(),
-                                    event.getScreenY(),
-                                    true,
-                                    sceneElementsList.isMulticellStructureName(name));
-                        }
-
-                    } else if (event.getButton() == PRIMARY) {
-                        // regular click
-                        if (allLabels.contains(name)) {
-                            removeLabelFor(name);
-                        } else {
-                            allLabels.add(name);
-                            currentLabels.add(name);
-                            final Shape3D entity = getEntityWithName(name);
-                            insertLabelFor(name, entity);
-                            highlightActiveCellLabel(entity);
-                        }
-                    }
-                    break;
-                }
-            }
-
-            // if the node isn't a SceneElement
-            if (!found) {
-                // note structure
-                currentNotesToMeshesMap.keySet()
-                        .stream()
-                        .filter(note -> currentNotesToMeshesMap.get(note).equals(node))
-                        .forEachOrdered(note -> selectedNameProperty.set(note.getTagName()));
-            }
+//        } else if (node instanceof SceneElementMeshView) {
+//            // Structure
+//            boolean found = false; // this will indicate whether this meshview is a scene element
+//            SceneElementMeshView curr;
+//            for (int i = 0; i < currentSceneElementMeshes.size(); i++) {
+//                curr = currentSceneElementMeshes.get(i);
+//                if (curr.equals(node)) {
+//                    found = true;
+//                    final SceneElement clickedSceneElement = currentSceneElements.get(i);
+//                    String name = normalizeName(clickedSceneElement.getSceneName());
+//
+//                    // if scene element is the cell body of a spherical nucleus, then use its lineage name
+//                    if (isFunctionalName(name)) {
+//                        name = getLineageNamesByFunctionalName(name).get(0);
+//                    }
+//                    selectedNameProperty.set(name);
+//
+//                    if (event.getButton() == SECONDARY
+//                            || (event.getButton() == PRIMARY && (event.isMetaDown() || event.isControlDown()))) {
+//                        // right click
+//                        if (sceneElementsList.isStructureSceneName(name)) {
+//                            final String functionalName;
+//                            if ((functionalName = getFunctionalNameByLineageName(name)) != null) {
+//                                name = functionalName;
+//                            }
+//                            showContextMenu(
+//                                    name,
+//                                    event.getScreenX(),
+//                                    event.getScreenY(),
+//                                    true,
+//                                    sceneElementsList.isMulticellStructureName(name));
+//                        }
+//
+//                    } else if (event.getButton() == PRIMARY) {
+//                        // regular click
+//                        if (allLabels.contains(name)) {
+//                            removeLabelFor(name);
+//                        } else {
+//                            allLabels.add(name);
+//                            currentLabels.add(name);
+//                            final Shape3D entity = getEntityWithName(name);
+//                            insertLabelFor(name, entity);
+//                            highlightActiveCellLabel(entity);
+//                        }
+//                    }
+//                    break;
+//                }
+//            }
+//
+//            // if the node isn't a SceneElement
+//            if (!found) {
+//                // note structure
+//                currentNotesToMeshesMap.keySet()
+//                        .stream()
+//                        .filter(note -> currentNotesToMeshesMap.get(note).equals(node))
+//                        .forEachOrdered(note -> selectedNameProperty.set(note.getTagName()));
+//            }
+//        }
         } else {
             selectedIndex.set(-1);
             selectedNameProperty.set("");
@@ -1628,19 +1632,26 @@ public class Window3DController {
 
             sceneElementsAtCurrentTime = sceneElementsList.getSceneElementsAtTime(requestedTime);
             for (SceneElement se : sceneElementsAtCurrentTime) {
-                final SceneElementMeshView mesh = se.buildGeometry(requestedTime - 1);
+                //final SceneElementMeshView mesh = se.buildGeometry(requestedTime - 1);
+                final MeshView mesh = se.buildGeometry(requestedTime);
                 if (mesh != null) {
                     mesh.getTransforms().addAll(rotateX, rotateY, rotateZ);
                     mesh.getTransforms().add(new Translate(
                             -offsetX * xScale,
                             -offsetY * yScale,
                             -offsetZ * zScale));
+                    mesh.setScaleX(5.0);
+                    mesh.setScaleY(5.0);
+                    mesh.setScaleZ(5.0);
                     // add rendered mesh to meshes list
                     currentSceneElementMeshes.add(mesh);
                     // add scene element to rendered scene element reference for on-click responsiveness
                     currentSceneElements.add(se);
+                } else {
+                    System.out.println(se.getSceneName() + " null mesh");
                 }
             }
+            System.out.println("successfully built: " + currentSceneElementMeshes.size() + "meshes");
             // End scene element mesh loading/building
         }
 
@@ -1697,18 +1708,18 @@ public class Window3DController {
                 if (defaultEmbryoFlag) {
                     // make mesh views for scene elements from note resources
                     if (note.hasSceneElements()) {
-                        for (SceneElement se : note.getSceneElements()) {
-                            final SceneElementMeshView mesh = se.buildGeometry(requestedTime);
-                            if (mesh != null) {
-                                mesh.setMaterial(colorHash.getNoteSceneElementMaterial());
-                                mesh.getTransforms().addAll(rotateX, rotateY, rotateZ);
-                                mesh.getTransforms().add(new Translate(
-                                        -offsetX * xScale,
-                                        -offsetY * yScale,
-                                        -offsetZ * zScale));
-                                currentNotesToMeshesMap.put(note, mesh);
-                            }
-                        }
+//                        for (SceneElement se : note.getSceneElements()) {
+//                            final SceneElementMeshView mesh = se.buildGeometry(requestedTime);
+//                            if (mesh != null) {
+//                                mesh.setMaterial(colorHash.getNoteSceneElementMaterial());
+//                                mesh.getTransforms().addAll(rotateX, rotateY, rotateZ);
+//                                mesh.getTransforms().add(new Translate(
+//                                        -offsetX * xScale,
+//                                        -offsetY * yScale,
+//                                        -offsetZ * zScale));
+//                                currentNotesToMeshesMap.put(note, mesh);
+//                            }
+//                        }
                     }
                 }
             }
@@ -1926,7 +1937,8 @@ public class Window3DController {
             // consult rules/search results
             final ListIterator<SceneElement> iter = currentSceneElements.listIterator();
             SceneElement sceneElement;
-            SceneElementMeshView meshView;
+//            SceneElementMeshView meshView;
+            MeshView meshView;
             int index = -1;
             while (iter.hasNext()) {
                 index++;
@@ -2162,7 +2174,7 @@ public class Window3DController {
                     if (note.attachedToCell()) {
                         subsceneEntity = getSubsceneSphereWithName(note.getCellName());
                     } else if (note.attachedToStructure() && defaultEmbryoFlag) {
-                        subsceneEntity = getSubsceneMeshWithName(note.getCellName());
+                        //subsceneEntity = getSubsceneMeshWithName(note.getCellName());
                     }
                     if (subsceneEntity != null) {
                         switch (note.getTagDisplay()) {
@@ -2258,7 +2270,7 @@ public class Window3DController {
                             subsceneEntity = getSubsceneSphereWithName(note.getCellName());
                         } else if (note.attachedToStructure() && defaultEmbryoFlag) {
                             // structure attachment
-                            subsceneEntity = getSubsceneMeshWithName(note.getCellName());
+                            //subsceneEntity = getSubsceneMeshWithName(note.getCellName());
                         }
                         if (subsceneEntity != null) {
                             // if another non-callout note is already attached to the subscene entity,
@@ -2288,12 +2300,12 @@ public class Window3DController {
                                     (Text) noteGraphic,
                                     getSubsceneSphereWithName(note.getCellName()));
                         } else if (note.attachedToStructure() && defaultEmbryoFlag) {
-                            final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
-                            if (meshView != null) {
-                                billboardFrontEntityMap.put(
-                                        (Text) noteGraphic,
-                                        meshView);
-                            }
+//                            final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
+//                            if (meshView != null) {
+//                                billboardFrontEntityMap.put(
+//                                        (Text) noteGraphic,
+//                                        meshView);
+//                            }
                         }
                     }
 
@@ -2312,12 +2324,12 @@ public class Window3DController {
                                     (ImageView) noteGraphic,
                                     getSubsceneSphereWithName(note.getCellName()));
                         } else if (note.attachedToStructure() && defaultEmbryoFlag) {
-                            final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
-                            if (meshView != null) {
-                                billboardImageEntityMap.put(
-                                        (ImageView) noteGraphic,
-                                        meshView);
-                            }
+//                            final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
+//                            if (meshView != null) {
+//                                billboardImageEntityMap.put(
+//                                        (ImageView) noteGraphic,
+//                                        meshView);
+//                            }
                         }
                     }
 
@@ -2342,12 +2354,12 @@ public class Window3DController {
                         }
                     } else if (note.attachedToStructure() && defaultEmbryoFlag) {
                         // structure attachment
-                        final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
-                        if (meshView != null) {
-                            double offset = 5;
-                            noteGraphic.getTransforms().addAll(meshView.getTransforms());
-//                            noteGraphic.getTransforms().add(new Translate(offset, offset));
-                        }
+//                        final SceneElementMeshView meshView = getSubsceneMeshWithName(note.getCellName());
+//                        if (meshView != null) {
+//                            double offset = 5;
+//                            noteGraphic.getTransforms().addAll(meshView.getTransforms());
+////                            noteGraphic.getTransforms().add(new Translate(offset, offset));
+//                        }
                     }
                 }
 
@@ -2385,7 +2397,7 @@ public class Window3DController {
      * @return the mesh view representing the scene element with that scene name, null if none were found in the
      * current time frame
      */
-    private SceneElementMeshView getSubsceneMeshWithName(final String sceneName) {
+    private MeshView getSubsceneMeshWithName(final String sceneName) {
         for (int i = 0; i < currentSceneElements.size(); i++) {
             if (currentSceneElements.get(i).getSceneName().equalsIgnoreCase(sceneName)) {
                 return currentSceneElementMeshes.get(i);
@@ -2393,6 +2405,22 @@ public class Window3DController {
         }
         return null;
     }
+
+//    /**
+//     * @param sceneName
+//     *         the scene name of the scene element mesh
+//     *
+//     * @return the mesh view representing the scene element with that scene name, null if none were found in the
+//     * current time frame
+//     */
+//    private SceneElementMeshView getSubsceneMeshWithName(final String sceneName) {
+//        for (int i = 0; i < currentSceneElements.size(); i++) {
+//            if (currentSceneElements.get(i).getSceneName().equalsIgnoreCase(sceneName)) {
+//                return currentSceneElementMeshes.get(i);
+//            }
+//        }
+//        return null;
+//    }
 
     /**
      * @param lineageName
@@ -2796,15 +2824,17 @@ public class Window3DController {
         return event -> {
             hideContextPopups();
             double z = zoomProperty.get();
-            if (z > 0.25) {
-                z -= 0.25;
-            } else if (z < 0) {
-                // normalize zoom by making 0 its minimum
-                // javafx has a bug where for a zoom below 0, the camera flips and does not pass through the scene
-                // The API does not recognize that the camera orientation has changed and thus the back of back face
-                // culled shapes appear, surrounded w/ artifacts.
-                z = 0;
-            }
+            z -= 0.05;
+
+//            if (z > 0.25) {
+//                z -= 0.25;
+//            } else if (z < 0) {
+//                // normalize zoom by making 0 its minimum
+//                // javafx has a bug where for a zoom below 0, the camera flips and does not pass through the scene
+//                // The API does not recognize that the camera orientation has changed and thus the back of back face
+//                // culled shapes appear, surrounded w/ artifacts.
+//                z = 0;
+//            }
             zoomProperty.set(z);
         };
     }

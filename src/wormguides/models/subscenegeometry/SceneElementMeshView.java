@@ -24,11 +24,16 @@ public class SceneElementMeshView extends MeshView {
     /**
      * Class constructor
      *
-     * @param triangleMesh
+     * @param meshView
      *         the triangle mesh needed to create a {@link MeshView} object
      */
-    public SceneElementMeshView(final TriangleMesh triangleMesh) {
-        super(triangleMesh);
+//    public SceneElementMeshView(final TriangleMesh triangleMesh) {
+//        super(triangleMesh);
+//        markerCoordinates = new ArrayList<>();
+//    }
+    public SceneElementMeshView(final MeshView meshView) {
+        //super(triangleMesh);
+//        /setMesh(meshView);
         markerCoordinates = new ArrayList<>();
     }
 

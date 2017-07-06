@@ -170,7 +170,7 @@ public class SceneElement {
      * @return scene element mesh view containing the actual {@link MeshView} object as well as marker points on the
      * geometry from which a callout note line can be drawn
      */
-    public SceneElementMeshView buildGeometry(int time) {
+    public MeshView buildGeometry(int time) {
         // check if complete resource
         if (completeResourceFlag) {
             return loadOBJ(resourceLocation);

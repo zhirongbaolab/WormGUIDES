@@ -308,6 +308,7 @@ public class SceneElementsList {
                 list.add(se.getAllCells().get(0));
             }
         });
+        System.out.println("num items at time: " + time + " is: " + list.size());
         return list.toArray(new String[list.size()]);
     }
 

@@ -12,7 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
+import javafx.scene.shape.DrawMode;
 
 import wormguides.MainApp;
 import wormguides.models.subscenegeometry.SceneElementMeshView;
@@ -65,65 +69,91 @@ public class GeometryLoader {
      *
      * @return the 3D mesh
      */
-    public static SceneElementMeshView loadOBJ(String resourcePath) {
-        SceneElementMeshView meshView = null;
+    public static MeshView loadOBJ(String resourcePath) {
+        MeshView meshView = null;
         resourcePath = "/" + resourcePath + OBJ_EXTENSION;
         final URL url = MainApp.class.getResource(resourcePath);
 
-        final List<double[]> coords = new ArrayList<>();
-        final List<int[]> faces = new ArrayList<>();
+//        final List<double[]> coords = new ArrayList<>();
+//        final List<int[]> faces = new ArrayList<>();
 
         if (url != null) {
-            try (final InputStreamReader streamReader = new InputStreamReader(url.openStream());
-                 final BufferedReader reader = new BufferedReader(streamReader)) {
-                String line;
-                StringTokenizer tokenizer;
-                String v;
-                String f;
-                String lineType;
-                while ((line = reader.readLine()) != null) {
-                    // processUrl each line in the obj file
-                    lineType = line.substring(0, 1);
-                    switch (lineType) {
-                        case VERTEX_LINE: {
-                            // processUrl vertex lines
-                            v = line.substring(2);
-                            double[] vertices = new double[3];
-                            int counter = 0;
-                            tokenizer = new StringTokenizer(v);
-                            while (tokenizer.hasMoreTokens()) {
-                                vertices[counter++] = Double.parseDouble(tokenizer.nextToken());
-                            }
-                            // make sure good line
-                            if (counter == 3) {
-                                coords.add(vertices);
-                            }
-                            break;
-                        }
-                        case FACE_LINE: {
-                            // processUrl face lines
-                            f = line.substring(2);
-                            int[] faceCoords = new int[3];
-                            int counter = 0;
 
-                            tokenizer = new StringTokenizer(f);
-                            while (tokenizer.hasMoreTokens()) {
-                                faceCoords[counter++] = Integer.parseInt(tokenizer.nextToken());
-                            }
-                            if (counter == 3) {
-                                faces.add(faceCoords);
-                            }
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                }
-                meshView = new SceneElementMeshView(createMesh(coords, faces));
-                meshView.pickOutMarkerPoints(coords);
-            } catch (IOException e) {
-                System.out.println("The file " + resourcePath + " wasn't found on the system.");
+            ObjModelImporter objImporter = new ObjModelImporter();
+            try {
+                objImporter.read(url);
+            } catch (Exception e) {
+                System.out.println("exception thrown building mesh");
+                e.printStackTrace();
+                System.exit(0);
             }
+
+            MeshView[] mvs = objImporter.getImport();
+            //System.out.println("size of mvs: " + mvs.length);
+            if (mvs.length == 1) {
+                meshView = mvs[0];
+                meshView.setDrawMode(DrawMode.FILL);
+                meshView.setMaterial(new PhongMaterial());
+            } else {
+                System.out.println("meshviews has size: " + mvs.length);
+            }
+
+//            try (final InputStreamReader streamReader = new InputStreamReader(url.openStream());
+//                 final BufferedReader reader = new BufferedReader(streamReader)) {
+//                String line;
+//                StringTokenizer tokenizer;
+//                String v;
+//                String f;
+//                String lineType;
+//                while ((line = reader.readLine()) != null) {
+//                    // processUrl each line in the obj file
+//                    lineType = line.substring(0, 1);
+//                    switch (lineType) {
+//                        case VERTEX_LINE: {
+//                            // processUrl vertex lines
+//                            v = line.substring(2);
+//                            double[] vertices = new double[3];
+//                            int counter = 0;
+//                            tokenizer = new StringTokenizer(v);
+//                            while (tokenizer.hasMoreTokens()) {
+//                                vertices[counter++] = Double.parseDouble(tokenizer.nextToken());
+//                            }
+//                            // make sure good line
+//                            if (counter == 3) {
+//                                coords.add(vertices);
+//                            }
+//                            break;
+//                        }
+//                        case FACE_LINE: {
+//                            // processUrl face lines
+//                            f = line.substring(2);
+//
+//                            tokenizer = new StringTokenizer(f);
+//
+//                            if (tokenizer.countTokens() == 3) {
+//                                int[] faceCoords = new int[3];
+//                                int counter = 0;
+//
+//                                while (tokenizer.hasMoreTokens()) {
+//                                    faceCoords[counter++] = Integer.parseInt(tokenizer.nextToken());
+//                                }
+//                                if (counter == 3) {
+//                                    faces.add(faceCoords);
+//                                }
+//                                break;
+//                            }
+//                        }
+//                        default:
+//                            break;
+//                    }
+//                }
+//                meshView = new SceneElementMeshView(createMesh(coords, faces));
+//                meshView.pickOutMarkerPoints(coords);
+//            } catch (IOException e) {
+//                System.out.println("The file " + resourcePath + " wasn't found on the system.");
+//            }
+        } else {
+            //System.out.println("null url");
         }
         return meshView;
     }
