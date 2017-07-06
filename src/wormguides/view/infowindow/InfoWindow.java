@@ -231,7 +231,7 @@ public class InfoWindow {
                                                 productionInfo.getNuclearInfo(),
                                                 productionInfo.getCellShapeData(funcName));
                                     } else {
-                                        String funcName = connectome.checkQueryCell(lineageName).toUpperCase();
+                                        String funcName = connectome.checkQueryCell(lineageName).toLowerCase();
                                         casesLists.makeTerminalCase(
                                                 lineageName,
                                                 funcName,

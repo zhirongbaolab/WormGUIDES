@@ -66,7 +66,6 @@ public class CasesLists {
             List<String> neuromuscularPartners,
             List<String> nuclearProductionInfo,
             List<String> cellShapeProductionInfo) {
-
         addTerminalCase(new TerminalCellCase(
                 lineageName,
                 cellName,
