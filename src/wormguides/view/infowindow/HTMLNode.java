@@ -5,6 +5,7 @@
 package wormguides.view.infowindow;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Nodes for the DOM tree
@@ -35,7 +36,7 @@ public class HTMLNode {
     // image vars
     private String imgSrc;
 
-    private ArrayList<HTMLNode> children;
+    private List<HTMLNode> children;
 
     /**
      * container node with no id - e.g. head, body, ul
@@ -46,21 +47,21 @@ public class HTMLNode {
     public HTMLNode(String tag) {
         this.tag = tag;
 
-        this.isContainer = true;
-        this.hasId = false;
-        this.isImage = false;
-        this.isStyle = false;
-        this.isButton = false;
-        this.isScript = false;
+        isContainer = true;
+        hasId = false;
+        isImage = false;
+        isStyle = false;
+        isButton = false;
+        isScript = false;
 
-        this.id = null;
-        this.style = null;
-        this.innerHTML = null;
-        this.imgSrc = null;
-        this.onclick = null;
-        this.script = null;
+        id = null;
+        style = null;
+        innerHTML = null;
+        imgSrc = null;
+        onclick = null;
+        script = null;
 
-        this.children = new ArrayList<>();
+        children = new ArrayList<>();
     }
 
     /**
@@ -402,13 +403,11 @@ public class HTMLNode {
      * @return the script node with the collapsing function
      */
     public HTMLNode makeCollapseButtonScript() {
-        if (!this.isButton()) {
+        if (!isButton) {
             return null;
         }
-
-        String functionName = "function " + this.getOnclick() + "() {";
-
-        String divToCollapseID = this.getOnclick().substring(0, this.getOnclick().indexOf("Collapse"));
+        final String functionName = "function " + getOnclick() + "() {";
+        final String divToCollapseID = getOnclick().substring(0, getOnclick().indexOf("Collapse"));
         final StringBuilder scriptStringBruilder = new StringBuilder();
         scriptStringBruilder.append(functionName)
                 .append(NEW_LINE)
@@ -467,7 +466,7 @@ public class HTMLNode {
      * @return the script node with the collapsing function
      */
     public HTMLNode makeHomologuesCollapseButtonScript() {
-        if (!this.isButton()) {
+        if (!isButton) {
             return null;
         }
         final StringBuilder scriptStringBuilder = new StringBuilder();
@@ -517,18 +516,23 @@ public class HTMLNode {
      * @return the script node with the callback function
      */
     public HTMLNode addLinkHandlerScript() {
-        String script = "function handleLink(element) {" + NEW_LINE + "app.handleLink(element.name);" + NEW_LINE + "}";
+        final String script = "function handleLink(element) {"
+                + NEW_LINE
+                + "app.handleLink(element.name);"
+                + NEW_LINE
+                + "}";
         return new HTMLNode("script", script, true);
-
     }
 
     /**
      * @return the script node with the callback to Java for generating a new tab on click
      */
     public HTMLNode handleWiringPartnerClickScript() {
-        String script = "function handleWiringPartnerClick(element) {" + NEW_LINE
-                + "app.handleWiringPartnerClick(element.innerHTML);" + NEW_LINE + "}";
-
+        final String script = "function handleWiringPartnerClick(element) {"
+                + NEW_LINE
+                + "app.handleWiringPartnerClick(element.innerHTML);"
+                + NEW_LINE
+                + "}";
         return new HTMLNode("script", script, true);
     }
 
@@ -536,39 +540,41 @@ public class HTMLNode {
      * @return the script node with the callback to Java for viewing a clicked cell in the cell theater
      */
     public HTMLNode viewInCellTheaterScript() {
-        String script = "function viewInCellTheater(element) {" + NEW_LINE + "app.viewInCellTheater(element.name);"
-                + NEW_LINE + "}";
-
+        final String script = "function viewInCellTheater(element) {"
+                + NEW_LINE
+                + "app.viewInCellTheater(element.name);"
+                + NEW_LINE
+                + "}";
         return new HTMLNode("script", script, true);
     }
 
     public HTMLNode handleAmphidClickScript() {
-        String script = "function handleAmphidClick() {" + NEW_LINE + "app.handleAmphidClick();"
-                + NEW_LINE + "}";
-
+        final String script = "function handleAmphidClick() {"
+                + NEW_LINE
+                + "app.handleAmphidClick();"
+                + NEW_LINE
+                + "}";
         return new HTMLNode("script", script, true);
     }
 
     public String getTag() {
-        if (this.tag != null) {
-            return this.tag;
+        if (tag != null) {
+            return tag;
         }
         return "";
     }
 
     public String getId() {
-        if (this.id != null) {
-            return this.id;
+        if (id != null) {
+            return id;
         }
-
         return "";
     }
 
     public String getStyle() {
-        if (this.style != null) {
-            return this.style;
+        if (style != null) {
+            return style;
         }
-
         if (this.isButton()) {
             System.out.println("BUTTON STYLE RETURNED NOTHING");
         }
@@ -576,68 +582,65 @@ public class HTMLNode {
     }
 
     public String getInnerHTML() {
-        if (this.innerHTML != null) {
-            return this.innerHTML;
+        if (innerHTML != null) {
+            return innerHTML;
         }
         return "";
     }
 
     public String getOnclick() {
-        if (this.onclick != null) {
-            return this.onclick;
+        if (onclick != null) {
+            return onclick;
         }
-
         return "";
     }
 
     public String getImgSrc() {
-        if (this.imgSrc != null) {
-            return this.imgSrc;
+        if (imgSrc != null) {
+            return imgSrc;
         }
-
         return "";
     }
 
     public String getScript() {
-        if (this.script != null) {
-            return this.script;
+        if (script != null) {
+            return script;
         }
-
         return "";
     }
 
-    public ArrayList<HTMLNode> getChildren() {
-        if (this.hasChildren()) {
-            return this.children;
+    public List<HTMLNode> getChildren() {
+        if (hasChildren()) {
+            return children;
         }
         return null;
     }
 
     public boolean hasChildren() {
-        return children != null && this.children.size() > 0;
+        return children != null && children.size() > 0;
     }
 
     public boolean isContainer() {
-        return this.isContainer;
+        return isContainer;
     }
 
     public boolean hasID() {
-        return this.hasId;
+        return hasId;
     }
 
     public boolean isImage() {
-        return this.isImage;
+        return isImage;
     }
 
     public boolean isStyle() {
-        return this.isStyle;
+        return isStyle;
     }
 
     public boolean isButton() {
-        return this.isButton;
+        return isButton;
     }
 
     public boolean isScript() {
-        return this.isScript;
+        return isScript;
     }
 }
