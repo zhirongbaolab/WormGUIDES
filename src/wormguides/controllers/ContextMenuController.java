@@ -203,7 +203,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                             String searchName = cellName;
 
                             // translate the name if necessary
-                            String funcName = connectome.checkQueryCell(cellName).toUpperCase();
+                            String funcName = connectome.checkQueryCell(cellName).toLowerCase();
 
                             boolean isTerminalCase = false;
                             if (funcName != null) {

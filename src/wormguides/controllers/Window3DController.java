@@ -982,16 +982,19 @@ public class Window3DController {
             if (event.getButton() == SECONDARY
                     || (event.getButton() == PRIMARY
                     && (event.isMetaDown() || event.isControlDown()))) {
+                boolean hasFunctionalName = false;
                 final String functionalName;
                 if ((functionalName = getFunctionalNameByLineageName(name)) != null) {
-                    name = functionalName;
+                    //name = functionalName;
+                    hasFunctionalName = true;
                 }
                 showContextMenu(
                         name,
                         event.getScreenX(),
                         event.getScreenY(),
                         false,
-                        false);
+                        false,
+                        hasFunctionalName);
 
             } else if (event.getButton() == PRIMARY) {
                 // regular click
@@ -1029,16 +1032,19 @@ public class Window3DController {
                             || (event.getButton() == PRIMARY && (event.isMetaDown() || event.isControlDown()))) {
                         // right click
                         if (sceneElementsList.isStructureSceneName(name)) {
+                            boolean hasFunctionalName = false;
                             final String functionalName;
                             if ((functionalName = getFunctionalNameByLineageName(name)) != null) {
-                                name = functionalName;
+                                //name = functionalName;
+                                hasFunctionalName = true;
                             }
                             showContextMenu(
                                     name,
                                     event.getScreenX(),
                                     event.getScreenY(),
                                     true,
-                                    sceneElementsList.isMulticellStructureName(name));
+                                    sceneElementsList.isMulticellStructureName(name),
+                                    hasFunctionalName);
                         }
 
                     } else if (event.getButton() == PRIMARY) {
@@ -1134,7 +1140,8 @@ public class Window3DController {
             final double sceneX,
             final double sceneY,
             final boolean isStructure,
-            final boolean isMulticellularStructure) {
+            final boolean isMulticellularStructure,
+            final boolean hasFunctionalName) {
 
         contextMenuController.setName(name);
         contextMenuController.setColorButtonText(isStructure);
@@ -1143,12 +1150,17 @@ public class Window3DController {
             contextMenuController.disableInfoButton(isMulticellularStructure);
         }
 
-        final String functionalName = getFunctionalNameByLineageName(name);
-        if (functionalName == null) {
-            contextMenuController.disableTerminalCaseFunctions(true);
-        } else {
+        if (hasFunctionalName) {
             contextMenuController.disableTerminalCaseFunctions(false);
+        } else {
+            contextMenuController.disableTerminalCaseFunctions(true);
         }
+//        final String functionalName = getFunctionalNameByLineageName(name);
+//        if (functionalName == null) {
+//            contextMenuController.disableTerminalCaseFunctions(true);
+//        } else {
+//            contextMenuController.disableTerminalCaseFunctions(false);
+//        }
 
         contextMenuController.setColorButtonListener(event -> {
             contextMenuStage.hide();

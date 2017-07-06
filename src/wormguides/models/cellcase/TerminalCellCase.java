@@ -81,7 +81,6 @@ public class TerminalCellCase extends CellCase {
             List<String> neuromuscularPartners,
             List<String> nuclearProductionInfo,
             List<String> cellShapeProductionInfo) {
-
         super(lineageName, nuclearProductionInfo, cellShapeProductionInfo);
 
         this.functionalName = functionalName;
@@ -104,7 +103,8 @@ public class TerminalCellCase extends CellCase {
         this.electricalPartners = electricalPartners;
         this.neuromuscularPartners = neuromuscularPartners;
 
-        this.hasAnatomy = hasAnatomy(this.functionalName);
+        //this.hasAnatomy = hasAnatomy(this.functionalName);
+        hasAnatomy = false; //TODO fix this
         if (hasAnatomy) {
             setAnatomy();
         }
