@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import partslist.PartsList;
+import wormguides.MainApp;
 
 /**
  * Contains anatomy information for a select number of cells
@@ -36,8 +37,10 @@ public class Anatomy {
         morphologicalFeatures = new ArrayList<>();
         functions = new ArrayList<>();
         neurotransmitters = new ArrayList<>();
+    }
 
-        final URL url = PartsList.class.getResource("/wormguides/models/anatomy_file/anatomy.csv");
+    public static void initAnatomy() {
+        final URL url = MainApp.class.getResource("/wormguides/models/anatomy/anatomy.csv");
         try (InputStream input = url.openStream();
              InputStreamReader isr = new InputStreamReader(input);
              BufferedReader br = new BufferedReader(isr)) {
@@ -71,7 +74,8 @@ public class Anatomy {
      * @return true if cell has anatomy, false otherwise
      */
     public static boolean hasAnatomy(String cellName) {
-        cellName = checkQueryCell(cellName);
+        if (cellName == null) return false;
+        cellName = checkQueryCell(cellName).toUpperCase();
 
         //check for exact match
         for (String funcName : functionalNames) {
@@ -79,7 +83,9 @@ public class Anatomy {
                 return true;
             }
         }
+
         cellName = findRootOfCell(cellName);
+
         //check for match with updated cell name
         for (String funcName : functionalNames) {
             if (funcName.equals(cellName)) {
@@ -154,9 +160,9 @@ public class Anatomy {
      * @return the anatomy information for the given cell
      */
     public static ArrayList<String> getAnatomy(String cellName) {
+        cellName = cellName.toUpperCase();
         ArrayList<String> anatomy = new ArrayList<>();
 
-        if (hasAnatomy(cellName)) {
             int idx = -1;
 
             //exact match
@@ -225,7 +231,6 @@ public class Anatomy {
                     anatomy.add("*");
                 }
             }
-        }
         return anatomy;
     }
 }
