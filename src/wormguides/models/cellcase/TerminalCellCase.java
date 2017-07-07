@@ -103,8 +103,7 @@ public class TerminalCellCase extends CellCase {
         this.electricalPartners = electricalPartners;
         this.neuromuscularPartners = neuromuscularPartners;
 
-        //this.hasAnatomy = hasAnatomy(this.functionalName);
-        hasAnatomy = false; //TODO fix this
+        this.hasAnatomy = hasAnatomy(this.functionalName);
         if (hasAnatomy) {
             setAnatomy();
         }
@@ -309,12 +308,7 @@ public class TerminalCellCase extends CellCase {
      * Sets the anatomy information that is applicable to this cell
      */
     private void setAnatomy() {
-        if (functionalName == null) {
-            return;
-        }
-        if (hasAnatomy(functionalName)) {
-            anatomies = getAnatomy(functionalName);
-        }
+        anatomies = getAnatomy(functionalName);
     }
 
     /**
