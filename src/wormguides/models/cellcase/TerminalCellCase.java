@@ -81,7 +81,6 @@ public class TerminalCellCase extends CellCase {
             List<String> neuromuscularPartners,
             List<String> nuclearProductionInfo,
             List<String> cellShapeProductionInfo) {
-
         super(lineageName, nuclearProductionInfo, cellShapeProductionInfo);
 
         this.functionalName = functionalName;
@@ -309,12 +308,7 @@ public class TerminalCellCase extends CellCase {
      * Sets the anatomy information that is applicable to this cell
      */
     private void setAnatomy() {
-        if (functionalName == null) {
-            return;
-        }
-        if (hasAnatomy(functionalName)) {
-            anatomies = getAnatomy(functionalName);
-        }
+        anatomies = getAnatomy(functionalName);
     }
 
     /**

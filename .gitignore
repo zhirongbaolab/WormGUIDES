@@ -5,6 +5,7 @@ out/
 .project
 .idea
 *.iml
+src/META-INF/
 
 .DS_Store
 .classpath

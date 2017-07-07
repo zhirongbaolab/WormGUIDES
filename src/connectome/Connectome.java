@@ -122,7 +122,6 @@ public class Connectome {
             boolean isElectricalTicked,
             boolean isNeuromuscularTicked,
             boolean areLineageNamesReturned) {
-
         final List<String> searchResults = new ArrayList<>();
         // error check
         if (queryCell == null) {
