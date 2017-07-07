@@ -156,9 +156,16 @@ public class AceTreeTableLineageDataLoader {
         }
 
         // find average of x-, y- and z-coordinates
-        avgX = (int) sumX / totalPositions;
-        avgY = (int) sumY / totalPositions;
-        avgZ = (int) sumZ / totalPositions;
+        if (totalPositions != 0) {
+            avgX = (int) sumX / totalPositions;
+            avgY = (int) sumY / totalPositions;
+            avgZ = (int) sumZ / totalPositions;
+        } else {
+            avgX = 0;
+            avgY = 0;
+            avgZ = 0;
+        }
+
 
         System.out.println("Average nuclei position offsets from origin (0, 0, 0): ("
                 + avgX

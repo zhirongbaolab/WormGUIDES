@@ -420,6 +420,9 @@ public class Rule {
         if (!visible) {
             return false;
         }
+
+        if (name == null) return false;
+
         name = name.trim();
         if (options.contains(CELL_NUCLEUS) && cells.contains(name)) {
             return true;

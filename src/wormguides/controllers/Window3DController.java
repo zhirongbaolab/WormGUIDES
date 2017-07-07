@@ -1595,27 +1595,27 @@ public class Window3DController {
 
     private void getSceneData() {
         final int requestedTime = timeProperty.get();
-        cellNames = new LinkedList<>(asList(lineageData.getNames(requestedTime)));
-        positions = new LinkedList<>();
-        for (double[] position : lineageData.getPositions(requestedTime)) {
-            positions.add(new Double[]{
-                    position[0],
-                    position[1],
-                    position[2]
-            });
-        }
-        diameters = new LinkedList<>();
-        for (double diameter : lineageData.getDiameters(requestedTime)) {
-            diameters.add(diameter);
-        }
-        otherCells.clear();
-
-        totalNucleiProperty.set(cellNames.size());
-
-        spheres = new LinkedList<>();
-        if (defaultEmbryoFlag) {
-            meshes = new LinkedList<>();
-        }
+        //cellNames = new LinkedList<>(asList(lineageData.getNames(requestedTime)));
+//        positions = new LinkedList<>();
+//        for (double[] position : lineageData.getPositions(requestedTime)) {
+//            positions.add(new Double[]{
+//                    position[0],
+//                    position[1],
+//                    position[2]
+//            });
+//        }
+//        diameters = new LinkedList<>();
+//        for (double diameter : lineageData.getDiameters(requestedTime)) {
+//            diameters.add(diameter);
+//        }
+//        otherCells.clear();
+//
+//        totalNucleiProperty.set(cellNames.size());
+//
+//        spheres = new LinkedList<>();
+//        if (defaultEmbryoFlag) {
+//            meshes = new LinkedList<>();
+//        }
 
         if (defaultEmbryoFlag) {
             // start scene element list, find scene elements present at current time, build meshes
@@ -1636,13 +1636,17 @@ public class Window3DController {
                 final MeshView mesh = se.buildGeometry(requestedTime);
                 if (mesh != null) {
                     mesh.getTransforms().addAll(rotateX, rotateY, rotateZ);
+//                    mesh.getTransforms().add(new Translate(
+//                            -offsetX * xScale,
+//                            -offsetY * yScale,
+//                            -offsetZ * zScale));
                     mesh.getTransforms().add(new Translate(
-                            -offsetX * xScale,
-                            -offsetY * yScale,
-                            -offsetZ * zScale));
-                    mesh.setScaleX(5.0);
-                    mesh.setScaleY(5.0);
-                    mesh.setScaleZ(5.0);
+                            0,
+                            0,
+                            0));
+                    mesh.setScaleX(10.0);
+                    mesh.setScaleY(10.0);
+                    mesh.setScaleZ(10.0);
                     // add rendered mesh to meshes list
                     currentSceneElementMeshes.add(mesh);
                     // add scene element to rendered scene element reference for on-click responsiveness
@@ -1655,75 +1659,75 @@ public class Window3DController {
             // End scene element mesh loading/building
         }
 
-        // Label stuff
-        entityLabelMap.clear();
-        currentLabels.clear();
-
-        for (String label : allLabels) {
-            if (defaultEmbryoFlag) {
-                for (SceneElement currentSceneElement : currentSceneElements) {
-                    if (!currentLabels.contains(label)
-                            && label.equalsIgnoreCase(normalizeName(currentSceneElement.getSceneName()))) {
-                        currentLabels.add(label);
-                        break;
-                    }
-                }
-            }
-
-            for (String cell : cellNames) {
-                if (!currentLabels.contains(label) && cell.equalsIgnoreCase(label)) {
-                    currentLabels.add(label);
-                    break;
-                }
-            }
-        }
-        // End label stuff
-
-        // Story stuff
-        // Notes are indexed starting from 1 (1 + offset is shown to the user)
-        if (storiesLayer != null) {
-            currentNotes.clear();
-            currentGraphicsToNotesMap.clear();
-            currentNotesToMeshesMap.clear();
-
-            entitySpriteMap.clear();
-            entityCalloutULMap.clear();
-            entityCalloutLLMap.clear();
-            entityCalloutURMap.clear();
-            entityCalloutLRMap.clear();
-
-            billboardFrontEntityMap.clear();
-            billboardImageEntityMap.clear();
-
-            currentNotes = storiesLayer.getNotesAtTime(requestedTime);
-
-            for (Note note : currentNotes) {
-                // Revert to overlay display if we have invalid
-                // display/attachment
-                // type combination
-                if (note.hasLocationError() || note.hasEntityNameError()) {
-                    note.setDisplay(OVERLAY);
-                }
-
-                if (defaultEmbryoFlag) {
-                    // make mesh views for scene elements from note resources
-                    if (note.hasSceneElements()) {
-//                        for (SceneElement se : note.getSceneElements()) {
-//                            final SceneElementMeshView mesh = se.buildGeometry(requestedTime);
-//                            if (mesh != null) {
-//                                mesh.setMaterial(colorHash.getNoteSceneElementMaterial());
-//                                mesh.getTransforms().addAll(rotateX, rotateY, rotateZ);
-//                                mesh.getTransforms().add(new Translate(
-//                                        -offsetX * xScale,
-//                                        -offsetY * yScale,
-//                                        -offsetZ * zScale));
-//                                currentNotesToMeshesMap.put(note, mesh);
-//                            }
-//                        }
-                    }
-                }
-            }
-        }
+//        // Label stuff
+//        entityLabelMap.clear();
+//        currentLabels.clear();
+//
+//        for (String label : allLabels) {
+//            if (defaultEmbryoFlag) {
+//                for (SceneElement currentSceneElement : currentSceneElements) {
+//                    if (!currentLabels.contains(label)
+//                            && label.equalsIgnoreCase(normalizeName(currentSceneElement.getSceneName()))) {
+//                        currentLabels.add(label);
+//                        break;
+//                    }
+//                }
+//            }
+//
+//            for (String cell : cellNames) {
+//                if (!currentLabels.contains(label) && cell.equalsIgnoreCase(label)) {
+//                    currentLabels.add(label);
+//                    break;
+//                }
+//            }
+//        }
+//        // End label stuff
+//
+//        // Story stuff
+//        // Notes are indexed starting from 1 (1 + offset is shown to the user)
+//        if (storiesLayer != null) {
+//            currentNotes.clear();
+//            currentGraphicsToNotesMap.clear();
+//            currentNotesToMeshesMap.clear();
+//
+//            entitySpriteMap.clear();
+//            entityCalloutULMap.clear();
+//            entityCalloutLLMap.clear();
+//            entityCalloutURMap.clear();
+//            entityCalloutLRMap.clear();
+//
+//            billboardFrontEntityMap.clear();
+//            billboardImageEntityMap.clear();
+//
+//            currentNotes = storiesLayer.getNotesAtTime(requestedTime);
+//
+//            for (Note note : currentNotes) {
+//                // Revert to overlay display if we have invalid
+//                // display/attachment
+//                // type combination
+//                if (note.hasLocationError() || note.hasEntityNameError()) {
+//                    note.setDisplay(OVERLAY);
+//                }
+//
+//                if (defaultEmbryoFlag) {
+//                    // make mesh views for scene elements from note resources
+//                    if (note.hasSceneElements()) {
+////                        for (SceneElement se : note.getSceneElements()) {
+////                            final SceneElementMeshView mesh = se.buildGeometry(requestedTime);
+////                            if (mesh != null) {
+////                                mesh.setMaterial(colorHash.getNoteSceneElementMaterial());
+////                                mesh.getTransforms().addAll(rotateX, rotateY, rotateZ);
+////                                mesh.getTransforms().add(new Translate(
+////                                        -offsetX * xScale,
+////                                        -offsetY * yScale,
+////                                        -offsetZ * zScale));
+////                                currentNotesToMeshesMap.put(note, mesh);
+////                            }
+////                        }
+//                    }
+//                }
+//            }
+//        }
         // End story stuff
 
         // SearchLayer stuff
