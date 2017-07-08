@@ -1135,9 +1135,9 @@ public class Window3DController {
     /**
      * Displays the context menu for an entity in the UI
      *
-     * @param lineageName
-     *         the lineage name of the entity, scene name if the entity is a multicellular structure or a
-     *         cell body
+     * @param name
+     *         the lineage name of a cell, the scene name of a multicellular structure or tract, or the functional
+     *         name of a cell body
      * @param sceneX
      *         the x coordinate of the mouse in the scene
      * @param sceneY
@@ -1150,14 +1150,14 @@ public class Window3DController {
      *         true if the entity has a functional name, false otherwise
      */
     private void showContextMenu(
-            final String lineageName,
+            final String name,
             final double sceneX,
             final double sceneY,
             final boolean isStructure,
             final boolean isMulticellularStructure,
             final boolean hasFunctionalName) {
 
-        contextMenuController.setName(lineageName);
+        contextMenuController.setName(name);
         contextMenuController.setColorButtonText(isStructure);
         // disable 'more info' option for multicellular structures
         if (isStructure) {
@@ -1173,10 +1173,10 @@ public class Window3DController {
         contextMenuController.setColorButtonListener(event -> {
             contextMenuStage.hide();
             if (isStructure) {
-                searchLayer.addStructureRuleBySceneName(lineageName, WHITE)
+                searchLayer.addStructureRuleBySceneName(name, WHITE)
                         .showEditStage(parentStage);
             } else {
-                searchLayer.addColorRule(LINEAGE, lineageName, WHITE, CELL_NUCLEUS, CELL_BODY)
+                searchLayer.addColorRule(LINEAGE, name, WHITE, CELL_NUCLEUS, CELL_BODY)
                         .showEditStage(parentStage);
             }
         });
@@ -1184,7 +1184,7 @@ public class Window3DController {
         contextMenuController.setColorNeighborsButtonListener(event -> {
             contextMenuStage.hide();
             // color neighboring cell bodies, multicellular structures, as well as nuclei
-            searchLayer.addColorRule(NEIGHBOR, lineageName, WHITE, CELL_NUCLEUS, CELL_BODY)
+            searchLayer.addColorRule(NEIGHBOR, name, WHITE, CELL_NUCLEUS, CELL_BODY)
                     .showEditStage(parentStage);
         });
 
