@@ -623,13 +623,6 @@ public class ContextMenuController extends AnchorPane implements Initializable {
         final MenuItem all = new MenuItem("Color All");
         menu.getItems().add(all);
         all.setOnAction(event -> {
-//            final Rule rule = searchLayer.addGiantConnectomeColorRule(
-//                    cellName,
-//                    DEFAULT_COLOR,
-//                    isPresynaptic,
-//                    isPostsynaptic,
-//                    isElectrical,
-//                    isNeuromuscular); 	
             final Rule rule = searchLayer.addConnectomeColorRuleFromContextMenu(
                     funcName,
                     DEFAULT_COLOR,
