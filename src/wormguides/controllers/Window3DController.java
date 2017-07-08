@@ -126,8 +126,6 @@ import static javafx.scene.transform.Rotate.Z_AXIS;
 import static com.sun.javafx.scene.CameraHelper.project;
 import static javax.imageio.ImageIO.write;
 import static partslist.PartsList.getFunctionalNameByLineageName;
-import static partslist.PartsList.getLineageNamesByFunctionalName;
-import static partslist.PartsList.isFunctionalName;
 import static search.SearchType.LINEAGE;
 import static search.SearchType.NEIGHBOR;
 import static search.SearchUtil.getFirstOccurenceOf;
@@ -982,9 +980,7 @@ public class Window3DController {
                     || (event.getButton() == PRIMARY
                     && (event.isMetaDown() || event.isControlDown()))) {
                 boolean hasFunctionalName = false;
-                final String functionalName;
-                if ((functionalName = getFunctionalNameByLineageName(name)) != null) {
-                    //name = functionalName;
+                if (getFunctionalNameByLineageName(name) != null) {
                     hasFunctionalName = true;
                 }
                 showContextMenu(
@@ -1014,17 +1010,14 @@ public class Window3DController {
             // Structure
             boolean found = false; // this will indicate whether this meshview is a scene element
             SceneElementMeshView curr;
+            SceneElement clickedSceneElement;
+            String funcName;
             for (int i = 0; i < currentSceneElementMeshes.size(); i++) {
                 curr = currentSceneElementMeshes.get(i);
                 if (curr.equals(node)) {
                     found = true;
-                    final SceneElement clickedSceneElement = currentSceneElements.get(i);
+                    clickedSceneElement = currentSceneElements.get(i);
                     String name = normalizeName(clickedSceneElement.getSceneName());
-
-                    // if scene element is the cell body of a spherical nucleus, then use its lineage name
-                    if (isFunctionalName(name)) {
-                        name = getLineageNamesByFunctionalName(name).get(0);
-                    }
                     selectedNameProperty.set(name);
 
                     if (event.getButton() == SECONDARY
@@ -1032,10 +1025,15 @@ public class Window3DController {
                         // right click
                         if (sceneElementsList.isStructureSceneName(name)) {
                             boolean hasFunctionalName = false;
-                            final String functionalName;
-                            if ((functionalName = getFunctionalNameByLineageName(name)) != null) {
-                                //name = functionalName;
+                            if (getFunctionalNameByLineageName(name) != null) {
                                 hasFunctionalName = true;
+                                System.out.println("struct name: " + name + " has func name: " + hasFunctionalName);
+
+                                // if scene element is the cell body of a spherical nucleus, then use its functional name
+                                funcName = getFunctionalNameByLineageName(name);
+                                if (funcName != null && !funcName.isEmpty()) {
+                                    name = funcName;
+                                }
                             }
                             showContextMenu(
                                     name,
@@ -1134,15 +1132,32 @@ public class Window3DController {
         mousePosY = event.getSceneY();
     }
 
+    /**
+     * Displays the context menu for an entity in the UI
+     *
+     * @param lineageName
+     *         the lineage name of the entity, scene name if the entity is a multicellular structure or a
+     *         cell body
+     * @param sceneX
+     *         the x coordinate of the mouse in the scene
+     * @param sceneY
+     *         the y coordinate of the mouse in the scene
+     * @param isStructure
+     *         true if the entity is a structure, false otherwise
+     * @param isMulticellularStructure
+     *         true if the entity is a multicellular structure, false otherwise
+     * @param hasFunctionalName
+     *         true if the entity has a functional name, false otherwise
+     */
     private void showContextMenu(
-            final String name,
+            final String lineageName,
             final double sceneX,
             final double sceneY,
             final boolean isStructure,
             final boolean isMulticellularStructure,
             final boolean hasFunctionalName) {
 
-        contextMenuController.setName(name);
+        contextMenuController.setName(lineageName);
         contextMenuController.setColorButtonText(isStructure);
         // disable 'more info' option for multicellular structures
         if (isStructure) {
@@ -1154,26 +1169,22 @@ public class Window3DController {
         } else {
             contextMenuController.disableTerminalCaseFunctions(true);
         }
-//        final String functionalName = getFunctionalNameByLineageName(name);
-//        if (functionalName == null) {
-//            contextMenuController.disableTerminalCaseFunctions(true);
-//        } else {
-//            contextMenuController.disableTerminalCaseFunctions(false);
-//        }
 
         contextMenuController.setColorButtonListener(event -> {
             contextMenuStage.hide();
             if (isStructure) {
-                searchLayer.addStructureRuleBySceneName(name, WHITE).showEditStage(parentStage);
+                searchLayer.addStructureRuleBySceneName(lineageName, WHITE)
+                        .showEditStage(parentStage);
             } else {
-                searchLayer.addColorRule(LINEAGE, name, WHITE, CELL_NUCLEUS, CELL_BODY).showEditStage(parentStage);
+                searchLayer.addColorRule(LINEAGE, lineageName, WHITE, CELL_NUCLEUS, CELL_BODY)
+                        .showEditStage(parentStage);
             }
         });
 
         contextMenuController.setColorNeighborsButtonListener(event -> {
             contextMenuStage.hide();
             // color neighboring cell bodies, multicellular structures, as well as nuclei
-            searchLayer.addColorRule(NEIGHBOR, name, WHITE, CELL_NUCLEUS, CELL_BODY)
+            searchLayer.addColorRule(NEIGHBOR, lineageName, WHITE, CELL_NUCLEUS, CELL_BODY)
                     .showEditStage(parentStage);
         });
 
@@ -2655,8 +2666,8 @@ public class Window3DController {
      * Converts saved frames of development in "play" mode to a single video file
      * Notes:
      * - The outputted video has the dimensions of the subscene width and height at capture time (if the
-     *   window is resized during capture, these parameters will be their values at the time "Stop Capture..."
-     *   is pressed)
+     * window is resized during capture, these parameters will be their values at the time "Stop Capture..."
+     * is pressed)
      * - The frame rate is set at 6 frames/sec
      */
     public void convertImagesToMovie() {
