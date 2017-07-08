@@ -7,8 +7,8 @@ package wormguides.models.cellcase;
 import java.util.ArrayList;
 import java.util.List;
 
-import wormguides.models.anatomy.Anatomy;
 import wormguides.models.anatomy.AmphidSensillaTerm;
+import wormguides.models.anatomy.Anatomy;
 import wormguides.models.anatomy.AnatomyTerm;
 import wormguides.models.anatomy.AnatomyTermCase;
 import wormguides.view.infowindow.InfoWindow;
