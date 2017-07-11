@@ -1,7 +1,6 @@
 #!/bin/bash
 
 DIR=.
-
 for f in $DIR/*.obj; do
-	sed -i '/usemtl/d' ./$f 
+	sed -i '/mtllib/d' ./$f 
 done

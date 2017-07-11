@@ -58,9 +58,9 @@ public class AceTreeTableLineageDataLoader {
 
     private static final List<String> allCellNames = new ArrayList<>();
 
-    private static int avgX;
-    private static int avgY;
-    private static int avgZ;
+    private static double avgX;
+    private static double avgY;
+    private static double avgZ;
 
     public static LineageData loadNucFiles(final ProductionInfo productionInfo) {
         final TableLineageData tableLineageData = new TableLineageData(
@@ -126,15 +126,15 @@ public class AceTreeTableLineageDataLoader {
         return resourceUrlString;
     }
 
-    public static int getAvgXOffsetFromZero() {
+    public static double getAvgXOffsetFromZero() {
         return avgX;
     }
 
-    public static int getAvgYOffsetFromZero() {
+    public static double getAvgYOffsetFromZero() {
         return avgY;
     }
 
-    public static int getAvgZOffsetFromZero() {
+    public static double getAvgZOffsetFromZero() {
         return avgZ;
     }
 
@@ -157,13 +157,12 @@ public class AceTreeTableLineageDataLoader {
 
         // find average of x-, y- and z-coordinates
         if (totalPositions != 0) {
-            avgX = (int) sumX / totalPositions;
-            avgY = (int) sumY / totalPositions;
-            avgZ = (int) sumZ / totalPositions;
+            System.out.println("sums = " + sumX + ", " + sumY + ", " + sumZ);
+            avgX = sumX / totalPositions;
+            avgY = sumY / totalPositions;
+            avgZ = sumZ / totalPositions;
         } else {
-            avgX = 0;
-            avgY = 0;
-            avgZ = 0;
+            avgX = avgY = avgZ = 0.;
         }
 
 

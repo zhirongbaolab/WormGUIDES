@@ -314,7 +314,7 @@ public class Window3DController {
     // Label stuff
     private double mouseDeltaX, mouseDeltaY;
     // average position offsets of nuclei from zero
-    private int offsetX, offsetY, offsetZ;
+    private double offsetX, offsetY, offsetZ;
     private double angleOfRotation;
     // searched highlighting stuff
     private boolean isInSearchMode;
@@ -371,9 +371,9 @@ public class Window3DController {
             final StoriesLayer storiesLayer,
             final SearchLayer searchLayer,
             final BooleanProperty bringUpInfoFlag,
-            final int offsetX,
-            final int offsetY,
-            final int offsetZ,
+            final double offsetX,
+            final double offsetY,
+            final double offsetZ,
             final boolean defaultEmbryoFlag,
             final double xScale,
             final double yScale,
