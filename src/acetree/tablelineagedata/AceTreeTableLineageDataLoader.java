@@ -144,10 +144,12 @@ public class AceTreeTableLineageDataLoader {
         double sumY = 0d;
         double sumZ = 0d;
 
-        // sum up all x-, y- and z-coordinates of nuclei
-        for (int i = 0; i < lineageData.getNumberOfTimePoints(); i++) {
+        // sum up all x-, y- and z-coordinates of nuclei - we start at 1 because an empty
+        // is appended to the front of lineagedata
+        for (int i = 1; i < lineageData.getNumberOfTimePoints(); i++) {
             double[][] positionsArray = lineageData.getPositions(i);
-            for (int j = 1; j < positionsArray.length; j++) {
+            for (int j = 0; j < positionsArray.length; j++) {
+                System.out.println(positionsArray[j][X_POS_INDEX] + ", " + positionsArray[j][Y_POS_INDEX] + ", " + positionsArray[j][Z_POS_INDEX]);
                 sumX += positionsArray[j][X_POS_INDEX];
                 sumY += positionsArray[j][Y_POS_INDEX];
                 sumZ += positionsArray[j][Z_POS_INDEX];
@@ -209,7 +211,7 @@ public class AceTreeTableLineageDataLoader {
                     tokens[ID_INDEX],
                     parseInt(tokens[XCOR_INDEX]),
                     parseInt(tokens[YCOR_INDEX]),
-                    round(parseDouble(tokens[ZCOR_INDEX])),
+                    parseDouble(tokens[ZCOR_INDEX]),
                     parseInt(tokens[DIAMETER_INDEX]));
         } catch (NumberFormatException nfe) {
             System.out.println("Incorrect format in nucleus file for time " + time + ".");
