@@ -427,9 +427,8 @@ public class Window3DController {
 
         this.defaultEmbryoFlag = defaultEmbryoFlag;
 
-        /** Sets listener properties for the timeProperty variable. Updates time. If in movie capture mode,
-         * a screenshot is captured per frame. Thus, movies are only captured during play mode
-         */
+        // Set listener properties for the timeProperty variable. Updates time. If in movie capture mode,
+        // a screenshot is captured per frame. Thus, movies are only captured during play mode
         this.timeProperty = requireNonNull(timeProperty);
         this.timeProperty.addListener((observable, oldValue, newValue) -> {
             final int newTime = newValue.intValue();
@@ -1027,13 +1026,6 @@ public class Window3DController {
                             boolean hasFunctionalName = false;
                             if (getFunctionalNameByLineageName(name) != null) {
                                 hasFunctionalName = true;
-                                System.out.println("struct name: " + name + " has func name: " + hasFunctionalName);
-
-                                // if scene element is the cell body of a spherical nucleus, then use its functional name
-                                funcName = getFunctionalNameByLineageName(name);
-                                if (funcName != null && !funcName.isEmpty()) {
-                                    name = funcName;
-                                }
                             }
                             showContextMenu(
                                     name,
@@ -1144,37 +1136,45 @@ public class Window3DController {
      *         the y coordinate of the mouse in the scene
      * @param isStructure
      *         true if the entity is a structure, false otherwise
-     * @param isMulticellularStructure
-     *         true if the entity is a multicellular structure, false otherwise
+     * @param isMulticellularStructureOrTract
+     *         true if the entity is a multicellular structure or a tract model, false otherwise
      * @param hasFunctionalName
      *         true if the entity has a functional name, false otherwise
      */
     private void showContextMenu(
-            final String name,
+            String name,
             final double sceneX,
             final double sceneY,
             final boolean isStructure,
-            final boolean isMulticellularStructure,
+            final boolean isMulticellularStructureOrTract,
             final boolean hasFunctionalName) {
 
         contextMenuController.setName(name);
         contextMenuController.setColorButtonText(isStructure);
-        // disable 'more info' option for multicellular structures
+
+        // disable terminal cell options for multicellular structures and tracts
         if (isStructure) {
-            contextMenuController.disableInfoButton(isMulticellularStructure);
+            contextMenuController.disableMoreInfoFunction(isMulticellularStructureOrTract);
+            contextMenuController.disableWiredToFunction(isMulticellularStructureOrTract);
+            contextMenuController.disableGeneExpressionFunction(isMulticellularStructureOrTract);
         }
 
         if (hasFunctionalName) {
-            contextMenuController.disableTerminalCaseFunctions(false);
+            contextMenuController.disableWiredToFunction(false);
         } else {
-            contextMenuController.disableTerminalCaseFunctions(true);
+            contextMenuController.disableWiredToFunction(true);
         }
 
         contextMenuController.setColorButtonListener(event -> {
             contextMenuStage.hide();
             if (isStructure) {
-                searchLayer.addStructureRuleBySceneName(name, WHITE)
-                        .showEditStage(parentStage);
+                if (hasFunctionalName) {
+                    searchLayer.addStructureRuleBySceneName(getFunctionalNameByLineageName(name), WHITE)
+                            .showEditStage(parentStage);
+                } else {
+                    searchLayer.addStructureRuleBySceneName(name, WHITE)
+                            .showEditStage(parentStage);
+                }
             } else {
                 searchLayer.addColorRule(LINEAGE, name, WHITE, CELL_NUCLEUS, CELL_BODY)
                         .showEditStage(parentStage);

@@ -416,9 +416,9 @@ public class SulstonTreePane extends ScrollPane {
             final String funcName = getFunctionalNameByLineageName(name);
 
             if (funcName == null) {
-                contextMenuController.disableTerminalCaseFunctions(true);
+                contextMenuController.disableWiredToFunction(true);
             } else {
-                contextMenuController.disableTerminalCaseFunctions(false);
+                contextMenuController.disableWiredToFunction(false);
             }
 
             contextMenuController.setColorButtonListener(event -> {

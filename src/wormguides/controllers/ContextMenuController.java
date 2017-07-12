@@ -1,5 +1,5 @@
 /*
- * Bao Lab 2016
+ * Bao Lab 2017
  */
 
 package wormguides.controllers;
@@ -47,8 +47,8 @@ import static search.SearchType.GENE;
 import static wormguides.models.colorrule.SearchOption.CELL_NUCLEUS;
 
 /**
- * This class is the controller for the context menu that shows up on right click on a 3D entity. The menu can be
- * accessed via the 3D subscene or the sulston tree.
+ * Controller for the context menu that shows up on right click on a 3D entity. The menu can be accessed via the 3D
+ * subscene or the sulston tree.
  */
 
 public class ContextMenuController extends AnchorPane implements Initializable {
@@ -419,14 +419,6 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     }
 
     /**
-     * Disables/enables the 'More Info' button from the context menu. The button is disabled for multicellular
-     * structures.
-     */
-    public void disableInfoButton(final boolean disable) {
-        info.setDisable(disable);
-    }
-
-    /**
      * Sets te listener for the 'color this cell' button click in the menu. Called by Window3DController and
      * SulstonTreePane since they handle the click differently. A different mouse click listener is set depending on
      * where the menu pops up (whether in the 3D subscene or the sulston tree)
@@ -497,15 +489,33 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     }
 
     /**
-     * Disables/enables the 'wired to' button depending on whether the cell is
-     * terminal or non-terminal.
+     * Disables/enables the 'More Info' functionality depending on whether the entity is a terminal cell/cell body
      *
      * @param disable
-     *         if true, 'wired to' button is disabled, otherwise, the button
-     *         is enabled
+     *         true if the entity is a multicellular structure or a tract, false otherwise
      */
-    public void disableTerminalCaseFunctions(boolean disable) {
+    public void disableMoreInfoFunction(final boolean disable) {
+        info.setDisable(disable);
+    }
+
+    /**
+     * Disables/enables the 'Wired To' functionality depending on whether the entity is a terminal cell/cell body
+     *
+     * @param disable
+     *         true if the entity is a multicellular structure or a tract, false otherwise
+     */
+    public void disableWiredToFunction(final boolean disable) {
         wiredTo.setDisable(disable);
+    }
+
+    /**
+     * Disables/enables the 'Gene Expression' functionality depending on whether the entity is a terminal cell/cell body
+     *
+     * @param disable
+     *         true if the entity is a multicellular structure or a tract, false otherwise
+     */
+    public void disableGeneExpressionFunction(final boolean disable) {
+        expresses.setDisable(disable);
     }
 
     /**
