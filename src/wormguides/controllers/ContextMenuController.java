@@ -440,9 +440,8 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     }
 
     /**
-     * Sets te listener for the 'color neighbors' button click in the menu.
-     * Called by Window3DController and SulstonTreePane since they handle the
-     * click differently. A different mouse click listener is set depending on
+     * Sets te listener for the 'color neighbors' button click in the menu. Called by Window3DController and
+     * SulstonTreePane since they handle the click differently. A different mouse click listener is set depending on
      * where the menu pops up (whether in the 3D subscene or the sulston tree)
      *
      * @param handler
@@ -455,9 +454,8 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     }
 
     /**
-     * Returns the cell name of the context menu (also its title). This name is
-     * either the lineage name or the functional name (if the cell is a terminal
-     * cell)
+     * Returns the cell name of the context menu (also its title). This name is either the lineage name or the
+     * functional name (if the cell is a terminal cell)
      *
      * @return cell name (title of the context menu)
      */
@@ -516,6 +514,16 @@ public class ContextMenuController extends AnchorPane implements Initializable {
      */
     public void disableGeneExpressionFunction(final boolean disable) {
         expresses.setDisable(disable);
+    }
+
+    /**
+     * Disables/enables the 'Color Neighbors' functionality depending on whether the entity is a terminal cell/cell body
+     *
+     * @param disable
+     *         true if entity is a multicellular structure or tract, false otherwise
+     */
+    public void disableColorNeighborsFunction(final boolean disable) {
+        colorNeighbors.setDisable(disable);
     }
 
     /**

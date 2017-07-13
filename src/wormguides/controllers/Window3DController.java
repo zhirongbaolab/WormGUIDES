@@ -1157,6 +1157,7 @@ public class Window3DController {
             contextMenuController.disableMoreInfoFunction(isMulticellularStructureOrTract);
             contextMenuController.disableWiredToFunction(isMulticellularStructureOrTract);
             contextMenuController.disableGeneExpressionFunction(isMulticellularStructureOrTract);
+            contextMenuController.disableColorNeighborsFunction(isMulticellularStructureOrTract);
         }
 
         if (hasFunctionalName) {
