@@ -1595,27 +1595,27 @@ public class Window3DController {
 
     private void getSceneData() {
         final int requestedTime = timeProperty.get();
-        //cellNames = new LinkedList<>(asList(lineageData.getNames(requestedTime)));
-//        positions = new LinkedList<>();
-//        for (double[] position : lineageData.getPositions(requestedTime)) {
-//            positions.add(new Double[]{
-//                    position[0],
-//                    position[1],
-//                    position[2]
-//            });
-//        }
-//        diameters = new LinkedList<>();
-//        for (double diameter : lineageData.getDiameters(requestedTime)) {
-//            diameters.add(diameter);
-//        }
-//        otherCells.clear();
-//
-//        totalNucleiProperty.set(cellNames.size());
-//
-//        spheres = new LinkedList<>();
-//        if (defaultEmbryoFlag) {
-//            meshes = new LinkedList<>();
-//        }
+        cellNames = new LinkedList<>(asList(lineageData.getNames(requestedTime)));
+        positions = new LinkedList<>();
+        for (double[] position : lineageData.getPositions(requestedTime)) {
+            positions.add(new Double[]{
+                    position[0],
+                    position[1],
+                    position[2]
+            });
+        }
+        diameters = new LinkedList<>();
+        for (double diameter : lineageData.getDiameters(requestedTime)) {
+            diameters.add(diameter);
+        }
+        otherCells.clear();
+
+        totalNucleiProperty.set(cellNames.size());
+
+        spheres = new LinkedList<>();
+        if (defaultEmbryoFlag) {
+            meshes = new LinkedList<>();
+        }
 
         if (defaultEmbryoFlag) {
             // start scene element list, find scene elements present at current time, build meshes
@@ -1640,10 +1640,11 @@ public class Window3DController {
                             -offsetX * xScale,
                             -offsetY * yScale,
                             -offsetZ * zScale));
-                    mesh.getTransforms().add(new Translate(
-                            0,
-                            0,
-                            0));
+//                    mesh.getTransforms().add(new Translate(
+//                            0,
+//                            0,
+//                            0))
+
                     mesh.setScaleX(25.0);
                     mesh.setScaleY(25.0);
                     mesh.setScaleZ(25.0);
