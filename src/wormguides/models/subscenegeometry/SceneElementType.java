@@ -14,7 +14,13 @@ public enum SceneElementType {
     SINGLE_CELL("its descendants"),
 
     /** SearchLayer for descendants of cells in the search results list */
-    MCS("Multicellular Structure"),
+    MCS_BODY("Multicellular Structure Body"),
+
+    /** SearchLayer for descendants of cells in the search results list */
+    MCS_CONNECTOR("Multicellular Structure Connector"),
+
+    /** SearchLayer for descendants of cells in the search results list */
+    MCS_PROCESS("Multicellular Structure Process"),
 
     /** SearchLayer for descendants of cells in the search results list */
     TRACT("A cellular tract");

@@ -30,7 +30,9 @@ import static partslist.PartsList.getFunctionalNameByLineageName;
 import static wormguides.loaders.GeometryLoader.getEffectiveStartTime;
 
 import static wormguides.models.subscenegeometry.SceneElementType.SINGLE_CELL;
-import static wormguides.models.subscenegeometry.SceneElementType.MCS;
+import static wormguides.models.subscenegeometry.SceneElementType.MCS_BODY;
+import static wormguides.models.subscenegeometry.SceneElementType.MCS_CONNECTOR;
+import static wormguides.models.subscenegeometry.SceneElementType.MCS_PROCESS;
 import static wormguides.models.subscenegeometry.SceneElementType.TRACT;
 
 /**
@@ -40,9 +42,11 @@ public class SceneElementsList {
 
     private static final String CELL_CONFIG_FILE_NAME = "CellShapesConfig.csv";
     private static final String ASTERISK = "*";
-    private static final String SINGLE_CELL_STR = "Single Cell";
-    private static final String MCS_STR = "MCS";
-    private static final String TRACT_STR = "Tract";
+    private static final String SINGLE_CELL_STR = "SINGLE CELL";
+    private static final String MCS_BODY_STR = "MCS BODY";
+    private static final String MCS_CONNECTOR_STR = "MCS CONNECTOR";
+    private static final String MCS_PROCESS_STR = "MCS PROCESS";
+    private static final String TRACT_STR = "TRACT";
 
     private static final int NUM_OF_CSV_FIELDS = 9;
     private static final int DESCRIPTION_INDEX = 0;
@@ -143,10 +147,16 @@ public class SceneElementsList {
                         type_str = tokens[TYPE_INDEX];
                         if (type_str.toUpperCase().equals(SINGLE_CELL_STR)) {
                             set = SINGLE_CELL;
-                        } else if (type_str.toUpperCase().equals(MCS)) {
-                            set = MCS;
+                        } else if (type_str.toUpperCase().equals(MCS_BODY_STR)) {
+                            set = MCS_BODY;
+                        } else if (type_str.toUpperCase().equals(MCS_CONNECTOR_STR)){
+                            set = MCS_CONNECTOR;
+                        } else if (type_str.toUpperCase().equals(MCS_PROCESS_STR)){
+                            set = MCS_PROCESS;
                         } else if (type_str.toUpperCase().equals(TRACT_STR)) {
                             set = TRACT;
+                        } else {
+                            System.out.println("No type found for scene element: " + name);
                         }
                         resourceLocation = tokens[RESOURCE_LOCATION_INDEX];
                         startTime = parseInt(tokens[START_TIME_INDEX]);
