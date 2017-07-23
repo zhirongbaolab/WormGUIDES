@@ -1,5 +1,5 @@
 /*
- * Bao Lab 2016
+ * Bao Lab 2017
  */
 
 package wormguides.loaders;
@@ -23,7 +23,7 @@ public class ProductionInfoLoader {
 
     private static final int NUMBER_OF_FIELDS = 17;
 
-    private static final String PRODUCTION_INFO_FILE_PATH = "/wormguides/model/production_info_file/"
+    private static final String PRODUCTION_INFO_FILE_PATH = "/wormguides/models/production_info_file/"
             + "Production_Info.csv";
 
     private static final String PRODUCT_INFO_LINE = "Production Information,,,,,,,,,,,,,,,,";
@@ -38,7 +38,7 @@ public class ProductionInfoLoader {
      * @return the 2D array
      */
     public static List<List<String>> buildProductionInfo() {
-        final URL url = MainApp.class.getResource("/wormguides/util/production_info_file/Production_Info.csv");
+        final URL url = MainApp.class.getResource(PRODUCTION_INFO_FILE_PATH);
 
         final List<List<String>> productionInfo = new ArrayList<>();
         final List<String> cells = new ArrayList<>();

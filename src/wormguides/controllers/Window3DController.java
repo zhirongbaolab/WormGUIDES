@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Vector;
 
 import javafx.beans.property.BooleanProperty;
@@ -127,8 +126,6 @@ import static javafx.scene.transform.Rotate.Z_AXIS;
 import static com.sun.javafx.scene.CameraHelper.project;
 import static javax.imageio.ImageIO.write;
 import static partslist.PartsList.getFunctionalNameByLineageName;
-import static partslist.PartsList.getLineageNamesByFunctionalName;
-import static partslist.PartsList.isFunctionalName;
 import static search.SearchType.LINEAGE;
 import static search.SearchType.NEIGHBOR;
 import static search.SearchUtil.getFirstOccurenceOf;
@@ -430,9 +427,8 @@ public class Window3DController {
 
         this.defaultEmbryoFlag = defaultEmbryoFlag;
 
-        /** Sets listener properties for the timeProperty variable. Updates time. If in movie capture mode,
-         * a screenshot is captured per frame. Thus, movies are only captured during play mode
-         */
+        // Set listener properties for the timeProperty variable. Updates time. If in movie capture mode,
+        // a screenshot is captured per frame. Thus, movies are only captured during play mode
         this.timeProperty = requireNonNull(timeProperty);
         this.timeProperty.addListener((observable, oldValue, newValue) -> {
             final int newTime = newValue.intValue();
@@ -983,9 +979,7 @@ public class Window3DController {
                     || (event.getButton() == PRIMARY
                     && (event.isMetaDown() || event.isControlDown()))) {
                 boolean hasFunctionalName = false;
-                final String functionalName;
-                if ((functionalName = getFunctionalNameByLineageName(name)) != null) {
-                    //name = functionalName;
+                if (getFunctionalNameByLineageName(name) != null) {
                     hasFunctionalName = true;
                 }
                 showContextMenu(
@@ -1015,17 +1009,14 @@ public class Window3DController {
             // Structure
             boolean found = false; // this will indicate whether this meshview is a scene element
             SceneElementMeshView curr;
+            SceneElement clickedSceneElement;
+            String funcName;
             for (int i = 0; i < currentSceneElementMeshes.size(); i++) {
                 curr = currentSceneElementMeshes.get(i);
                 if (curr.equals(node)) {
                     found = true;
-                    final SceneElement clickedSceneElement = currentSceneElements.get(i);
+                    clickedSceneElement = currentSceneElements.get(i);
                     String name = normalizeName(clickedSceneElement.getSceneName());
-
-                    // if scene element is the cell body of a spherical nucleus, then use its lineage name
-                    if (isFunctionalName(name)) {
-                        name = getLineageNamesByFunctionalName(name).get(0);
-                    }
                     selectedNameProperty.set(name);
 
                     if (event.getButton() == SECONDARY
@@ -1033,9 +1024,7 @@ public class Window3DController {
                         // right click
                         if (sceneElementsList.isStructureSceneName(name)) {
                             boolean hasFunctionalName = false;
-                            final String functionalName;
-                            if ((functionalName = getFunctionalNameByLineageName(name)) != null) {
-                                //name = functionalName;
+                            if (getFunctionalNameByLineageName(name) != null) {
                                 hasFunctionalName = true;
                             }
                             showContextMenu(
@@ -1135,39 +1124,61 @@ public class Window3DController {
         mousePosY = event.getSceneY();
     }
 
+    /**
+     * Displays the context menu for an entity in the UI
+     *
+     * @param name
+     *         the lineage name of a cell, the scene name of a multicellular structure or tract, or the functional
+     *         name of a cell body
+     * @param sceneX
+     *         the x coordinate of the mouse in the scene
+     * @param sceneY
+     *         the y coordinate of the mouse in the scene
+     * @param isStructure
+     *         true if the entity is a structure, false otherwise
+     * @param isMulticellularStructureOrTract
+     *         true if the entity is a multicellular structure or a tract model, false otherwise
+     * @param hasFunctionalName
+     *         true if the entity has a functional name, false otherwise
+     */
     private void showContextMenu(
-            final String name,
+            String name,
             final double sceneX,
             final double sceneY,
             final boolean isStructure,
-            final boolean isMulticellularStructure,
+            final boolean isMulticellularStructureOrTract,
             final boolean hasFunctionalName) {
 
         contextMenuController.setName(name);
         contextMenuController.setColorButtonText(isStructure);
-        // disable 'more info' option for multicellular structures
+
+        // disable terminal cell options for multicellular structures and tracts
         if (isStructure) {
-            contextMenuController.disableInfoButton(isMulticellularStructure);
+            contextMenuController.disableMoreInfoFunction(isMulticellularStructureOrTract);
+            contextMenuController.disableWiredToFunction(isMulticellularStructureOrTract);
+            contextMenuController.disableGeneExpressionFunction(isMulticellularStructureOrTract);
+            contextMenuController.disableColorNeighborsFunction(isMulticellularStructureOrTract);
         }
 
         if (hasFunctionalName) {
-            contextMenuController.disableTerminalCaseFunctions(false);
+            contextMenuController.disableWiredToFunction(false);
         } else {
-            contextMenuController.disableTerminalCaseFunctions(true);
+            contextMenuController.disableWiredToFunction(true);
         }
-//        final String functionalName = getFunctionalNameByLineageName(name);
-//        if (functionalName == null) {
-//            contextMenuController.disableTerminalCaseFunctions(true);
-//        } else {
-//            contextMenuController.disableTerminalCaseFunctions(false);
-//        }
 
         contextMenuController.setColorButtonListener(event -> {
             contextMenuStage.hide();
             if (isStructure) {
-                searchLayer.addStructureRuleBySceneName(name, WHITE).showEditStage(parentStage);
+                if (hasFunctionalName) {
+                    searchLayer.addStructureRuleBySceneName(getFunctionalNameByLineageName(name), WHITE)
+                            .showEditStage(parentStage);
+                } else {
+                    searchLayer.addStructureRuleBySceneName(name, WHITE)
+                            .showEditStage(parentStage);
+                }
             } else {
-                searchLayer.addColorRule(LINEAGE, name, WHITE, CELL_NUCLEUS, CELL_BODY).showEditStage(parentStage);
+                searchLayer.addColorRule(LINEAGE, name, WHITE, CELL_NUCLEUS, CELL_BODY)
+                        .showEditStage(parentStage);
             }
         });
 
@@ -2656,8 +2667,8 @@ public class Window3DController {
      * Converts saved frames of development in "play" mode to a single video file
      * Notes:
      * - The outputted video has the dimensions of the subscene width and height at capture time (if the
-     *   window is resized during capture, these parameters will be their values at the time "Stop Capture..."
-     *   is pressed)
+     * window is resized during capture, these parameters will be their values at the time "Stop Capture..."
+     * is pressed)
      * - The frame rate is set at 6 frames/sec
      */
     public void convertImagesToMovie() {
