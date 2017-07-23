@@ -29,6 +29,10 @@ import static java.util.Collections.sort;
 import static partslist.PartsList.getFunctionalNameByLineageName;
 import static wormguides.loaders.GeometryLoader.getEffectiveStartTime;
 
+import static wormguides.models.subscenegeometry.SceneElementType.SINGLE_CELL;
+import static wormguides.models.subscenegeometry.SceneElementType.MCS;
+import static wormguides.models.subscenegeometry.SceneElementType.TRACT;
+
 /**
  * Record of {@link SceneElement}s over the life of the embryo
  */
@@ -36,16 +40,20 @@ public class SceneElementsList {
 
     private static final String CELL_CONFIG_FILE_NAME = "CellShapesConfig.csv";
     private static final String ASTERISK = "*";
+    private static final String SINGLE_CELL_STR = "Single Cell";
+    private static final String MCS_STR = "MCS";
+    private static final String TRACT_STR = "Tract";
 
-    private static final int NUM_OF_CSV_FIELDS = 8;
+    private static final int NUM_OF_CSV_FIELDS = 9;
     private static final int DESCRIPTION_INDEX = 0;
-    private static final int CELLS_INDEX = 1;
-    private static final int MARKER_INDEX = 2;
-    private static final int IMAGING_SOURCE_INDEX = 3;
-    private static final int RESOURCE_LOCATION_INDEX = 4;
-    private static final int START_TIME_INDEX = 5;
-    private static final int END_TIME_INDEX = 6;
-    private static final int COMMENTS_INDEX = 7;
+    private static final int TYPE_INDEX = 1;
+    private static final int CELLS_INDEX = 2;
+    private static final int MARKER_INDEX = 3;
+    private static final int IMAGING_SOURCE_INDEX = 4;
+    private static final int RESOURCE_LOCATION_INDEX = 5;
+    private static final int START_TIME_INDEX = 6;
+    private static final int END_TIME_INDEX = 7;
+    private static final int COMMENTS_INDEX = 8;
 
     private final List<SceneElement> elementsList;
     private final TreeItem<StructureTreeNode> root;
@@ -103,6 +111,8 @@ public class SceneElementsList {
 
             String line;
             String name;
+            String type_str;
+            SceneElementType set = null;
             String resourceLocation;
             int startTime;
             int endTime;
@@ -130,6 +140,14 @@ public class SceneElementsList {
                     // add structure (leaf node) to tree
                     // add scene element only if resource exists in /wormguides/models/obj_files
                     try {
+                        type_str = tokens[TYPE_INDEX];
+                        if (type_str.toUpperCase().equals(SINGLE_CELL_STR)) {
+                            set = SINGLE_CELL;
+                        } else if (type_str.toUpperCase().equals(MCS)) {
+                            set = MCS;
+                        } else if (type_str.toUpperCase().equals(TRACT_STR)) {
+                            set = TRACT;
+                        }
                         resourceLocation = tokens[RESOURCE_LOCATION_INDEX];
                         startTime = parseInt(tokens[START_TIME_INDEX]);
                         endTime = parseInt(tokens[END_TIME_INDEX]);
@@ -162,6 +180,7 @@ public class SceneElementsList {
 
                         final SceneElement element = new SceneElement(
                                 name,
+                                set,
                                 cellNames,
                                 tokens[MARKER_INDEX],
                                 tokens[IMAGING_SOURCE_INDEX],
