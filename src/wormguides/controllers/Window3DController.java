@@ -1640,14 +1640,13 @@ public class Window3DController {
                             -offsetX * xScale,
                             -offsetY * yScale,
                             -offsetZ * zScale));
-//                    mesh.getTransforms().add(new Translate(
-//                            0,
-//                            0,
-//                            0))
-
                     mesh.setScaleX(25.0);
                     mesh.setScaleY(25.0);
                     mesh.setScaleZ(25.0);
+                    mesh.getTransforms().add(new Translate(
+                            0,
+                            0,
+                            0));
                     // add rendered mesh to meshes list
                     currentSceneElementMeshes.add(mesh);
                     // add scene element to rendered scene element reference for on-click responsiveness

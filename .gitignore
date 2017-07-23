@@ -5,6 +5,7 @@ out/
 .project
 .idea
 *.iml
+.idea/
 
 .DS_Store
 .classpath
