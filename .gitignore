@@ -5,11 +5,5 @@ out/
 .project
 .idea
 *.iml
-<<<<<<< HEAD
-src/META-INF/
-=======
-.idea/
->>>>>>> em_branch
-
 .DS_Store
 .classpath
