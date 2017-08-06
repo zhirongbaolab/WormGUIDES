@@ -666,6 +666,7 @@ public class Window3DController {
         this.rebuildSubsceneFlag.set(false);
         this.rebuildSubsceneFlag.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
+                System.out.println("rebuilding scene");
                 buildScene();
                 rebuildSubsceneFlag.set(false);
             }
@@ -1711,15 +1712,26 @@ public class Window3DController {
                 currentSceneElements.clear();
             }
 
+
             sceneElementsAtCurrentTime = sceneElementsList.getSceneElementsAtTime(requestedTime);
             for (SceneElement se : sceneElementsAtCurrentTime) {
                 final SceneElementMeshView mesh = se.buildGeometry(requestedTime - 1);
                 if (mesh != null) {
                     mesh.getTransforms().addAll(rotateX, rotateY, rotateZ);
+
+                    // TRANSFORMS FOR LIBRARY LOADER
+                    //mesh.getTransforms().add(new Rotate(180., new Point3D(1, 0, 0)));
+//                    mesh.getTransforms().add(new Translate(
+//                            -offsetX * xScale,
+//                            offsetY * yScale,
+//                            offsetZ * zScale));
+
+                    // TRANSFORMS FOR MANUAL LOADER
                     mesh.getTransforms().add(new Translate(
-                            offsetX * xScale,
-                            offsetY * yScale,
-                            offsetZ * zScale));
+                            -offsetX * xScale,
+                            -offsetY * yScale,
+                            -offsetZ * zScale));
+
                     // add rendered mesh to meshes list
                     currentSceneElementMeshes.add(mesh);
                     // add scene element to rendered scene element reference for on-click responsiveness

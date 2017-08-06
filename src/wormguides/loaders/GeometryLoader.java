@@ -35,9 +35,7 @@ public class GeometryLoader {
     /**
      * Checks to see if a spefified resource exists in the shapes archive.
      *
-     * @param resourcePath
-     *         the resource path to check, without the .obj extension
-     *
+     * @param resourcePath the resource path to check, without the .obj extension
      * @return the effective start time at which this geometry exists, {@link Integer#MIN_VALUE} if the resource does
      * not exist
      */
@@ -64,9 +62,7 @@ public class GeometryLoader {
     /**
      * Builds a 3D mesh from a file
      *
-     * @param resourcePath
-     *         the resource path to check, without the .obj extension
-     *
+     * @param resourcePath the resource path to check, without the .obj extension
      * @return the 3D mesh
      */
     public static SceneElementMeshView loadOBJ(String resourcePath) {
@@ -74,88 +70,96 @@ public class GeometryLoader {
         resourcePath = "/" + resourcePath + OBJ_EXTENSION;
         final URL url = MainApp.class.getResource(resourcePath);
 
-//        final List<double[]> coords = new ArrayList<>();
-//        final List<int[]> faces = new ArrayList<>();
-
         if (url != null) {
-
-            ObjModelImporter objImporter = new ObjModelImporter();
-            try {
-                objImporter.read(url);
-            } catch (Exception e) {
-                System.out.println("exception thrown building mesh: " + url.toString());
-                System.exit(0);
-                //e.printStackTrace();
-            }
-
-            MeshView[] mvs = objImporter.getImport();
-            //System.out.println("size of mvs: " + mvs.length);
-            if (mvs.length == 1) {
-                meshView = new SceneElementMeshView(mvs[0]);
-//                meshView.setDrawMode(DrawMode.FILL);
-//                meshView.setMaterial(new PhongMaterial());
-            } else {
-                System.out.println("meshviews has size: " + mvs.length);
-            }
-
-//            try (final InputStreamReader streamReader = new InputStreamReader(url.openStream());
-//                 final BufferedReader reader = new BufferedReader(streamReader)) {
-//                String line;
-//                StringTokenizer tokenizer;
-//                String v;
-//                String f;
-//                String lineType;
-//                while ((line = reader.readLine()) != null) {
-//                    // processUrl each line in the obj file
-//                    lineType = line.substring(0, 1);
-//                    switch (lineType) {
-//                        case VERTEX_LINE: {
-//                            // processUrl vertex lines
-//                            v = line.substring(2);
-//                            double[] vertices = new double[3];
-//                            int counter = 0;
-//                            tokenizer = new StringTokenizer(v);
-//                            while (tokenizer.hasMoreTokens()) {
-//                                vertices[counter++] = Double.parseDouble(tokenizer.nextToken());
-//                            }
-//                            // make sure good line
-//                            if (counter == 3) {
-//                                coords.add(vertices);
-//                            }
-//                            break;
-//                        }
-//                        case FACE_LINE: {
-//                            // processUrl face lines
-//                            f = line.substring(2);
-//
-//                            tokenizer = new StringTokenizer(f);
-//
-//                            if (tokenizer.countTokens() == 3) {
-//                                int[] faceCoords = new int[3];
-//                                int counter = 0;
-//
-//                                while (tokenizer.hasMoreTokens()) {
-//                                    faceCoords[counter++] = Integer.parseInt(tokenizer.nextToken());
-//                                }
-//                                if (counter == 3) {
-//                                    faces.add(faceCoords);
-//                                }
-//                                break;
-//                            }
-//                        }
-//                        default:
-//                            break;
-//                    }
-//                }
-//                meshView = new SceneElementMeshView(createMesh(coords, faces));
-//                meshView.pickOutMarkerPoints(coords);
-//            } catch (IOException e) {
-//                System.out.println("The file " + resourcePath + " wasn't found on the system.");
-//            }
+            return createMeshFromManualLoader(url);
+            //return createMeshFromLibraryLoader(url);
         } else {
-            //System.out.println("null url");
+            return meshView;
         }
-        //meshView.pickOutMarkerPoints(coords);
+
+    }
+
+    private static SceneElementMeshView createMeshFromManualLoader(URL url) {
+        SceneElementMeshView meshView = null;
+        final List<double[]> coords = new ArrayList<>();
+        final List<int[]> faces = new ArrayList<>();
+        try (final InputStreamReader streamReader = new InputStreamReader(url.openStream());
+             final BufferedReader reader = new BufferedReader(streamReader)) {
+            String line;
+            StringTokenizer tokenizer;
+            String v;
+            String f;
+            String lineType;
+            while ((line = reader.readLine()) != null) {
+                // processUrl each line in the obj file
+                lineType = line.substring(0, 1);
+                switch (lineType) {
+                    case VERTEX_LINE: {
+                        // processUrl vertex lines
+                        v = line.substring(2);
+                        double[] vertices = new double[3];
+                        int counter = 0;
+                        tokenizer = new StringTokenizer(v);
+                        while (tokenizer.hasMoreTokens()) {
+                            vertices[counter++] = Double.parseDouble(tokenizer.nextToken());
+                        }
+                        // make sure good line
+                        if (counter == 3) {
+                            coords.add(vertices);
+                        }
+                        break;
+                    }
+                    case FACE_LINE: {
+                        // processUrl face lines
+                        f = line.substring(2);
+
+                        tokenizer = new StringTokenizer(f);
+
+                        if (tokenizer.countTokens() == 3) {
+                            int[] faceCoords = new int[3];
+                            int counter = 0;
+
+                            while (tokenizer.hasMoreTokens()) {
+                                faceCoords[counter++] = Integer.parseInt(tokenizer.nextToken());
+                            }
+                            if (counter == 3) {
+                                faces.add(faceCoords);
+                            }
+                            break;
+                        }
+                    }
+                    default:
+                        break;
+                }
+            }
+            meshView = new SceneElementMeshView(createMesh(coords, faces));
+            meshView.pickOutMarkerPoints(coords);
+        } catch (IOException e) {
+            System.out.println("The file " + url.toString() + " wasn't found on the system.");
+        }
+
+        return meshView;
+    }
+
+
+    private static SceneElementMeshView createMeshFromLibraryLoader(URL url) {
+        SceneElementMeshView meshView = null;
+        ObjModelImporter objImporter = new ObjModelImporter();
+        try {
+            objImporter.read(url);
+        } catch (Exception e) {
+            System.out.println("exception thrown building mesh: " + url.toString());
+            System.exit(0);
+            //e.printStackTrace();
+        }
+
+        MeshView[] mvs = objImporter.getImport();
+        //System.out.println("size of mvs: " + mvs.length);
+        if (mvs.length == 1) {
+            meshView = new SceneElementMeshView(mvs[0]);
+        } else {
+            System.out.println("meshviews has size: " + mvs.length);
+        }
 
         return meshView;
     }
