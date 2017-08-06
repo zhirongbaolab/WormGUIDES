@@ -666,7 +666,7 @@ public class Window3DController {
         this.rebuildSubsceneFlag.set(false);
         this.rebuildSubsceneFlag.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                System.out.println("rebuilding scene");
+                //System.out.println("rebuilding scene");
                 buildScene();
                 rebuildSubsceneFlag.set(false);
             }
