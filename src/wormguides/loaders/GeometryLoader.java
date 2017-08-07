@@ -71,9 +71,10 @@ public class GeometryLoader {
         final URL url = MainApp.class.getResource(resourcePath);
 
         if (url != null) {
-            return createMeshFromManualLoader(url);
-            //return createMeshFromLibraryLoader(url);
+            //return createMeshFromManualLoader(url);
+            return createMeshFromLibraryLoader(url);
         } else {
+            System.out.println("null url: " + url.toString());
             return meshView;
         }
 
@@ -149,8 +150,8 @@ public class GeometryLoader {
             objImporter.read(url);
         } catch (Exception e) {
             System.out.println("exception thrown building mesh: " + url.toString());
+            e.printStackTrace();
             System.exit(0);
-            //e.printStackTrace();
         }
 
         MeshView[] mvs = objImporter.getImport();

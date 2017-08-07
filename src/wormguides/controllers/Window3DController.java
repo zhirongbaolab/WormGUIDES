@@ -1714,23 +1714,29 @@ public class Window3DController {
 
 
             sceneElementsAtCurrentTime = sceneElementsList.getSceneElementsAtTime(requestedTime);
+            System.out.println(sceneElementsAtCurrentTime.size());
             for (SceneElement se : sceneElementsAtCurrentTime) {
-                final SceneElementMeshView mesh = se.buildGeometry(requestedTime - 1);
+//                final SceneElementMeshView mesh = se.buildGeometry(requestedTime - 1);
+                final SceneElementMeshView mesh = se.buildGeometry(requestedTime);
                 if (mesh != null) {
                     mesh.getTransforms().addAll(rotateX, rotateY, rotateZ);
 
                     // TRANSFORMS FOR LIBRARY LOADER
                     //mesh.getTransforms().add(new Rotate(180., new Point3D(1, 0, 0)));
-//                    mesh.getTransforms().add(new Translate(
-//                            -offsetX * xScale,
-//                            offsetY * yScale,
-//                            offsetZ * zScale));
-
-                    // TRANSFORMS FOR MANUAL LOADER
                     mesh.getTransforms().add(new Translate(
                             -offsetX * xScale,
                             -offsetY * yScale,
                             -offsetZ * zScale));
+
+                    // TRANSFORMS FOR MANUAL LOADER
+//                    mesh.getTransforms().add(new Translate(
+//                            -offsetX * xScale,
+//                            -offsetY * yScale,
+//                            -offsetZ * zScale));
+
+                    mesh.setScaleX(25.0);
+                    mesh.setScaleY(25.0);
+                    mesh.setScaleZ(25.0);
 
                     // add rendered mesh to meshes list
                     currentSceneElementMeshes.add(mesh);
