@@ -58,9 +58,9 @@ public class AceTreeTableLineageDataLoader {
 
     private static final List<String> allCellNames = new ArrayList<>();
 
-    private static int avgX;
-    private static int avgY;
-    private static int avgZ;
+    private static double avgX;
+    private static double avgY;
+    private static double avgZ;
 
     public static LineageData loadNucFiles(final ProductionInfo productionInfo) {
         final TableLineageData tableLineageData = new TableLineageData(
@@ -126,15 +126,15 @@ public class AceTreeTableLineageDataLoader {
         return resourceUrlString;
     }
 
-    public static int getAvgXOffsetFromZero() {
+    public static double getAvgXOffsetFromZero() {
         return avgX;
     }
 
-    public static int getAvgYOffsetFromZero() {
+    public static double getAvgYOffsetFromZero() {
         return avgY;
     }
 
-    public static int getAvgZOffsetFromZero() {
+    public static double getAvgZOffsetFromZero() {
         return avgZ;
     }
 
@@ -144,10 +144,12 @@ public class AceTreeTableLineageDataLoader {
         double sumY = 0d;
         double sumZ = 0d;
 
-        // sum up all x-, y- and z-coordinates of nuclei
-        for (int i = 0; i < lineageData.getNumberOfTimePoints(); i++) {
+        // sum up all x-, y- and z-coordinates of nuclei - we start at 1 because an empty
+        // is appended to the front of lineagedata
+        for (int i = 1; i < lineageData.getNumberOfTimePoints(); i++) {
             double[][] positionsArray = lineageData.getPositions(i);
-            for (int j = 1; j < positionsArray.length; j++) {
+            for (int j = 0; j < positionsArray.length; j++) {
+//                System.out.println(positionsArray[j][X_POS_INDEX] + ", " + positionsArray[j][Y_POS_INDEX] + ", " + positionsArray[j][Z_POS_INDEX]);
                 sumX += positionsArray[j][X_POS_INDEX];
                 sumY += positionsArray[j][Y_POS_INDEX];
                 sumZ += positionsArray[j][Z_POS_INDEX];
@@ -156,9 +158,14 @@ public class AceTreeTableLineageDataLoader {
         }
 
         // find average of x-, y- and z-coordinates
-        avgX = (int) sumX / totalPositions;
-        avgY = (int) sumY / totalPositions;
-        avgZ = (int) sumZ / totalPositions;
+        if (totalPositions != 0) {
+            avgX = sumX / totalPositions;
+            avgY = sumY / totalPositions;
+            avgZ = sumZ / totalPositions;
+        } else {
+            avgX = avgY = avgZ = 0.;
+        }
+
 
         System.out.println("Average nuclei position offsets from origin (0, 0, 0): ("
                 + avgX
@@ -203,7 +210,7 @@ public class AceTreeTableLineageDataLoader {
                     tokens[ID_INDEX],
                     parseInt(tokens[XCOR_INDEX]),
                     parseInt(tokens[YCOR_INDEX]),
-                    round(parseDouble(tokens[ZCOR_INDEX])),
+                    parseDouble(tokens[ZCOR_INDEX]),
                     parseInt(tokens[DIAMETER_INDEX]));
         } catch (NumberFormatException nfe) {
             System.out.println("Incorrect format in nucleus file for time " + time + ".");

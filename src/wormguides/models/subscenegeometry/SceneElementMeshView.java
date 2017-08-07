@@ -32,6 +32,11 @@ public class SceneElementMeshView extends MeshView {
         markerCoordinates = new ArrayList<>();
     }
 
+    public SceneElementMeshView(final MeshView meshView) {
+        super(meshView.getMesh());
+        markerCoordinates = new ArrayList<>();
+    }
+
     /**
      * Picks out the number of marker points specified from a list of vertices
      *
