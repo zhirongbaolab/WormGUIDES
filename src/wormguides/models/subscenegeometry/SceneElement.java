@@ -28,6 +28,8 @@ public class SceneElement {
 
     /** Descriptor or display of object */
     private String sceneName;
+    /** Type of the scene element */
+    private SceneElementType type;
     /** Cells contained by this structure */
     private List<String> cellNames;
     /** Used when neuron is separated from marker */
@@ -72,6 +74,7 @@ public class SceneElement {
      */
     public SceneElement(
             final String sceneName,
+            final SceneElementType type,
             final List<String> cellNames,
             final String markerName,
             final String imagingSource,
@@ -233,6 +236,14 @@ public class SceneElement {
     public void setSceneName(String name) {
         if (name != null) {
             sceneName = name;
+        }
+    }
+
+    public SceneElementType getSceneElementType() { return this.type; }
+
+    public void setSceneElementType(SceneElementType type) {
+        if (type != null) {
+            this.type = type;
         }
     }
 

@@ -60,7 +60,7 @@ public class TableLineageData implements LineageData {
 
     /** {@inheritDoc} */
     @Override
-    public void shiftAllPositions(final int x, final int y, final int z) {
+    public void shiftAllPositions(final double x, final double y, final double z) {
         for (Frame timeFrame : timeFrames) {
             timeFrame.shiftPositions(x, y, z);
         }
@@ -229,7 +229,7 @@ public class TableLineageData implements LineageData {
             diameters = new ArrayList<>();
         }
 
-        private void shiftPositions(final int x, final int y, final int z) {
+        private void shiftPositions(final double x, final double y, final double z) {
             for (int i = 0; i < positions.size(); i++) {
                 final Double[] pos = positions.get(i);
                 positions.set(i, new Double[]{pos[0] - x, pos[1] - y, pos[2] - z});

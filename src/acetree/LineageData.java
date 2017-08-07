@@ -91,7 +91,7 @@ public interface LineageData {
      * @param z
      *         Amount of offset the z-coordinates by
      */
-    void shiftAllPositions(final int x, final int y, final int z);
+    void shiftAllPositions(final double x, final double y, final double z);
 
     /**
      * @return true if the lineage is in Sulston mode, false otherwise
