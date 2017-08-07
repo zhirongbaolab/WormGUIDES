@@ -500,13 +500,15 @@ public class SearchLayer {
         StructureTreeNode node;
         while (!nodeQueue.isEmpty()) {
             treeItem = nodeQueue.remove();
-            node = treeItem.getValue();
-            if (node.isHeading()) {
-                if (node.getNodeText().equalsIgnoreCase(heading)) {
-                    headingNode = treeItem;
-                    break;
-                } else {
-                    nodeQueue.addAll(treeItem.getChildren());
+            if (treeItem != null) {
+                node = treeItem.getValue();
+                if (node.isHeading()) {
+                    if (node.getNodeText().equalsIgnoreCase(heading)) {
+                        headingNode = treeItem;
+                        break;
+                    } else {
+                        nodeQueue.addAll(treeItem.getChildren());
+                    }
                 }
             }
         }

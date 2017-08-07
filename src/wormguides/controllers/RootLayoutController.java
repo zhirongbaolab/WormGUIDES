@@ -1214,11 +1214,11 @@ public class RootLayoutController extends BorderPane implements Initializable {
         initSearchLayer();
         searchLayer.initDatabases(lineageData, sceneElementsList, connectome, casesLists, productionInfo);
 
-        // takes ~120ms
-        initStoriesLayer();
-
         // takes ~5ms
         initStructuresLayer();
+
+        // takes ~120ms
+        initStoriesLayer();
 
         initContextMenuStage();
 
