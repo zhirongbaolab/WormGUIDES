@@ -928,6 +928,8 @@ public class Window3DController {
 
         mouseDeltaX /= 2;
         mouseDeltaY /= 2;
+        mouseDeltaX *= zoomProperty.getValue();
+        mouseDeltaY *= zoomProperty.getValue();
 
         angleOfRotation = rotationAngleFromMouseMovement();
         mousePosZ = computeZCoord(mousePosX, mousePosY, angleOfRotation);
