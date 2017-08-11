@@ -928,17 +928,23 @@ public class Window3DController {
 
         mouseDeltaX /= 2;
         mouseDeltaY /= 2;
-        mouseDeltaX *= zoomProperty.getValue();
-        mouseDeltaY *= zoomProperty.getValue();
 
         angleOfRotation = rotationAngleFromMouseMovement();
         mousePosZ = computeZCoord(mousePosX, mousePosY, angleOfRotation);
 
         if (event.isSecondaryButtonDown() || event.isMetaDown() || event.isControlDown()) {
-            final double translateX = xform.getTranslateX() - mouseDeltaX;
-            final double translateY = xform.getTranslateY() - mouseDeltaY;
+            double translateX = xform.getTranslateX() - mouseDeltaX;
+            double translateY = xform.getTranslateY() - mouseDeltaY;
 
-            System.out.println(translateX + ", " + translateY);
+            if (translateX < (mouseDeltaX + 5.) || translateY < (mouseDeltaY + 5.)) {
+                if (zoomProperty.getValue() > 1.) {
+                    translateX = xform.getTranslateX() - ((mouseDeltaX/zoomProperty.getValue())/2.);
+                    translateY = xform.getTranslateY() - ((mouseDeltaY/zoomProperty.getValue())/2.);
+                } else {
+                    translateX = xform.getTranslateX() - ((mouseDeltaX*zoomProperty.getValue())/2.);
+                    translateY = xform.getTranslateY() - ((mouseDeltaY*zoomProperty.getValue())/2.);
+                }
+            }
 
             xform.setTranslateX(translateX);
             xform.setTranslateY(translateY);
