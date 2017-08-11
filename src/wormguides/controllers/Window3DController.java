@@ -936,7 +936,7 @@ public class Window3DController {
             double translateX = xform.getTranslateX() - mouseDeltaX;
             double translateY = xform.getTranslateY() - mouseDeltaY;
 
-            if (translateX < (mouseDeltaX + 5.) || translateY < (mouseDeltaY + 5.)) {
+            if ((Math.abs(translateX) + 2.) < Math.abs(mouseDeltaX) || (Math.abs(translateY) + 2.) < Math.abs(mouseDeltaY)) {
                 if (zoomProperty.getValue() > 1.) {
                     translateX = xform.getTranslateX() - ((mouseDeltaX/zoomProperty.getValue())/2.);
                     translateY = xform.getTranslateY() - ((mouseDeltaY/zoomProperty.getValue())/2.);
