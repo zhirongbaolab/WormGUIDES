@@ -933,17 +933,17 @@ public class Window3DController {
         mousePosZ = computeZCoord(mousePosX, mousePosY, angleOfRotation);
 
         if (event.isSecondaryButtonDown() || event.isMetaDown() || event.isControlDown()) {
-            double translateX = xform.getTranslateX() - mouseDeltaX;
-            double translateY = xform.getTranslateY() - mouseDeltaY;
-
-            if ((Math.abs(translateX) + 2.) < Math.abs(mouseDeltaX) || (Math.abs(translateY) + 2.) < Math.abs(mouseDeltaY)) {
-                if (zoomProperty.getValue() > 1.) {
-                    translateX = xform.getTranslateX() - ((mouseDeltaX/zoomProperty.getValue())/2.);
-                    translateY = xform.getTranslateY() - ((mouseDeltaY/zoomProperty.getValue())/2.);
-                } else {
-                    translateX = xform.getTranslateX() - ((mouseDeltaX*zoomProperty.getValue())/2.);
-                    translateY = xform.getTranslateY() - ((mouseDeltaY*zoomProperty.getValue())/2.);
-                }
+            double translateX = 0.;
+            double translateY = 0.;
+            if (xform.s.getX() < 1.) {
+                translateX = xform.getTranslateX() - (mouseDeltaX * xform.s.getX());
+                translateY = xform.getTranslateY() - (mouseDeltaY * xform.s.getY());
+            } else if (xform.s.getX() < 2.) {
+                translateX = xform.getTranslateX() - (mouseDeltaX / xform.s.getX());
+                translateY = xform.getTranslateY() - (mouseDeltaY / xform.s.getY());
+            } else {
+                translateX = xform.getTranslateX() - mouseDeltaX;
+                translateY = xform.getTranslateY() - mouseDeltaY;
             }
 
             xform.setTranslateX(translateX);
