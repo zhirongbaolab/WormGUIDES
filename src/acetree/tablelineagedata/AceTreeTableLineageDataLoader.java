@@ -208,10 +208,10 @@ public class AceTreeTableLineageDataLoader {
             tableLineageData.addNucleus(
                     time,
                     tokens[ID_INDEX],
-                    parseInt(tokens[XCOR_INDEX]),
-                    parseInt(tokens[YCOR_INDEX]),
+                    parseDouble(tokens[XCOR_INDEX]),
+                    parseDouble(tokens[YCOR_INDEX]),
                     parseDouble(tokens[ZCOR_INDEX]),
-                    parseInt(tokens[DIAMETER_INDEX]));
+                    parseDouble(tokens[DIAMETER_INDEX]));
         } catch (NumberFormatException nfe) {
             System.out.println("Incorrect format in nucleus file for time " + time + ".");
         }
