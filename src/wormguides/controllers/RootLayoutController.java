@@ -7,11 +7,13 @@ package wormguides.controllers;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import wormguides.view.popups.TimelineChart;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -87,6 +89,8 @@ import wormguides.view.popups.SulstonTreePane;
 import wormguides.view.urlwindow.URLLoadWarningDialog;
 import wormguides.view.urlwindow.URLLoadWindow;
 import wormguides.view.urlwindow.URLShareWindow;
+
+import javax.print.URIException;
 
 import static java.lang.System.lineSeparator;
 import static java.time.Duration.between;
@@ -260,6 +264,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private Stage rotationControllerStage;
     private Stage contextMenuStage;
     private Popup exitSavePopup;
+    private Stage timelineStage;
+
+    private TimelineChart<Number, String> chart;
 
     // URL generation/loading
     private URLShareWindow urlShareWindow;
@@ -395,6 +402,14 @@ public class RootLayoutController extends BorderPane implements Initializable {
     }
 
     @FXML
+    public void viewTimeline() {
+        if (timelineStage == null) {
+            initTimelineChart();
+        }
+        timelineStage.show();
+    }
+
+    @FXML
     public void generateURLAction() {
         if (urlDisplayStage == null) {
             urlDisplayStage = new Stage();
@@ -497,47 +512,47 @@ public class RootLayoutController extends BorderPane implements Initializable {
             // create the header line that will format the search criteria corresponding to these search results
             String searchType = "";
             if (sysRadioBtn.isSelected()) {
-            	searchType = "Lineage Name";
+                searchType = "Lineage Name";
             } else if (funRadioBtn.isSelected()) {
-            	searchType = "Function Name";
+                searchType = "Function Name";
             } else if (desRadioBtn.isSelected()) {
-            	searchType = "PartsList Desciption";
+                searchType = "PartsList Desciption";
             } else if (genRadioBtn.isSelected()) {
-            	searchType = "Gene";
+                searchType = "Gene";
             } else if (conRadioBtn.isSelected()) {
-            	searchType = "Connectome - ";
-            	if (presynapticCheckBox.isSelected()) {
-            		searchType += "pre-synaptic, ";
-            	}
-            	if (postsynapticCheckBox.isSelected()) {
-            		searchType += "post-synaptic, ";
-            	}
-            	if (electricalCheckBox.isSelected()) {
-            		searchType += "electrical, ";
-            	}
-            	if (neuromuscularCheckBox.isSelected()) {
-            		searchType += "neuromuscular";
-            	}
-            	if (searchType.substring(searchType.length()-2).equals(", ")) {
-            		searchType = searchType.substring(0, searchType.length()-2);
-            	}
+                searchType = "Connectome - ";
+                if (presynapticCheckBox.isSelected()) {
+                    searchType += "pre-synaptic, ";
+                }
+                if (postsynapticCheckBox.isSelected()) {
+                    searchType += "post-synaptic, ";
+                }
+                if (electricalCheckBox.isSelected()) {
+                    searchType += "electrical, ";
+                }
+                if (neuromuscularCheckBox.isSelected()) {
+                    searchType += "neuromuscular";
+                }
+                if (searchType.substring(searchType.length()-2).equals(", ")) {
+                    searchType = searchType.substring(0, searchType.length()-2);
+                }
             } else if (multiRadioBtn.isSelected()) {
-            	searchType = "Multicellular Structure";
+                searchType = "Multicellular Structure";
             }
 
             String searchOptions = "";
 
             if (ancestorCheckBox.isSelected() && descendantCheckBox.isSelected()) {
-            	searchOptions = "ancestors, descdendants";
+                searchOptions = "ancestors, descdendants";
             } else if (ancestorCheckBox.isSelected() && !descendantCheckBox.isSelected()) {
-            	searchOptions = "ancestors";
+                searchOptions = "ancestors";
             } else if (!ancestorCheckBox.isSelected() && descendantCheckBox.isSelected()) {
-            	searchOptions = "descendants";
+                searchOptions = "descendants";
             }
 
             String searchCriteria = "'" + searchField.getText() + "' (Options: " + searchType;
             if (!searchOptions.isEmpty()) {
-            	searchCriteria += ", " + searchOptions;
+                searchCriteria += ", " + searchOptions;
             }
             searchCriteria += ")";
 
@@ -775,7 +790,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 contextMenuStage,
                 contextMenuController,
                 searchResultsUpdateService,
-                searchResultsList);
+                searchResultsList,
+                timelineStage);
 
         timeProperty.addListener((observable, oldValue, newValue) -> {
             timeSlider.setValue(timeProperty.get());
@@ -1103,6 +1119,12 @@ public class RootLayoutController extends BorderPane implements Initializable {
         casesLists.setInfoWindow(infoWindow);
     }
 
+    private void initTimelineChart() {
+        timelineStage = new Stage();
+        timelineStage.setTitle("Timeline");
+        timelineStage.setScene(TimelineChart.initialize(storiesLayer, productionInfo));
+    }
+
     /**
      * Replaces all application tabs with dockable ones
      *
@@ -1163,7 +1185,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
             defaultEmbryoFlag = true;
             lineageData.setIsSulstonModeFlag(productionInfo.getIsSulstonFlag());
         }
-        
+
         // set values based on default vs. other model
         if (defaultEmbryoFlag) {
             startTime = productionInfo.getDefaultStartTime();
@@ -1172,7 +1194,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
             startTime = 0;
             movieTimeOffset = 0;
         }
-        
+
         endTime = lineageData.getNumberOfTimePoints() - 1;
         movieTimeOffset = productionInfo.getMovieTimeOffset();
 
@@ -1221,6 +1243,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
         initStoriesLayer();
 
         initContextMenuStage();
+
+        // takes TODO ms
+        initTimelineChart();
 
         addListeners();
 

@@ -402,7 +402,7 @@ public class StoriesLayer {
      * @param note
      *         the note that should become active
      */
-    private void setActiveNoteWithSubsceneRebuild(final Note note) {
+    public void setActiveNoteWithSubsceneRebuild(final Note note) {
         boolean wasUsingNoteUrl = activeNote != null && activeNote.hasColorScheme();
         boolean willUseNoteUrl = note != null && note.hasColorScheme();
         if (wasUsingNoteUrl) {

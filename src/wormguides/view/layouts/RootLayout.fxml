@@ -56,6 +56,7 @@
                 <Menu mnemonicParsing="false" text="View">
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#viewTreeAction" text="Lineage tree" />
+                        <MenuItem mnemonicParsing="false" onAction="#viewTimeline" text="Timeline" />
                         <Menu mnemonicParsing="false" text="Primary Data">
                             <items>
                                 <MenuItem mnemonicParsing="false" onAction="#viewCellShapesIndex" text="Cell Shapes Index" />
