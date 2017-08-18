@@ -163,7 +163,6 @@ public class TimelineChart<X,Y> extends XYChart<X,Y> {
 
     // variables for chart initialization and rebuild
     private static TimelineChart<Number, String> chart;
-    private static Story lastActiveStory;
     private static int movieTimeOffset;
     private static int min = 250;
     private static int max = 0;
@@ -186,7 +185,6 @@ public class TimelineChart<X,Y> extends XYChart<X,Y> {
         cellSeries = new HashMap<String, XYChart.Series>();
         tagMap = new HashMap<String, String>();
         noteDisplay = new HashMap<XYChart.Data, Note>();
-        lastActiveStory = storiesLayer.getActiveStory();
         return buildTimeline(storiesLayer);
     }
 
@@ -194,10 +192,9 @@ public class TimelineChart<X,Y> extends XYChart<X,Y> {
      * builds timeline when new note or story is active
      */
     public static Scene buildTimeline(StoriesLayer storiesLayer) {
-        Story activeStory = storiesLayer.getActiveStory();
         clearData();
 
-        if (activeStory == null) {
+        if (storiesLayer == null || storiesLayer.getActiveStory() == null) {
             cellNames = new ArrayList<String>();
             HashMap<String, Series> hmap = new HashMap<String, XYChart.Series>();
 
@@ -222,6 +219,7 @@ public class TimelineChart<X,Y> extends XYChart<X,Y> {
                 chart.getData().addAll(thisSeries);
             }
         } else {
+            Story activeStory = storiesLayer.getActiveStory();
             for (int i = 0; i < (activeStory.getNotes().size()); i++) {
                 Note note = activeStory.getNotes().get(i);
                 String cellName = activeStory.getNotes().get(i).getCellName();
@@ -326,10 +324,6 @@ public class TimelineChart<X,Y> extends XYChart<X,Y> {
         cellSeries.clear();
         tagMap.clear();
         noteDisplay.clear();
-    }
-
-    public static boolean isNewActiveStory(Story activeStory) {
-        return !lastActiveStory.equals(activeStory);
     }
 
 

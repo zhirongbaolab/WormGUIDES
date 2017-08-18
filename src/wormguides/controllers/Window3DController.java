@@ -225,7 +225,6 @@ public class Window3DController {
     private final LineageData lineageData;
     private final SubScene subscene;
     private final TextField searchField;
-    private final Stage timelineStage;
 
     // housekeeping stuff
     private final BooleanProperty rebuildSubsceneFlag;
@@ -347,8 +346,6 @@ public class Window3DController {
     private File frameDir;
     private String frameDirPath;
 
-    private TimelineChart chart;
-
     // private Quaternion quaternion;
 
     /** X-scale of the subscene coordinate axis read from ProductionInfo.csv */
@@ -413,14 +410,9 @@ public class Window3DController {
             final Stage contextMenuStage,
             final ContextMenuController contextMenuController,
             final Service<Void> searchResultsUpdateService,
-            final ObservableList<String> searchResultsList,
-            final Stage timelineStage) {
+            final ObservableList<String> searchResultsList) {
 
         this.parentStage = requireNonNull(parentStage);
-
-        // set up the timeline
-        this.timelineStage = requireNonNull(timelineStage);
-        this.chart = chart;
 
         this.offsetX = offsetX;
         this.offsetY = offsetY;
@@ -676,12 +668,6 @@ public class Window3DController {
         this.rebuildSubsceneFlag.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 buildScene();
-
-                // check if the story has changed. If so, rebuild the timeline
-                if (TimelineChart.isNewActiveStory(storiesLayer.getActiveStory())) {
-                    timelineStage.setScene(TimelineChart.buildTimeline(storiesLayer));
-                    timelineStage.toBack();
-                }
                 rebuildSubsceneFlag.set(false);
             }
         });

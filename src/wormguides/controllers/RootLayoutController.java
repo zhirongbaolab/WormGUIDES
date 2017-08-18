@@ -790,8 +790,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 contextMenuStage,
                 contextMenuController,
                 searchResultsUpdateService,
-                searchResultsList,
-                timelineStage);
+                searchResultsList);
 
         timeProperty.addListener((observable, oldValue, newValue) -> {
             timeSlider.setValue(timeProperty.get());
@@ -1090,7 +1089,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 startTime,
                 endTime,
                 movieTimeOffset,
-                defaultEmbryoFlag);
+                defaultEmbryoFlag,
+                timelineStage);
 
         displayedStory.setText("Active Story: " + storiesLayer.getActiveStory().getTitle());
         displayedStoryDescription.setText(storiesLayer.getActiveStoryDescription());
@@ -1239,13 +1239,13 @@ public class RootLayoutController extends BorderPane implements Initializable {
         // takes ~5ms
         initStructuresLayer();
 
+        // takes TODO ms
+        initTimelineChart();
+
         // takes ~120ms
         initStoriesLayer();
 
         initContextMenuStage();
-
-        // takes TODO ms
-        initTimelineChart();
 
         addListeners();
 
