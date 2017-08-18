@@ -91,6 +91,7 @@ import wormguides.util.ColorComparator;
 import wormguides.util.ColorHash;
 import wormguides.util.subscenesaving.JavaPicture;
 import wormguides.util.subscenesaving.JpegImagesToMovie;
+import wormguides.view.popups.TimelineChart;
 
 import static java.lang.Math.pow;
 import static java.lang.Math.round;
@@ -666,7 +667,6 @@ public class Window3DController {
         this.rebuildSubsceneFlag.set(false);
         this.rebuildSubsceneFlag.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                //System.out.println("rebuilding scene");
                 buildScene();
                 rebuildSubsceneFlag.set(false);
             }
