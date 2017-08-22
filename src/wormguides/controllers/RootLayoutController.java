@@ -879,9 +879,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         // Cell body/structue
         if (isStructureWithComment(name)) {
             displayedDescription.setText(getStructureComment(name));
-        }
-        // Cell lineage name
-        else {
+        } else { // Cell lineage name
             String functionalName = getFunctionalNameByLineageName(name);
             if (functionalName != null) {
                 displayedName.setText("Active Cell: " + name + " (" + functionalName + ")");

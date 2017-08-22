@@ -1076,64 +1076,6 @@ public class Window3DController {
                         .filter(note -> currentNotesToMeshesMap.get(note).equals(node))
                         .forEachOrdered(note -> selectedNameProperty.set(note.getTagName()));
             }
-//        } else if (node instanceof SceneElementMeshView) {
-//            // Structure
-//            boolean found = false; // this will indicate whether this meshview is a scene element
-//            SceneElementMeshView curr;
-//            for (int i = 0; i < currentSceneElementMeshes.size(); i++) {
-//                curr = currentSceneElementMeshes.get(i);
-//                if (curr.equals(node)) {
-//                    found = true;
-//                    final SceneElement clickedSceneElement = currentSceneElements.get(i);
-//                    String name = normalizeName(clickedSceneElement.getSceneName());
-//
-//                    // if scene element is the cell body of a spherical nucleus, then use its lineage name
-//                    if (isFunctionalName(name)) {
-//                        name = getLineageNamesByFunctionalName(name).get(0);
-//                    }
-//                    selectedNameProperty.set(name);
-//
-//                    if (event.getButton() == SECONDARY
-//                            || (event.getButton() == PRIMARY && (event.isMetaDown() || event.isControlDown()))) {
-//                        // right click
-//                        if (sceneElementsList.isStructureSceneName(name)) {
-//                            final String functionalName;
-//                            if ((functionalName = getFunctionalNameByLineageName(name)) != null) {
-//                                name = functionalName;
-//                            }
-//                            showContextMenu(
-//                                    name,
-//                                    event.getScreenX(),
-//                                    event.getScreenY(),
-//                                    true,
-//                                    sceneElementsList.isMulticellStructureName(name));
-//                        }
-//
-//                    } else if (event.getButton() == PRIMARY) {
-//                        // regular click
-//                        if (allLabels.contains(name)) {
-//                            removeLabelFor(name);
-//                        } else {
-//                            allLabels.add(name);
-//                            currentLabels.add(name);
-//                            final Shape3D entity = getEntityWithName(name);
-//                            insertLabelFor(name, entity);
-//                            highlightActiveCellLabel(entity);
-//                        }
-//                    }
-//                    break;
-//                }
-//            }
-//
-//            // if the node isn't a SceneElement
-//            if (!found) {
-//                // note structure
-//                currentNotesToMeshesMap.keySet()
-//                        .stream()
-//                        .filter(note -> currentNotesToMeshesMap.get(note).equals(node))
-//                        .forEachOrdered(note -> selectedNameProperty.set(note.getTagName()));
-//            }
-//        }
         } else {
             selectedIndex.set(-1);
             selectedNameProperty.set("");
