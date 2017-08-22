@@ -40,6 +40,9 @@ import wormguides.stories.Note;
 import wormguides.stories.Story;
 import wormguides.view.graphicalrepresentations.NoteGraphic;
 import wormguides.view.graphicalrepresentations.StoryGraphic;
+import wormguides.view.popups.TimelineChart;
+
+import javax.swing.event.ChangeListener;
 
 import static java.lang.Integer.MIN_VALUE;
 import static java.util.Objects.requireNonNull;
@@ -128,7 +131,8 @@ public class StoriesLayer {
             final int startTime,
             final int endTime,
             final int movieTimeOffset,
-            final boolean defaultEmbryoFlag) {
+            final boolean defaultEmbryoFlag,
+            Stage timelineStage) {
 
         this.parentStage = requireNonNull(parentStage);
         this.searchLayer = requireNonNull(searchLayer);
@@ -210,6 +214,25 @@ public class StoriesLayer {
         }
 
         setActiveStory(stories.get(0));
+
+        // now that the active story is set, set up the timeline chart
+        timelineStage.setScene(TimelineChart.buildTimeline(this));
+
+        // when the active story is edited, rebuild the timeline
+        activeStory.getChangedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != oldValue) {
+                timelineStage.setScene(TimelineChart.buildTimeline(this));
+                timelineStage.toBack();
+            }
+        });
+
+        // when the active story is switched, rebuild the timeline
+        activeStoryProperty.addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && !newValue.isEmpty()) {
+                timelineStage.setScene(TimelineChart.buildTimeline(this));
+                timelineStage.toBack();
+            }
+        });
 
         requireNonNull(storiesListView);
         storiesListView.setItems(stories);
@@ -402,7 +425,7 @@ public class StoriesLayer {
      * @param note
      *         the note that should become active
      */
-    private void setActiveNoteWithSubsceneRebuild(final Note note) {
+    public void setActiveNoteWithSubsceneRebuild(final Note note) {
         boolean wasUsingNoteUrl = activeNote != null && activeNote.hasColorScheme();
         boolean willUseNoteUrl = note != null && note.hasColorScheme();
         if (wasUsingNoteUrl) {

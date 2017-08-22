@@ -58,22 +58,17 @@ public class Story {
 
         this.activeProperty = new SimpleBooleanProperty(false);
         this.changedProperty = new SimpleBooleanProperty(false);
-        this.changedProperty.addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                setChanged(false);
-            }
-        });
 
         this.notes = observableArrayList(note -> new Observable[]{note.getChangedProperty()});
         this.notes.addListener((ListChangeListener<Note>) c -> {
             while (c.next()) {
                 // note was edited
                 if (c.wasUpdated()) {
-                    setChanged(true);
+                    setChanged();
                 } else if (c.wasAdded()) {
-                    setChanged(true);
+                    setChanged();
                 } else if (c.wasRemoved()) {
-                    setChanged(true);
+                    setChanged();
                 }
             }
         });
@@ -190,8 +185,13 @@ public class Story {
         }
     }
 
-    public void setChanged(final boolean changed) {
-        changedProperty.set(changed);
+    public void setChanged() {
+            // if the value was previously true, set to false
+            if (changedProperty.get()) {
+                changedProperty.set(false);
+            } else { // if the value was previously false, set to true
+                changedProperty.set(true);
+            }
     }
 
     public void removeNote(final Note note) {
