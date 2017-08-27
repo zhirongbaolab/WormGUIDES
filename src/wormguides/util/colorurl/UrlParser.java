@@ -6,6 +6,7 @@ package wormguides.util.colorurl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -57,12 +58,14 @@ public class UrlParser {
         final List<SearchOption> options = new ArrayList<>();
         StringBuilder sb;
         boolean noTypeSpecified;
+        boolean isMLS; // flag denoting whether this is a Manually Specified List
         String wholeColorString;
         String name;
         for (String ruleString : ruleStrings) {
             types.clear();
             sb = new StringBuilder(ruleString);
             noTypeSpecified = false;
+            isMLS = false;
             // determine if rule is a cell/cellbody rule, or a multicelllar structure rule
             try {
                 // multicellular structure rules have a null SearchType
@@ -103,12 +106,18 @@ public class UrlParser {
                 if (sb.indexOf("-b") > -1) {
                     types.add("-b");
                 }
+                // manually specified list
+                if (sb.indexOf("MSL") > -1) {
+                    types.clear(); // remove any other types
+                    types.add("-MSL");
+                    isMLS = true;
+                }
 
                 // remove type arguments from url string
                 if (!types.isEmpty()) {
                     for (String arg : types) {
                         int i = sb.indexOf(arg);
-                        sb.replace(i, i + 2, "");
+                        sb.replace(i, i + arg.length(), "");
                     }
                 } else {
                     noTypeSpecified = true;
@@ -157,44 +166,55 @@ public class UrlParser {
                     sb.replace(i, i + 1, "");
                 }
 
-                // extract name from what's left of rule
+
+                // extract name(s) from what's left of rule
                 name = sb.substring(0, sb.indexOf("+"));
 
-                // add regular ColorRule
-                if (types.contains("-s")) {
-                    searchLayer.addColorRule(LINEAGE, name, web(colorHex, alpha), options);
-                }
-                if (types.contains("-n")) {
-                    searchLayer.addColorRule(FUNCTIONAL, name, web(colorHex, alpha), options);
-                }
-                if (types.contains("-d")) {
-                    searchLayer.addColorRule(DESCRIPTION, name, web(colorHex, alpha), options);
-                }
-                if (types.contains("-g")) {
-                    searchLayer.addGeneColorRuleFromUrl(name, web(colorHex, alpha), options);
-                }
-                if (types.contains("-m")) {
-                    searchLayer.addColorRule(
-                            MULTICELLULAR_STRUCTURE_CELLS,
-                            name,
-                            web(colorHex, alpha),
-                            options);
-                }
-                if (types.contains("-M")) {
-                    searchLayer.addStructureRuleBySceneName(
-                            name.replace("=", " "),
-                            web(colorHex, alpha));
-                }
-                if (types.contains("-H")) {
-                    searchLayer.addStructureRuleByHeading(
-                            name.replace("=", " "),
-                            web(colorHex, alpha));
-                }
-                if (types.contains("-c")) {
-                    searchLayer.addColorRule(CONNECTOME, name, web(colorHex, alpha), options);
-                }
-                if (types.contains("-b")) {
-                    searchLayer.addColorRule(NEIGHBOR, name, web(colorHex, alpha), options);
+                // if this is a manually specified list, extract each name and its options for
+                if (isMLS) {
+                    List<String> names = new ArrayList<>();
+                    StringTokenizer st = new StringTokenizer(name, ";");
+                    while (st.hasMoreTokens()) {
+                        names.add(st.nextToken());
+                    }
+                    searchLayer.addColorRule(names, web(colorHex, alpha), options);
+                } else {
+                    // add regular ColorRule
+                    if (types.contains("-s")) {
+                        searchLayer.addColorRule(LINEAGE, name, web(colorHex, alpha), options);
+                    }
+                    if (types.contains("-n")) {
+                        searchLayer.addColorRule(FUNCTIONAL, name, web(colorHex, alpha), options);
+                    }
+                    if (types.contains("-d")) {
+                        searchLayer.addColorRule(DESCRIPTION, name, web(colorHex, alpha), options);
+                    }
+                    if (types.contains("-g")) {
+                        searchLayer.addGeneColorRuleFromUrl(name, web(colorHex, alpha), options);
+                    }
+                    if (types.contains("-m")) {
+                        searchLayer.addColorRule(
+                                MULTICELLULAR_STRUCTURE_CELLS,
+                                name,
+                                web(colorHex, alpha),
+                                options);
+                    }
+                    if (types.contains("-M")) {
+                        searchLayer.addStructureRuleBySceneName(
+                                name.replace("=", " "),
+                                web(colorHex, alpha));
+                    }
+                    if (types.contains("-H")) {
+                        searchLayer.addStructureRuleByHeading(
+                                name.replace("=", " "),
+                                web(colorHex, alpha));
+                    }
+                    if (types.contains("-c")) {
+                        searchLayer.addColorRule(CONNECTOME, name, web(colorHex, alpha), options);
+                    }
+                    if (types.contains("-b")) {
+                        searchLayer.addColorRule(NEIGHBOR, name, web(colorHex, alpha), options);
+                    }
                 }
 
                 // if no type present, default is systematic or gene

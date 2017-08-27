@@ -20,7 +20,7 @@ import wormguides.resources.ProductionInfo;
 import static java.util.Collections.sort;
 
 /**
- * Document object model for the external info windows. Future DOM uses include connectome, parts list, and cell
+ * Document object model for the external info windows. Future DOM uses include parts list, and cell
  * shapes index.
  */
 public class InfoWindowDOM {
@@ -134,6 +134,16 @@ public class InfoWindowDOM {
         buildStyleNode();
     }
 
+    /**
+     * Class constructor to create a DOM for the Parts List window
+     *
+     * @param functionalNames
+     *         the functional names of cells
+     * @param lineageNames
+     *         the lineage names of cells
+     * @param descriptions
+     *         the descriptions of cells
+     */
     public InfoWindowDOM(
             List<String> functionalNames,
             List<String> lineageNames,
@@ -264,6 +274,12 @@ public class InfoWindowDOM {
         buildStyleNode();
     }
 
+    /**
+     * Class constructor to create a DOM for the Experimental Data window
+     *
+     * @param productionInfo
+     *      The experimental data information as defined in the ProductionInfo.csv file
+     */
     public InfoWindowDOM(ProductionInfo productionInfo) {
         this.html = new HTMLNode("html");
         this.name = productionInfoName;
