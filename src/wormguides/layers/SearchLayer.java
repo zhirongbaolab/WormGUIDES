@@ -29,6 +29,7 @@ import javafx.scene.paint.Color;
 
 import acetree.LineageData;
 import connectome.Connectome;
+import partslist.PartsList;
 import search.SearchType;
 import search.SearchUtil;
 import wormguides.models.anatomy.AnatomyTerm;
@@ -595,6 +596,50 @@ public class SearchLayer {
         return rule;
     }
 
+    /**
+     * Adds a color rule to the currently active rules list, specified only by URL.
+     * This is not a searchable rule. It is a Manually Specified List (MSL) that can
+     * only be defined in URL format. See documentation in code_README
+     *
+     * @param names
+     * @param color
+     * @param options
+     * @return
+     */
+    public Rule addColorRule(
+            final List<String> names,
+            final Color color,
+            final List<SearchOption> options) {
+
+        //
+        final Rule rule = new Rule(
+                rebuildSubsceneFlag,
+                createRuleLabel(names),
+                color,
+                SearchType.MSL,
+                options
+        );
+        rule.setCells(getCellsList(names));
+        rulesList.add(rule);
+        return rule;
+
+    }
+
+    private String createRuleLabel(List<String> names) {
+        StringBuilder labelBuilder = new StringBuilder();
+        labelBuilder.append("'");
+        for (String name : names) {
+            labelBuilder.append(name);
+            labelBuilder.append("; ");
+        }
+        // remove last two characters after last name
+        labelBuilder.deleteCharAt(labelBuilder.length()-1);
+        labelBuilder.deleteCharAt(labelBuilder.length()-1);
+
+        labelBuilder.append("' ").append(SearchType.MSL.toString());
+        return labelBuilder.toString();
+    }
+
     private String createRuleLabel(String searched, final SearchType searchType) {
         searched = searched.trim();
         StringBuilder labelBuilder = new StringBuilder();
@@ -618,6 +663,28 @@ public class SearchLayer {
             labelBuilder.append(searched);
         }
         return labelBuilder.toString();
+    }
+
+    private List<String> getCellsList(final List<String> names) {
+        List<String> lineageNames = new ArrayList<String>();
+
+        for (String name : names) {
+            if (SearchUtil.isLineageName(name)) { // lineage name already
+                lineageNames.add(name);
+            } else if (SearchUtil.isMulticellularStructureByName(name)) { // get all the cells associated with structure
+                List<String> cells = getCellsInMulticellularStructure(name);
+                for (String cell : cells) {
+                    lineageNames.add(cell);
+                }
+            } else { // functional name
+                List<String> cells = PartsList.getLineageNamesByFunctionalName(name);
+                for (String cell : cells) {
+                    lineageNames.add(cell);
+                }
+            }
+        }
+
+        return lineageNames;
     }
 
     private List<String> getCellsList(final SearchType type, final String searched) {

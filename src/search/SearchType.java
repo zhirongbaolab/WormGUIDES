@@ -38,7 +38,11 @@ public enum SearchType {
     STRUCTURES_BY_HEADING("Structures Heading"),
 
     /** Search for the neighboring cells of the cell with a specified lineage name */
-    NEIGHBOR("Neighbor");
+    NEIGHBOR("Neighbor"),
+
+    /** Manually Specified List. Non-searchable. The search type denoted in a {@link wormguides.models.colorrule.Rule}
+     * that is created from a URL and is not searchable */
+    MSL("Manually Specified List");
 
     private final String description;
 
