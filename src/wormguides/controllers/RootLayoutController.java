@@ -1225,7 +1225,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         initLineageTree(lineageData.getAllCellNames());
 
         // takes ~170ms
-        sceneElementsList = new SceneElementsList(lineageData);
+        sceneElementsList = new SceneElementsList(lineageData, this.defaultEmbryoFlag);
 
         // takes ~20ms
         connectome = new Connectome();
