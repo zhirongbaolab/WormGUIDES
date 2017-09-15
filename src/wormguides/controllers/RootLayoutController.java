@@ -373,7 +373,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
     @FXML
     public void viewTreeAction() {
-        if (sulstonTreeStage == null) {
+        if (sulstonTreeStage == null && defaultEmbryoFlag) {
             sulstonTreeStage = new Stage();
             final SulstonTreePane treePane = new SulstonTreePane(
                     sulstonTreeStage,
@@ -395,7 +395,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
             sulstonTreeStage.show();
             treePane.addDrawing();
             mainStage.show();
-        } else {
+        } else if (defaultEmbryoFlag){
             sulstonTreeStage.show();
             runLater(() -> ((Stage) sulstonTreeStage.getScene().getWindow()).toFront());
         }
@@ -1016,7 +1016,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 geneResultsUpdatedFlag,
                 rebuildSubsceneFlag);
         searchResultsListView.setItems(searchResultsList);
-        searchLayer.addDefaultInternalColorRules();
+        if (defaultEmbryoFlag) {
+            searchLayer.addDefaultInternalColorRules();
+        }
         searchResultsUpdateService = searchLayer.getResultsUpdateService();
     }
 
@@ -1172,6 +1174,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
         if (bundle != null) {
             lineageData = (LineageData) bundle.getObject("lineageData");
+            System.out.println("loading internal model");
             defaultEmbryoFlag = false;
             setOriginToZero(lineageData, defaultEmbryoFlag);
         } else {
@@ -1189,7 +1192,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
             startTime = productionInfo.getDefaultStartTime();
             movieTimeOffset = productionInfo.getMovieTimeOffset();
         } else {
-            startTime = 0;
+            startTime = 1;
             movieTimeOffset = 0;
         }
 
@@ -1253,7 +1256,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
         sizeInfoPane();
 
         // takes ~700ms
-        viewTreeAction();
+        if (defaultEmbryoFlag)
+            viewTreeAction();
 
         // takes ~50ms
         initWindow3DController();
