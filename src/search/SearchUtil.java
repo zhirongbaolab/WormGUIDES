@@ -493,12 +493,17 @@ public class SearchUtil {
         // special cases for 'ab' and 'p0' because the input list of cells would be empty
         final String searched = searchedText.trim().toLowerCase();
 
-        cells.add("P0"); // P0 is always an ancestor
+        // if P0, return
+        if (searched.equals("p0")) {
+            return new ArrayList<>();
+        } else { // otherwise, the cell will have at least P0, the common ancestor, so add and proceed
+            cells.add("P0"); // P0 is always an ancestor
+        }
 
         // check which side of the tree we are on
-        if (searched.startsWith("a")) {
+        if (searched.startsWith("a")) { // all cells on the left side of the tree start with A
             cells.add("AB");
-        } else {
+        } else { // since we've ruled out that the searched cell is "P0" by reaching this point, automatically add "P1"
             cells.add("P1");
         }
 
