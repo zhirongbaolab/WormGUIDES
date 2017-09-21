@@ -281,7 +281,7 @@ public class Window3DController {
     /* Map of all callout Texts to their Lines */
     private final Map<Text, Line> calloutLineMap;
     // orientation indicator
-    private final Cylinder orientationIndicator;
+    private Cylinder orientationIndicator;
     private final ProductionInfo productionInfo;
     private final Connectome connectome;
     private final BooleanProperty bringUpInfoFlag;
@@ -654,11 +654,14 @@ public class Window3DController {
         double height = 15.0;
         final PhongMaterial material = new PhongMaterial();
         material.setDiffuseColor(RED);
-        orientationIndicator = new Cylinder(radius, height);
-        orientationIndicator.getTransforms().addAll(rotateX, rotateY, rotateZ);
-        orientationIndicator.setMaterial(material);
+        if (defaultEmbryoFlag) {
+            orientationIndicator = new Cylinder(radius, height);
+            orientationIndicator.getTransforms().addAll(rotateX, rotateY, rotateZ);
+            orientationIndicator.setMaterial(material);
 
-        xform.getChildren().add(createOrientationIndicator());
+            xform.getChildren().add(createOrientationIndicator());
+        }
+
 
         this.bringUpInfoFlag = requireNonNull(bringUpInfoFlag);
 
@@ -1819,9 +1822,11 @@ public class Window3DController {
             }
         }
 
-        double newrotate = computeInterpolatedValue(timeProperty.get(), keyFramesRotate, keyValuesRotate);
-        indicatorRotation.setAngle(-newrotate);
-        indicatorRotation.setAxis(new Point3D(1, 0, 0));
+        if (defaultEmbryoFlag) {
+            double newrotate = computeInterpolatedValue(timeProperty.get(), keyFramesRotate, keyValuesRotate);
+            indicatorRotation.setAngle(-newrotate);
+            indicatorRotation.setAxis(new Point3D(1, 0, 0));
+        }
     }
 
     private void addEntitiesAndNotes() {
