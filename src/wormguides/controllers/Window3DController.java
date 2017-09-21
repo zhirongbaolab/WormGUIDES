@@ -716,7 +716,17 @@ public class Window3DController {
                 opacitySlider.setValue(newVal * 100);
             }
         });
-        this.othersOpacityProperty.setValue(getDefaultOthersOpacity());
+        if (defaultEmbryoFlag) {
+            this.othersOpacityProperty.setValue(getDefaultOthersOpacity());
+        } else {
+            /*
+             * if a non-default model has been loaded, set the opacity cutoff at the level where labels will
+             * appear by default
+             */
+            this.othersOpacityProperty.set(0.26);
+
+        }
+
 
         uniformSizeCheckBox.setSelected(true);
         uniformSize = true;

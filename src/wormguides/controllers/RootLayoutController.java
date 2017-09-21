@@ -395,7 +395,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
             sulstonTreeStage.show();
             treePane.addDrawing();
             mainStage.show();
-        } else {
+        } else if (defaultEmbryoFlag){
             sulstonTreeStage.show();
             runLater(() -> ((Stage) sulstonTreeStage.getScene().getWindow()).toFront());
         }
@@ -1016,7 +1016,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 geneResultsUpdatedFlag,
                 rebuildSubsceneFlag);
         searchResultsListView.setItems(searchResultsList);
-        searchLayer.addDefaultInternalColorRules();
+        if (defaultEmbryoFlag) {
+            searchLayer.addDefaultInternalColorRules();
+        }
         searchResultsUpdateService = searchLayer.getResultsUpdateService();
     }
 
@@ -1035,8 +1037,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
                     allCellNames.remove(i--);
                 }
             }
-            //sort the lineage names that remain
-            sort(allCellNames);
         }
         final LineageTree lineageTree = new LineageTree(
                 allCellNames.toArray(new String[allCellNames.size()]),
@@ -1171,8 +1171,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
         casesLists = new CasesLists();
 
         if (bundle != null) {
-            lineageData = (LineageData) bundle.getObject("lineageData");
             defaultEmbryoFlag = false;
+            lineageData = (LineageData) bundle.getObject("lineageData");
+            System.out.println("loading external model");
             setOriginToZero(lineageData, defaultEmbryoFlag);
         } else {
             // takes about 2800ms (dictates noticeable part of startup time)
@@ -1189,7 +1190,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
             startTime = productionInfo.getDefaultStartTime();
             movieTimeOffset = productionInfo.getMovieTimeOffset();
         } else {
-            startTime = 0;
+            startTime = 1;
             movieTimeOffset = 0;
         }
 
@@ -1225,7 +1226,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         initLineageTree(lineageData.getAllCellNames());
 
         // takes ~170ms
-        sceneElementsList = new SceneElementsList(lineageData);
+        sceneElementsList = new SceneElementsList(lineageData, this.defaultEmbryoFlag);
 
         // takes ~20ms
         connectome = new Connectome();
@@ -1253,6 +1254,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         sizeInfoPane();
 
         // takes ~700ms
+        //if (defaultEmbryoFlag)
         viewTreeAction();
 
         // takes ~50ms

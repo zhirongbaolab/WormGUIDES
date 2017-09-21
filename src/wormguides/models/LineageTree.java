@@ -193,29 +193,57 @@ public class LineageTree {
             if (descendant.equalsIgnoreCase(p0)) {
                 return false;
             }
+            // if the descendant is "AB", check if the ancestor is "P0"
             if (descendant.equals("ab")) {
                 return ancestor.equals(p0);
             }
+
+            // if the descendant starts with "Z", see if the ancestor is any "PX" cell
             if (descendant.startsWith("z")) {
                 return ancestor.startsWith(p);
             }
+
+            // if the descendant is "D", see if the ancestor is any "PX" cell excluding P4 (D's sibling)
             if (descendant.equals("d")) {
                 return ancestor.startsWith(p) && parseInt(ancestor.substring(1, 2)) <= 3;
             }
+
+            // if the descendant is "C", see if the ancestor is "P2", "P1" or "P0"
             if (descendant.equals("c")) {
                 return ancestor.startsWith(p) && parseInt(ancestor.substring(1, 2)) <= 2;
             }
+
+            // if the descendant is "EMS", see if the ancestor is "P1" or "P0"
             if (descendant.equals("ems")) {
                 return ancestor.startsWith(p) && parseInt(ancestor.substring(1, 2)) <= 1;
             }
+
+            // if the descendant is "MS", see if the ancestor is "EMS", "P1" or "P0"
             if (descendant.equals("ms") || descendant.equals("e")) {
                 return ancestor.equals("ems")
                         || (ancestor.startsWith(p) && parseInt(ancestor.substring(1, 2)) <= 1);
             }
+
             // for the p cells, test number after the 'p'
             if (descendant.startsWith(p) && ancestor.startsWith(p)) {
                 return descendant.compareTo(ancestor) > 0;
             }
+
+            // if the descendant starts with "E" or "M", see if the ancestor is "EMS", but continue if not
+            if (descendant.startsWith("e") || descendant.startsWith("ms")) {
+                if (ancestor.equals("ems") || ancestor.equals("p1")) return true;
+            }
+
+            // if the descendant starts with "C", see if the ancestor is "P2", "P1" or "P0", but continue if not
+            if (descendant.startsWith("c")) {
+                if (ancestor.startsWith(p) && parseInt(ancestor.substring(1, 2)) <= 2) return true;
+            }
+
+            // if the descendant starts with "D", see if the ancestor is "P3", "P2", "P1" or "P0", but continue if not
+            if (descendant.startsWith("d")) {
+                if (ancestor.startsWith(p) && parseInt(ancestor.substring(1, 2)) <= 3) return true;
+            }
+
             // try to decipher lineage from names
             if (descendant.startsWith(ancestor)
                     && descendant.length() > ancestor.length()) {
@@ -230,7 +258,7 @@ public class LineageTree {
     }
 
     /**
-     * Adds a node to the tree speficied by a cell name
+     * Adds a node to the tree specified by a cell name
      *
      * @param cellName
      *         the cell name
