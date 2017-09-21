@@ -688,7 +688,7 @@ public class SearchLayer {
     }
 
     private List<String> getCellsList(final SearchType type, final String searched) {
-        List<String> cells = null;
+        List<String> cells = new ArrayList<>();
         if (type != null) {
             switch (type) {
                 case LINEAGE:
@@ -741,6 +741,7 @@ public class SearchLayer {
                     cells = getNeighboringCells(searched);
             }
         }
+
         return cells;
     }
 
@@ -834,6 +835,8 @@ public class SearchLayer {
             }
         };
     }
+
+
 
     private void refreshSearchResultsList(
             final SearchType searchType,

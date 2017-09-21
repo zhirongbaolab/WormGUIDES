@@ -9,6 +9,7 @@ import java.util.*;
 import acetree.LineageData;
 import connectome.Connectome;
 import partslist.PartsList;
+import wormguides.models.LineageTree;
 import wormguides.models.cellcase.CasesLists;
 import wormguides.models.cellcase.NonTerminalCellCase;
 import wormguides.models.subscenegeometry.SceneElement;
@@ -99,6 +100,11 @@ public class SearchUtil {
                 cells.add(name);
             }
         });
+
+        if (cells.isEmpty() && LineageTree.isLineageNameInTree(searched)) {
+            cells.add(searched.toUpperCase());
+        }
+
         return cells;
     }
 

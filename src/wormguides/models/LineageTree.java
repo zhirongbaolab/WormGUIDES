@@ -324,4 +324,8 @@ public class LineageTree {
         nameNodeHash.put(name.toLowerCase(), node);
         return node;
     }
+
+    public static boolean isLineageNameInTree(String name) {
+        return nameNodeHash.containsKey(name.toLowerCase());
+    }
 }
