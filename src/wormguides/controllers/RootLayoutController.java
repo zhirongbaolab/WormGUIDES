@@ -373,7 +373,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
     @FXML
     public void viewTreeAction() {
-        if (sulstonTreeStage == null && defaultEmbryoFlag) {
+        if (sulstonTreeStage == null) {
             sulstonTreeStage = new Stage();
             final SulstonTreePane treePane = new SulstonTreePane(
                     sulstonTreeStage,
@@ -1037,8 +1037,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
                     allCellNames.remove(i--);
                 }
             }
-            //sort the lineage names that remain
-            sort(allCellNames);
         }
         final LineageTree lineageTree = new LineageTree(
                 allCellNames.toArray(new String[allCellNames.size()]),
@@ -1173,9 +1171,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
         casesLists = new CasesLists();
 
         if (bundle != null) {
-            lineageData = (LineageData) bundle.getObject("lineageData");
-            System.out.println("loading internal model");
             defaultEmbryoFlag = false;
+            lineageData = (LineageData) bundle.getObject("lineageData");
+            System.out.println("loading external model");
             setOriginToZero(lineageData, defaultEmbryoFlag);
         } else {
             // takes about 2800ms (dictates noticeable part of startup time)
@@ -1256,8 +1254,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
         sizeInfoPane();
 
         // takes ~700ms
-        if (defaultEmbryoFlag)
-            viewTreeAction();
+        //if (defaultEmbryoFlag)
+        viewTreeAction();
 
         // takes ~50ms
         initWindow3DController();

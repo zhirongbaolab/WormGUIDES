@@ -59,6 +59,7 @@ public class TableLineageData implements LineageData {
     }
 
     /** {@inheritDoc} */
+    /** {@inheritDoc} */
     @Override
     public void shiftAllPositions(final double x, final double y, final double z) {
         for (Frame timeFrame : timeFrames) {

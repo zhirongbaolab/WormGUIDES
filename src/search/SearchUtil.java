@@ -4,11 +4,7 @@
 
 package search;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import acetree.LineageData;
 import connectome.Connectome;
@@ -88,6 +84,7 @@ public class SearchUtil {
 
     /**
      * Returns the list of cells with a searched lineage name
+     * TODO --> this should probably come from LineageTree
      *
      * @param searched
      *         searched term, the lineage name
@@ -106,6 +103,8 @@ public class SearchUtil {
     }
 
     /**
+     * TODO --> this should also come from the lineage tree
+     *
      * @param searched
      *         searched term, the prefix functional names
      *         <p>
@@ -457,9 +456,13 @@ public class SearchUtil {
             final String searched = searchedText.trim().toLowerCase();
             if (cells.isEmpty()) {
                 if (searched.equals("ab")) {
-                    cells.add("ab");
+                    cells.add(0, "AB");
                 } else if (searched.equals("p0")) {
-                    cells.add("p0");
+                    cells.add(0, "AB");
+                    cells.add(0, "P1");
+                    cells.add(0, "P0");
+                } else if (searched.equals("p1")) {
+                    cells.add(0, "P1");
                 }
             }
 
@@ -491,9 +494,11 @@ public class SearchUtil {
         final String searched = searchedText.trim().toLowerCase();
         if (cells.isEmpty()) {
             if (searched.equals("ab")) {
-                cells.add("ab");
-            } else if (searched.equals("p0")) {
-                cells.add("p0");
+                cells.add("AB");
+                cells.add("P0");
+            } else if (searched.equals("p1")) {
+                cells.add("P1");
+                cells.add("P0");
             }
         }
         for (String cell : cells) {
