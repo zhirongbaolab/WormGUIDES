@@ -492,15 +492,17 @@ public class SearchUtil {
         }
         // special cases for 'ab' and 'p0' because the input list of cells would be empty
         final String searched = searchedText.trim().toLowerCase();
-        if (cells.isEmpty()) {
-            if (searched.equals("ab")) {
-                cells.add("AB");
-                cells.add("P0");
-            } else if (searched.equals("p1")) {
-                cells.add("P1");
-                cells.add("P0");
-            }
+
+        cells.add("P0"); // P0 is always an ancestor
+
+        // check which side of the tree we are on
+        if (searched.startsWith("a")) {
+            cells.add("AB");
+        } else {
+            cells.add("P1");
         }
+
+
         for (String cell : cells) {
             activeLineageNames.stream()
                     .filter(name -> isAncestor(name, cell))
