@@ -58,7 +58,7 @@ public class UrlParser {
         final List<SearchOption> options = new ArrayList<>();
         StringBuilder sb;
         boolean noTypeSpecified;
-        boolean isMLS; // flag denoting whether this is a Manually Specified List
+        boolean isMLS; // flag denoting whether this is \a Manually Specified List
         String wholeColorString;
         String name;
         for (String ruleString : ruleStrings) {
