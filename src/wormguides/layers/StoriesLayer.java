@@ -105,6 +105,8 @@ public class StoriesLayer {
     private Comparator<Note> noteComparator;
     private double width;
 
+    private boolean defaultEmbryoFlag;
+
     public StoriesLayer(
             final Stage parentStage,
             final SearchLayer searchLayer,
@@ -161,6 +163,8 @@ public class StoriesLayer {
         this.startTime = startTime;
         this.endTime = endTime;
         this.movieTimeOffset = movieTimeOffset;
+
+        this.defaultEmbryoFlag = requireNonNull(defaultEmbryoFlag);
 
         stories = observableArrayList(story -> new Observable[]{
                 story.getChangedProperty(),
@@ -305,14 +309,21 @@ public class StoriesLayer {
      * Adds a blank story
      */
     private void addBlankStory() {
-        stories.add(new Story(
-                TEMPLATE_STORY_NAME,
-                TEMPLATE_STORY_DESCRIPTION,
-                "http://scene.wormguides.org/wormguides/testurlscript?/set/ash-n$@+#ff8"
-                        + "fbc8f/rib-n$@+#ff663366/avg-n$@+#ffb41919/dd-n@+#ff4a24c1/da-"
-                        + "n@+#ffc56002/dd-n$+#ffb30a95/da-n$+#ffe6b34d/rivl-n@+#ffffb366/"
-                        + "rivr-n@+#ffffe6b3/sibd-n@+#ffe6ccff/siav-n@+#ff8099ff/view/"
-                        + "time=393/rX=51.625/rY=-2.125/rZ=0.0/tX=0.0/tY=0.0/scale=2.25/dim=0.25/browser/"));
+        if (defaultEmbryoFlag) {
+            stories.add(new Story(
+                    TEMPLATE_STORY_NAME,
+                    TEMPLATE_STORY_DESCRIPTION,
+                    "http://scene.wormguides.org/wormguides/testurlscript?/set/ash-n$@+#ff8"
+                            + "fbc8f/rib-n$@+#ff663366/avg-n$@+#ffb41919/dd-n@+#ff4a24c1/da-"
+                            + "n@+#ffc56002/dd-n$+#ffb30a95/da-n$+#ffe6b34d/rivl-n@+#ffffb366/"
+                            + "rivr-n@+#ffffe6b3/sibd-n@+#ffe6ccff/siav-n@+#ff8099ff/view/"
+                            + "time=393/rX=51.625/rY=-2.125/rZ=0.0/tX=0.0/tY=0.0/scale=2.25/dim=0.25/browser/"));
+        } else {
+            stories.add(new Story(
+                    TEMPLATE_STORY_NAME,
+                    TEMPLATE_STORY_DESCRIPTION,
+                    ""));
+        }
     }
 
     /**

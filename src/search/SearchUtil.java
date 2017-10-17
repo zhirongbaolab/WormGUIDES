@@ -4,15 +4,12 @@
 
 package search;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import acetree.LineageData;
 import connectome.Connectome;
 import partslist.PartsList;
+import wormguides.models.LineageTree;
 import wormguides.models.cellcase.CasesLists;
 import wormguides.models.cellcase.NonTerminalCellCase;
 import wormguides.models.subscenegeometry.SceneElement;
@@ -88,6 +85,7 @@ public class SearchUtil {
 
     /**
      * Returns the list of cells with a searched lineage name
+     * TODO --> this should probably come from LineageTree
      *
      * @param searched
      *         searched term, the lineage name
@@ -102,10 +100,17 @@ public class SearchUtil {
                 cells.add(name);
             }
         });
+
+        if (cells.isEmpty() && LineageTree.isLineageNameInTree(searched)) {
+            cells.add(searched.toUpperCase());
+        }
+
         return cells;
     }
 
     /**
+     * TODO --> this should also come from the lineage tree
+     *
      * @param searched
      *         searched term, the prefix functional names
      *         <p>
@@ -457,9 +462,13 @@ public class SearchUtil {
             final String searched = searchedText.trim().toLowerCase();
             if (cells.isEmpty()) {
                 if (searched.equals("ab")) {
-                    cells.add("ab");
+                    cells.add(0, "AB");
                 } else if (searched.equals("p0")) {
-                    cells.add("p0");
+                    cells.add(0, "AB");
+                    cells.add(0, "P1");
+                    cells.add(0, "P0");
+                } else if (searched.equals("p1")) {
+                    cells.add(0, "P1");
                 }
             }
 
@@ -489,13 +498,22 @@ public class SearchUtil {
         }
         // special cases for 'ab' and 'p0' because the input list of cells would be empty
         final String searched = searchedText.trim().toLowerCase();
-        if (cells.isEmpty()) {
-            if (searched.equals("ab")) {
-                cells.add("ab");
-            } else if (searched.equals("p0")) {
-                cells.add("p0");
-            }
+
+        // if P0, return
+        if (searched.equals("p0")) {
+            return new ArrayList<>();
+        } else { // otherwise, the cell will have at least P0, the common ancestor, so add and proceed
+            cells.add("P0"); // P0 is always an ancestor
         }
+
+        // check which side of the tree we are on
+        if (searched.startsWith("a")) { // all cells on the left side of the tree start with A
+            cells.add("AB");
+        } else { // since we've ruled out that the searched cell is "P0" by reaching this point, automatically add "P1"
+            cells.add("P1");
+        }
+
+
         for (String cell : cells) {
             activeLineageNames.stream()
                     .filter(name -> isAncestor(name, cell))

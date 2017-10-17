@@ -66,13 +66,15 @@ public class SceneElementsList {
     private final Map<String, String> nameCommentsMap;
     private final Map<String, String> nameToMarkerMap;
 
-    public SceneElementsList(final LineageData lineageData) {
+    public SceneElementsList(final LineageData lineageData, boolean defaultEmbryoFlag) {
         elementsList = new ArrayList<>();
         root = new TreeItem<>(new StructureTreeNode(true, "root", "root"));
         nameCellsMap = new HashMap<>();
         nameCommentsMap = new HashMap<>();
         nameToMarkerMap = new HashMap<>();
-        buildListFromConfig(lineageData);
+
+        if (defaultEmbryoFlag) // only build if we're working with the default model
+            buildListFromConfig(lineageData);
     }
 
     private void buildListFromConfig(final LineageData lineageData) {

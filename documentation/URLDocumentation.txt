@@ -12,6 +12,7 @@ Gene		->	"-g"
 Multicellular Structure Cells	->	"-m"	* added later
 Structure by Scene Name	        ->	"-M"	* added later
 Structures by Heading           ->  "-H"    * added later
+Manually Specified List			->  "-MSL"	* added later
 Connectome	->	"-c"	* added later
 Neighbor	->	"-b"	* added later
 
@@ -24,7 +25,12 @@ Note:	The documentation says that "-g" corresponds to gene search, but iOS only 
 		a gene search if there are no modifiers.
 Note:	Currently on the desktop version, we toggle each search type by itself. Multiple search types
 		can be toggled on the iOS version.
-
+Note:	Manually Specified Lists follow a different syntax for specifying multiple entities for which the
+		rule will apply. First, list the entities for the rule, separated by semi-colons (including one 
+		following the final entity in the list). Next, add "_MSL". Then, add the modifiers before placing
+		the hex-code prepended by "+#". Note, the names of the entities do not all need to be of the same
+		type e.g. lineage, functional. These types can be combined in a single list of entities
+		 Example: saavl;avg;sibd;rip;riv;siad-MSL$@<>+#ffffffff
 
 Modifier:
 Cell Nucleus			->	"$"
