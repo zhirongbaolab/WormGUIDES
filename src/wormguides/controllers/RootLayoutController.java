@@ -373,31 +373,33 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
     @FXML
     public void viewTreeAction() {
-        if (sulstonTreeStage == null) {
-            sulstonTreeStage = new Stage();
-            final SulstonTreePane treePane = new SulstonTreePane(
-                    sulstonTreeStage,
-                    searchLayer,
-                    lineageData,
-                    movieTimeOffset,
-                    lineageTreeRoot,
-                    rulesList,
-                    colorHash,
-                    timeProperty,
-                    contextMenuStage,
-                    contextMenuController,
-                    selectedNameLabeledProperty,
-                    rebuildSubsceneFlag,
-                    defaultEmbryoFlag);
-            sulstonTreeStage.setScene(new Scene(treePane));
-            sulstonTreeStage.setTitle("LineageTree");
-            sulstonTreeStage.initModality(NONE);
-            sulstonTreeStage.show();
-            treePane.addDrawing();
-            mainStage.show();
-        } else if (defaultEmbryoFlag){
-            sulstonTreeStage.show();
-            runLater(() -> ((Stage) sulstonTreeStage.getScene().getWindow()).toFront());
+        if (lineageData.isSulstonMode()) {
+            if (sulstonTreeStage == null) {
+                sulstonTreeStage = new Stage();
+                final SulstonTreePane treePane = new SulstonTreePane(
+                        sulstonTreeStage,
+                        searchLayer,
+                        lineageData,
+                        movieTimeOffset,
+                        lineageTreeRoot,
+                        rulesList,
+                        colorHash,
+                        timeProperty,
+                        contextMenuStage,
+                        contextMenuController,
+                        selectedNameLabeledProperty,
+                        rebuildSubsceneFlag,
+                        defaultEmbryoFlag);
+                sulstonTreeStage.setScene(new Scene(treePane));
+                sulstonTreeStage.setTitle("LineageTree");
+                sulstonTreeStage.initModality(NONE);
+                sulstonTreeStage.show();
+                treePane.addDrawing();
+                mainStage.show();
+            } else {
+                sulstonTreeStage.show();
+                runLater(() -> ((Stage) sulstonTreeStage.getScene().getWindow()).toFront());
+            }
         }
     }
 
@@ -1254,7 +1256,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
         sizeInfoPane();
 
         // takes ~700ms
-        //if (defaultEmbryoFlag)
         viewTreeAction();
 
         // takes ~50ms
