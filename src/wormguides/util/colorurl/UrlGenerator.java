@@ -135,11 +135,18 @@ public class UrlGenerator {
 
         for (Rule rule : rules) {
             String ruleName = rule.getSearchedText();
-            if (ruleName.contains("'")) {
+            System.out.println(ruleName);
+
+            // this is the delimiter for entities in the Manually Specified List
+            if (ruleName.contains(";")) {
+                ruleName = ruleName.substring(1, ruleName.lastIndexOf("'")); // remove the single quotes
+                ruleName = ruleName.replaceAll("\\s", ""); //remove all white space
+            } else if (ruleName.contains("'")) {
                 ruleName = ruleName.substring(0, ruleName.lastIndexOf("'"));
                 ruleName = ruleName.substring(ruleName.indexOf("'") + 1, ruleName.length());
                 ruleName = ruleName.replace(" ", "=");
             }
+            System.out.println(ruleName);
             builder.append("/").append(ruleName);
 
             // rule from cell search
@@ -173,6 +180,8 @@ public class UrlGenerator {
                     case CONNECTOME:
                         builder.append("-c");
                         break;
+                    case MSL:
+                        builder.append("-MSL");
                     default:
                         break;
                 }
@@ -229,5 +238,4 @@ public class UrlGenerator {
                 "/scale=" + scale
                 + "/dim=" + dim;
     }
-
 }

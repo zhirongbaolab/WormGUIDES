@@ -21,11 +21,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<fx:root prefHeight="890.0" prefWidth="400.0" type="AnchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root prefHeight="920.0" prefWidth="400.0" type="AnchorPane" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" layoutX="100.0" layoutY="121.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <content>
-                <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="930.0" spacing="3.0">
+                <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="887.0" prefWidth="398.0" spacing="3.0">
                     <children>
                         <HBox maxWidth="1.7976931348623157E308">
                             <children>
@@ -203,60 +203,6 @@
                                     </children>
                                     <padding>
                                         <Insets left="20.0" />
-                                    </padding>
-                                </HBox>
-                                <HBox maxWidth="-Infinity" minWidth="-Infinity" prefWidth="260.0">
-                                    <children>
-                                        <Label fx:id="substructureLabel" disable="true" text="Sub-Structure Location:">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Label>
-                                    </children>
-                                    <padding>
-                                        <Insets left="40.0" />
-                                    </padding>
-                                </HBox>
-                                <HBox maxWidth="1.7976931348623157E308">
-                                    <children>
-                                        <Label disable="true" text="Axon ">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Label>
-                                        <RadioButton fx:id="axonRadioBtn" contentDisplay="TEXT_ONLY" disable="true" graphicTextGap="0.0" mnemonicParsing="false">
-                                            <toggleGroup>
-                                                <ToggleGroup fx:id="subStructureToggle" />
-                                            </toggleGroup>
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </RadioButton>
-                                        <Region maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
-                                        <Label disable="true" text="Dendrite ">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Label>
-                                        <RadioButton fx:id="dendriteRadioBtn" contentDisplay="TEXT_ONLY" disable="true" graphicTextGap="0.0" mnemonicParsing="false" toggleGroup="$subStructureToggle">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </RadioButton>
-                                        <Region maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
-                                        <Label disable="true" text="Cell Body ">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </Label>
-                                        <RadioButton fx:id="cellBodyRadioBtn" contentDisplay="TEXT_ONLY" disable="true" graphicTextGap="0.0" mnemonicParsing="false" toggleGroup="$subStructureToggle">
-                                            <font>
-                                                <Font size="14.0" />
-                                            </font>
-                                        </RadioButton>
-                                    </children>
-                                    <padding>
-                                        <Insets left="40.0" />
                                     </padding>
                                 </HBox>
                                 <Label text="Note is visible at time:">
