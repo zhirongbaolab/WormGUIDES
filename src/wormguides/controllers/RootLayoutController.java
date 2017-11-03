@@ -1150,6 +1150,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         displayTab = displayDragTab;
 
         colorAndDisplayTabPane.getTabs().addAll(cellsTab, structuresTab, displayTab);
+        colorAndDisplayTabPane.getSelectionModel().select(displayTab);
 
         final DraggableTab storiesDragTab = new DraggableTab(storiesTab.getText());
         storiesDragTab.setCloseable(false);
@@ -1163,7 +1164,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
         storiesTab = storiesDragTab;
         colorAndDisplayTab = colorAndDisplayDragTab;
 
-        mainTabPane.getTabs().addAll(storiesTab, colorAndDisplayTab);
+        mainTabPane.getTabs().add(storiesTab);
+        mainTabPane.getTabs().add(colorAndDisplayTab);
         mainTabPane.toFront();
     }
 
@@ -1218,7 +1220,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
         setSlidersProperties();
 
-        mainTabPane.getSelectionModel().select(storiesTab);
+        mainTabPane.getSelectionModel().select(colorAndDisplayTab);
 
         // takes about 1050ms
         initializeWithLineageData();

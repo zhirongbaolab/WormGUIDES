@@ -135,7 +135,6 @@ public class UrlGenerator {
 
         for (Rule rule : rules) {
             String ruleName = rule.getSearchedText();
-            System.out.println(ruleName);
 
             // this is the delimiter for entities in the Manually Specified List
             if (ruleName.contains(";")) {
@@ -146,7 +145,6 @@ public class UrlGenerator {
                 ruleName = ruleName.substring(ruleName.indexOf("'") + 1, ruleName.length());
                 ruleName = ruleName.replace(" ", "=");
             }
-            System.out.println(ruleName);
             builder.append("/").append(ruleName);
 
             // rule from cell search

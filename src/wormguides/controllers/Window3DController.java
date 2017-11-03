@@ -2553,9 +2553,9 @@ public class Window3DController {
      */
     private Node makeNoteGraphic(final Note note) {
         String title = note.getTagName();
-        if (note.isExpandedInScene()) {
+        if (note.isExpandedInScene() && note.getTagContents().length() > 0) {
             title += ": " + note.getTagContents();
-        } else {
+        } else if (note.getTagContents().length() > 0) {
             title += " [more...]";
         }
 
