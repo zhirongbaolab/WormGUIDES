@@ -52,8 +52,8 @@ public class StoriesLoader {
 
     public static final int COLOR_URL_INDEX = 16;
 
-    // TODO
-    private static final String STORY_LIST_CONFIG = "/atlas_model/configurations/stories/StoryListConfig.csv";
+    private static final String STORY_LIST_CONFIG_PATH = "/atlas_model/configurations/stories_config/";
+    private static final String STORY_LIST_CONFIG_FILE_NAME = "StoryListConfig.csv";
 
     public static void loadFromFile(final ObservableList<Story> stories, final File file, final int offset) {
         if (file != null) {
@@ -66,12 +66,12 @@ public class StoriesLoader {
     }
 
     public static void loadConfigFile(final ObservableList<Story> stories, final int offset) {
-        final URL url = StoriesLoader.class.getResource(STORY_LIST_CONFIG);
+        final URL url = StoriesLoader.class.getResource(STORY_LIST_CONFIG_PATH + STORY_LIST_CONFIG_FILE_NAME);
         if (url != null) {
             try (final InputStream stream = url.openStream()) {
                 processStream(stream, stories, offset);
             } catch (IOException e) {
-                System.out.println("Could not read file '" + STORY_LIST_CONFIG + "' in the system.");
+                System.out.println("Could not read file '" + STORY_LIST_CONFIG_PATH + STORY_LIST_CONFIG_FILE_NAME + "' in the system.");
             }
         }
     }

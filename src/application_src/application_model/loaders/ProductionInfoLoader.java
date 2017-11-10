@@ -24,8 +24,8 @@ public class ProductionInfoLoader {
     private static final int NUMBER_OF_FIELDS = 17;
 
     // TODO
-    private static final String PRODUCTION_INFO_FILE_PATH = "/atlas_model/parameters/production_info/"
-            + "Production_Info.csv";
+    private static final String PRODUCTION_INFO_FILE_PATH = "/atlas_model/parameters/production_info/";
+    private static final String PRODUCTION_INFO_FILE_NAME = "ProductionInfo.csv";
 
     private static final String PRODUCT_INFO_LINE = "Production Information,,,,,,,,,,,,,,,,";
 
@@ -39,7 +39,7 @@ public class ProductionInfoLoader {
      * @return the 2D array
      */
     public static List<List<String>> buildProductionInfo() {
-        final URL url = MainApp.class.getResource(PRODUCTION_INFO_FILE_PATH);
+        final URL url = MainApp.class.getResource(PRODUCTION_INFO_FILE_PATH + PRODUCTION_INFO_FILE_NAME);
 
         final List<List<String>> productionInfo = new ArrayList<>();
         final List<String> cells = new ArrayList<>();

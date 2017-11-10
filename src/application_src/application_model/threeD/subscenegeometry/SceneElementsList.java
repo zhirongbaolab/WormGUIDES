@@ -40,6 +40,7 @@ import static application_src.application_model.threeD.subscenegeometry.SceneEle
  */
 public class SceneElementsList {
 
+    private static final String CELL_CONFIG_FILE_PATH = "/atlas_model/configurations/shapes_config/";
     private static final String CELL_CONFIG_FILE_NAME = "CellShapesConfig.csv";
     private static final String ASTERISK = "*";
     private static final String SINGLE_CELL_STR = "SINGLE CELL";
@@ -78,7 +79,7 @@ public class SceneElementsList {
     }
 
     private void buildListFromConfig(final LineageData lineageData) {
-        final URL url = MainApp.class.getResource("/atlas_model/configurations/shapes/" + CELL_CONFIG_FILE_NAME);
+        final URL url = MainApp.class.getResource(CELL_CONFIG_FILE_PATH + CELL_CONFIG_FILE_NAME);
         if (url != null) {
             try {
                 final InputStream stream = url.openStream();

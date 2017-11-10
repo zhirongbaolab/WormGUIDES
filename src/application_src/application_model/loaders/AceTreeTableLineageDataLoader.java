@@ -28,8 +28,11 @@ import static java.lang.Integer.parseInt;
  */
 public class AceTreeTableLineageDataLoader {
 
-    // TODO
-    private static final String ENTRY_PREFIX = "/atlas_model/data/nuclei_files/";
+    private static String CONFIG_FILE_PATH = "/atlas_model/configurations/nuclei_config/";
+    private static String CONFIG_FILE_NAME = "NucleiConfig.csv";
+    private static String HEADER_LINE = "Resource Location";
+
+    private static String ENTRY_PREFIX;
 
     private static final String T = "t";
 
@@ -69,6 +72,30 @@ public class AceTreeTableLineageDataLoader {
                 productionInfo.getXScale(),
                 productionInfo.getYScale(),
                 productionInfo.getZScale());
+
+        // first find the ENTRY_PREFIX
+        final URL config_url = MainApp.class.getResource(CONFIG_FILE_PATH + CONFIG_FILE_NAME);
+        try (final InputStreamReader streamReader = new InputStreamReader(config_url.openStream());
+             final BufferedReader reader = new BufferedReader(streamReader)) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // skip header line
+                if (line.equals(HEADER_LINE)) {
+                        line = reader.readLine();
+                }
+                // make sure valid line
+                if (line.length() <= 1) {
+                    break;
+                }
+
+                // save the entry prefix, removing the appended comma
+                ENTRY_PREFIX = line.substring(0, line.length());
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         try {
             // accounts for first tld.addFrame() added when reading from JAR --> from dir name first entry match
