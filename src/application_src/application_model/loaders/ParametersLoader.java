@@ -16,7 +16,7 @@ import application_src.MainApp;
 
 public class ParametersLoader {
 
-	public static final String PARAMETERS_FILE_PATH = "/application_src/application_model/threeD/subsceneparameters/parameters.txt";
+	public static final String PARAMETERS_FILE_PATH = "/atlas_model/parameters/subscene_parameters/parameters.txt";
 
 	public static Map<String, String> loadParameters() {
 		final URL url = MainApp.class.getResource(PARAMETERS_FILE_PATH);

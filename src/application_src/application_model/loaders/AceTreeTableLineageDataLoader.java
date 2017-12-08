@@ -83,6 +83,7 @@ public class AceTreeTableLineageDataLoader {
                 // skip header line
                 if (line.equals(HEADER_LINE)) {
                         line = reader.readLine();
+
                 }
                 // make sure valid line
                 if (line.length() <= 1) {
