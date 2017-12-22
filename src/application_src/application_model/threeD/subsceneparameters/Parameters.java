@@ -14,7 +14,7 @@ import static application_src.application_model.loaders.ParametersLoader.PARAMET
 import static application_src.application_model.loaders.ParametersLoader.loadParameters;
 
 /**
- * Loader and wrapper for all parameters loaded from /wormguides/util/subsceneparameters/parameters.txt
+ * Loader and wrapper for all parameters
  */
 public class Parameters {
 
@@ -38,6 +38,8 @@ public class Parameters {
     private static final String NOTE_BILLBOARD_TEXT_WIDTH_KEY = "NOTE_BILLBOARD_TEXT_WIDTH";
     private static final String NOTE_IMAGE_SCALE_KEY = "NOTE_IMAGE_SCALE";
     private static final String SUBSCENE_BACKGROUND_COLOR_HEX_KEY = "SUBSCENE_BACKGROUND_COLOR_HEX";
+    private static final String MODEL_SCALE_FACTOR_KEY = "MODEL_SCALE_FACTOR";
+    private static final String SHAPES_INDEX_PAD_KEY = "SHAPES_INDEX_PAD";
 
     // values
     /** Waiting time between rendering consecutive frames while movie is playing */
@@ -64,7 +66,7 @@ public class Parameters {
     private static int uniformRadius;
 
     /** Y-offset from sprite to label for one cell entity */
-    private static int labelSpriteYOffset;
+    private static double labelSpriteYOffset;
 
     /** Default transparency of 'other' entities on startup */
     private static double defaultOthersOpacity;
@@ -90,6 +92,12 @@ public class Parameters {
     /** Background color (in hex) of the 3D subscene */
     private static String subsceneBackgroundColorHex;
 
+    /** the factor to which the entire model should be scaled */
+    private static double model_scale_factor;
+
+    /** indicates whether the shapes files are 0 or 1 indexed */
+    private static int shapes_index_pad;
+
     public static void init() {
         final Map<String, String> param_map = loadParameters();
         try {
@@ -103,7 +111,7 @@ public class Parameters {
             billboardScale = parseDouble(param_map.get(BILLBOARD_SCALE_KEY));
             sizeScale = parseDouble(param_map.get(SIZE_SCALE_KEY));
             uniformRadius = parseInt(param_map.get(UNIFORM_RADIUS_KEY));
-            labelSpriteYOffset = parseInt(param_map.get(LABEL_SPRITE_Y_OFFSET_KEY));
+            labelSpriteYOffset = parseDouble(param_map.get(LABEL_SPRITE_Y_OFFSET_KEY));
             defaultOthersOpacity = parseDouble(param_map.get(DEFAULT_OTHERS_OPACITY_KEY));
             visibilityCutoff = parseDouble(param_map.get(VISIBILITY_CUTOFF_KEY));
             selectabilityVisibilityCutoff = parseDouble(param_map.get(SELECTABILITY_VISIBILITY_CUTOFF_KEY));
@@ -112,6 +120,9 @@ public class Parameters {
             noteBillboardTextWidth = parseDouble(param_map.get(NOTE_BILLBOARD_TEXT_WIDTH_KEY));
             noteBillboardImageScale = parseDouble(param_map.get(NOTE_IMAGE_SCALE_KEY));
             subsceneBackgroundColorHex = param_map.get(SUBSCENE_BACKGROUND_COLOR_HEX_KEY);
+            model_scale_factor = parseDouble(param_map.get(MODEL_SCALE_FACTOR_KEY));
+            shapes_index_pad = parseInt(param_map.get(SHAPES_INDEX_PAD_KEY));
+
         } catch (Exception e) {
             System.out.println("Error in parsing parameters file at " + PARAMETERS_FILE_PATH);
             e.printStackTrace();
@@ -158,7 +169,7 @@ public class Parameters {
         return uniformRadius;
     }
 
-    public static int getLabelSpriteYOffset() {
+    public static double getLabelSpriteYOffset() {
         return labelSpriteYOffset;
     }
 
@@ -193,4 +204,8 @@ public class Parameters {
     public static String getSubsceneBackgroundColorHex() {
         return subsceneBackgroundColorHex;
     }
+
+    public static double getModelScaleFactor() { return model_scale_factor; }
+
+    public static int getShapesIndexPad() { return shapes_index_pad; }
 }

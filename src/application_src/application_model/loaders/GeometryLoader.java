@@ -90,6 +90,9 @@ public class GeometryLoader {
             String lineType;
             while ((line = reader.readLine()) != null) {
                 // processUrl each line in the obj file
+                if (line.length() < 2) {
+                    continue;
+                }
                 lineType = line.substring(0, 1);
                 switch (lineType) {
                     case VERTEX_LINE: {

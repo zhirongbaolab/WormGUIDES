@@ -164,6 +164,8 @@ import static application_src.application_model.threeD.subsceneparameters.Parame
 import static application_src.application_model.threeD.subsceneparameters.Parameters.getUniformRadius;
 import static application_src.application_model.threeD.subsceneparameters.Parameters.getVisibilityCutoff;
 import static application_src.application_model.threeD.subsceneparameters.Parameters.getWaitTimeMilli;
+import static application_src.application_model.threeD.subsceneparameters.Parameters.getModelScaleFactor;
+import static application_src.application_model.threeD.subsceneparameters.Parameters.getShapesIndexPad;
 
 /**
  * The controller for the 3D subscene inside the rootEntitiesGroup layout. This class contains the subscene itself, and
@@ -857,9 +859,9 @@ public class Window3DController {
                     final Point2D p = project(
                             camera,
                             new Point3D(
-                                    (b.getMinX() + b.getMaxX()) / 2,
-                                    (b.getMinY() + b.getMaxY()) / 2,
-                                    (b.getMaxZ() + b.getMinZ()) / 2));
+                                    (b.getMinX() + b.getMaxX())*getModelScaleFactor() / 2.0,
+                                    (b.getMinY() + b.getMaxY())*getModelScaleFactor() / 2.0,
+                                    (b.getMaxZ() + b.getMinZ())*getModelScaleFactor() / 2.0));
                     double x = p.getX();
                     double y = p.getY();
 
@@ -1292,9 +1294,9 @@ public class Window3DController {
                 final Point2D p = project(
                         camera,
                         new Point3D(
-                                (b.getMinX() + b.getMaxX()) / 2.0,
-                                (b.getMinY() + b.getMaxY()) / 2.0,
-                                (b.getMaxZ() + b.getMinZ()) / 2.0));
+                                (b.getMinX() + b.getMaxX())*getModelScaleFactor() / 2.0,
+                                (b.getMinY() + b.getMaxY())*getModelScaleFactor() / 2.0,
+                                (b.getMaxZ() + b.getMinZ())*getModelScaleFactor() / 2.0));
                 double x = p.getX();
                 double y = p.getY();
                 double height = b.getHeight();
@@ -1681,7 +1683,7 @@ public class Window3DController {
 
             sceneElementsAtCurrentTime = sceneElementsList.getSceneElementsAtTime(requestedTime);
             for (SceneElement se : sceneElementsAtCurrentTime) {
-                final SceneElementMeshView mesh = se.buildGeometry(requestedTime - 1);
+                final SceneElementMeshView mesh = se.buildGeometry(requestedTime - getShapesIndexPad());
                 if (mesh != null) {
                     mesh.getTransforms().addAll(rotateX, rotateY, rotateZ);
 
@@ -1760,7 +1762,7 @@ public class Window3DController {
                     // make mesh views for scene elements from note resources
                     if (note.hasSceneElements()) {
                         for (SceneElement se : note.getSceneElements()) {
-                            final SceneElementMeshView mesh = se.buildGeometry(requestedTime);
+                            final SceneElementMeshView mesh = se.buildGeometry(requestedTime - getShapesIndexPad());
                             if (mesh != null) {
                                 mesh.setMaterial(colorHash.getNoteSceneElementMaterial());
                                 mesh.getTransforms().addAll(rotateX, rotateY, rotateZ);
@@ -1863,6 +1865,9 @@ public class Window3DController {
             // will not be completely visible behind semi-opaque entities)
             rootEntitiesGroup.getChildren().addAll(0, noteGraphics);
         }
+        rootEntitiesGroup.setScaleX(rootEntitiesGroup.getScaleX() * getModelScaleFactor());
+        rootEntitiesGroup.setScaleY(rootEntitiesGroup.getScaleY() * getModelScaleFactor());
+        rootEntitiesGroup.setScaleZ(rootEntitiesGroup.getScaleZ() * getModelScaleFactor());
 
         repositionNotes();
     }
