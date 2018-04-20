@@ -467,7 +467,7 @@ public class Window3DController {
         // set orientation indicator frames and rotation from production info
         keyFramesRotate = productionInfo.getKeyFramesRotate();
         keyValuesRotate = productionInfo.getKeyValuesRotate();
-        // double[] initialRotation = productionInfo.getInitialRotation();
+        double[] initialRotation = productionInfo.getInitialRotation();
 
         spheres = new LinkedList<>();
         meshes = new LinkedList<>();
@@ -583,9 +583,9 @@ public class Window3DController {
 
         otherCells = new ArrayList<>();
 
-        rotateX = new Rotate(0, X_AXIS);
-        rotateY = new Rotate(0, Y_AXIS);
-        rotateZ = new Rotate(0, Z_AXIS);
+        rotateX = new Rotate(initialRotation[0], X_AXIS);
+        rotateY = new Rotate(initialRotation[1], Y_AXIS);
+        rotateZ = new Rotate(initialRotation[2], Z_AXIS);
 
         // initialize
         this.rotateXAngleProperty = requireNonNull(rotateXAngleProperty);

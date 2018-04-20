@@ -136,9 +136,9 @@ DA6	ABplpppaaap	Ventral cord motor neurons, innervate dorsal muscles
 DA7	ABprpppaaap	Ventral cord motor neurons, innervate dorsal muscles
 DA8	ABprpapappp	Ventral cord motor neurons, innervate dorsal muscles
 DA9	ABplpppaaaa	Ventral cord motor neurons, innervate dorsal muscles
-DB1/3	ABplpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
+DB1	ABplpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
 DB2	ABarappappa	Ventral cord motor neurons, innervate dorsal muscles
-DB3/1	ABprpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
+DB3	ABprpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
 DB4	ABprpappapp	Ventral cord motor neurons, innervate dorsal muscles
 DB5	ABplpapappp	Ventral cord motor neurons, innervate dorsal muscles
 DB6	ABplppaappp	Ventral cord motor neurons, innervate dorsal muscles
