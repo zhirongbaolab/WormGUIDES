@@ -583,9 +583,29 @@ public class Window3DController {
 
         otherCells = new ArrayList<>();
 
-        rotateX = new Rotate(initialRotation[0], X_AXIS);
-        rotateY = new Rotate(initialRotation[1], Y_AXIS);
-        rotateZ = new Rotate(initialRotation[2], Z_AXIS);
+        rotateX = new Rotate(0, X_AXIS);
+        rotateY = new Rotate(0, Y_AXIS);
+        rotateZ = new Rotate(0, Z_AXIS);
+
+        // set up the orientation indicator in bottom right corner
+        double radius = 5.0;
+        double height = 15.0;
+        final PhongMaterial material = new PhongMaterial();
+        material.setDiffuseColor(RED);
+        if (defaultEmbryoFlag) {
+            orientationIndicator = new Cylinder(radius, height);
+            orientationIndicator.getTransforms().addAll(rotateX, rotateY, rotateZ);
+            orientationIndicator.setMaterial(material);
+
+            xform.getChildren().add(createOrientationIndicator());
+        }
+
+        // now that the orientation indicator has been set up in the default canonical orientation,
+        // add the initial rotation values
+        rotateX.setAngle(initialRotation[0]);
+        rotateY.setAngle(initialRotation[1]);
+        rotateZ.setAngle(initialRotation[2]);
+
 
         // initialize
         this.rotateXAngleProperty = requireNonNull(rotateXAngleProperty);
@@ -650,19 +670,6 @@ public class Window3DController {
         movieFiles = new Vector<>();
         javaPictures = new Vector<>();
         count = -1;
-
-        // set up the orientation indicator in bottom right corner
-        double radius = 5.0;
-        double height = 15.0;
-        final PhongMaterial material = new PhongMaterial();
-        material.setDiffuseColor(RED);
-        if (defaultEmbryoFlag) {
-            orientationIndicator = new Cylinder(radius, height);
-            orientationIndicator.getTransforms().addAll(rotateX, rotateY, rotateZ);
-            orientationIndicator.setMaterial(material);
-
-            xform.getChildren().add(createOrientationIndicator());
-        }
 
 
         this.bringUpInfoFlag = requireNonNull(bringUpInfoFlag);

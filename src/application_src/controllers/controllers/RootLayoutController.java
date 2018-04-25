@@ -1239,9 +1239,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
         sizeSubscene();
         sizeInfoPane();
 
-        // takes ~700ms
-        viewTreeAction();
-
         // takes ~50ms
         initWindow3DController();
 
