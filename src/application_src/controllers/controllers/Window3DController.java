@@ -206,6 +206,9 @@ public class Window3DController {
     private final Rotate rotateX;
     private final Rotate rotateY;
     private final Rotate rotateZ;
+    private final Rotate rotateXIndicator;
+    private final Rotate rotateYIndicator;
+    private final Rotate rotateZIndicator;
     // transformation stuff
     private final Group rootEntitiesGroup;
     // switching timepoints stuff
@@ -237,6 +240,8 @@ public class Window3DController {
     private final DoubleProperty translateYProperty;
     private final IntegerProperty timeProperty;
     private final IntegerProperty totalNucleiProperty;
+    private final double[] initialRotation;
+
     /** Start timeProperty of the lineage without movie timeProperty offset */
     private final int startTime;
     /** End timeProperty of the lineage without movie timeProperty offset */
@@ -467,7 +472,7 @@ public class Window3DController {
         // set orientation indicator frames and rotation from production info
         keyFramesRotate = productionInfo.getKeyFramesRotate();
         keyValuesRotate = productionInfo.getKeyValuesRotate();
-        double[] initialRotation = productionInfo.getInitialRotation();
+        initialRotation = productionInfo.getInitialRotation();
 
         spheres = new LinkedList<>();
         meshes = new LinkedList<>();
@@ -583,29 +588,13 @@ public class Window3DController {
 
         otherCells = new ArrayList<>();
 
-        rotateX = new Rotate(0, X_AXIS);
-        rotateY = new Rotate(0, Y_AXIS);
-        rotateZ = new Rotate(0, Z_AXIS);
+        rotateXIndicator = new Rotate(0, X_AXIS);
+        rotateYIndicator = new Rotate(0, Y_AXIS);
+        rotateZIndicator = new Rotate(0, Z_AXIS);
 
-        // set up the orientation indicator in bottom right corner
-        double radius = 5.0;
-        double height = 15.0;
-        final PhongMaterial material = new PhongMaterial();
-        material.setDiffuseColor(RED);
-        if (defaultEmbryoFlag) {
-            orientationIndicator = new Cylinder(radius, height);
-            orientationIndicator.getTransforms().addAll(rotateX, rotateY, rotateZ);
-            orientationIndicator.setMaterial(material);
-
-            xform.getChildren().add(createOrientationIndicator());
-        }
-
-        // now that the orientation indicator has been set up in the default canonical orientation,
-        // add the initial rotation values
-        rotateX.setAngle(initialRotation[0]);
-        rotateY.setAngle(initialRotation[1]);
-        rotateZ.setAngle(initialRotation[2]);
-
+        rotateX = new Rotate(initialRotation[0], X_AXIS);
+        rotateY = new Rotate(initialRotation[1], Y_AXIS);
+        rotateZ = new Rotate(initialRotation[2], Z_AXIS);
 
         // initialize
         this.rotateXAngleProperty = requireNonNull(rotateXAngleProperty);
@@ -671,6 +660,17 @@ public class Window3DController {
         javaPictures = new Vector<>();
         count = -1;
 
+        // set up the orientation indicator in bottom right corner
+        double radius = 5.0;
+        double height = 15.0;
+        final PhongMaterial material = new PhongMaterial();
+        material.setDiffuseColor(RED);
+        if (defaultEmbryoFlag) {
+            orientationIndicator = new Cylinder(radius, height);
+            orientationIndicator.setMaterial(material);
+
+            xform.getChildren().add(createOrientationIndicator());
+        }
 
         this.bringUpInfoFlag = requireNonNull(bringUpInfoFlag);
 
@@ -799,7 +799,7 @@ public class Window3DController {
         orientationIndicator.getTransforms().add(new Translate(270, 200, 800));
 
         // add rotation variables
-        orientationIndicator.getTransforms().addAll(rotateX, rotateY, rotateZ);
+        orientationIndicator.getTransforms().addAll(rotateXIndicator, rotateYIndicator, rotateZIndicator);
 
         // add the directional symbols to the group
         orientationIndicator.getChildren().add(middleTransformGroup);
@@ -982,9 +982,11 @@ public class Window3DController {
                 rotateXAngleProperty.set((
                         (rotateXAngleProperty.get() + mouseDeltaY * modifierFactor * modifier * 2.0)
                                 % 360 + 540) % 360 - 180);
+                rotateXIndicator.setAngle(rotateX.getAngle() - initialRotation[0]);
                 rotateYAngleProperty.set((
                         (rotateYAngleProperty.get() + mouseDeltaX * modifierFactor * modifier * 2.0)
                                 % 360 + 540) % 360 - 180);
+                rotateYIndicator.setAngle(rotateY.getAngle() - initialRotation[1]);
 
                 repositionNotes();
             }
@@ -2852,6 +2854,7 @@ public class Window3DController {
         return (observable, oldValue, newValue) -> {
             double newAngle = newValue.doubleValue();
             rotateX.setAngle(newAngle);
+            rotateXIndicator.setAngle(newAngle - initialRotation[0]);
         };
     }
 
@@ -2859,6 +2862,7 @@ public class Window3DController {
         return (observable, oldValue, newValue) -> {
             double newAngle = newValue.doubleValue();
             rotateY.setAngle(newAngle);
+            rotateYIndicator.setAngle(newAngle - initialRotation[1]);
         };
     }
 
@@ -2866,6 +2870,7 @@ public class Window3DController {
         return (observable, oldValue, newValue) -> {
             double newAngle = newValue.doubleValue();
             rotateZ.setAngle(newAngle);
+            rotateZIndicator.setAngle(newAngle - initialRotation[2]);
         };
     }
 

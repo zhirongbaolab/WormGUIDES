@@ -30,7 +30,7 @@ import static application_src.application_model.logic.search.SearchUtil.isLineag
 public class WormBaseQuery {
 
     /** The WormBase URL */
-    private static final String WORMBASE_URL = "http://www.wormbase.org";
+    private static final String WORMBASE_URL = "https://www.wormbase.org";
 
     /** Time to wait, in millis, for WormBase to respond */
     private static final int CONNECTION_TIMEOUT_MILLIS = 15000;
