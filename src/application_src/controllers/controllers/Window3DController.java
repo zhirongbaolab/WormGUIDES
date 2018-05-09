@@ -987,8 +987,6 @@ public class Window3DController {
                         (rotateYAngleProperty.get() + mouseDeltaX * modifierFactor * modifier * 2.0)
                                 % 360 + 540) % 360 - 180);
                 rotateYIndicator.setAngle(rotateY.getAngle() - initialRotation[1]);
-
-                repositionNotes();
             }
         }
     }
@@ -2853,24 +2851,30 @@ public class Window3DController {
     private ChangeListener<Number> getRotateXAngleListener() {
         return (observable, oldValue, newValue) -> {
             double newAngle = newValue.doubleValue();
-            rotateX.setAngle(newAngle);
+            this.rotateXAngleProperty.set(newAngle);
+            rotateX.setAngle(rotateXAngleProperty.get());
             rotateXIndicator.setAngle(newAngle - initialRotation[0]);
+            repositionNotes();
         };
     }
 
     private ChangeListener<Number> getRotateYAngleListener() {
         return (observable, oldValue, newValue) -> {
             double newAngle = newValue.doubleValue();
-            rotateY.setAngle(newAngle);
+            this.rotateYAngleProperty.set(newAngle);
+            rotateY.setAngle(rotateYAngleProperty.get());
             rotateYIndicator.setAngle(newAngle - initialRotation[1]);
+            repositionNotes();
         };
     }
 
     private ChangeListener<Number> getRotateZAngleListener() {
         return (observable, oldValue, newValue) -> {
             double newAngle = newValue.doubleValue();
-            rotateZ.setAngle(newAngle);
+            this.rotateZAngleProperty.set(newAngle);
+            rotateZ.setAngle(rotateZAngleProperty.get());;
             rotateZIndicator.setAngle(newAngle - initialRotation[2]);
+            repositionNotes();
         };
     }
 
