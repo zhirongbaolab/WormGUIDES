@@ -2239,7 +2239,7 @@ public class Window3DController {
                     if (note.attachedToCell()) {
                         subsceneEntity = getSubsceneSphereWithName(note.getCellName());
                     } else if (note.attachedToStructure() && defaultEmbryoFlag) {
-                        //subsceneEntity = getSubsceneMeshWithName(note.getCellName());
+                        subsceneEntity = getSubsceneMeshWithName(note.getCellName());
                     }
                     if (subsceneEntity != null) {
                         switch (note.getTagDisplay()) {
@@ -2335,7 +2335,7 @@ public class Window3DController {
                             subsceneEntity = getSubsceneSphereWithName(note.getCellName());
                         } else if (note.attachedToStructure() && defaultEmbryoFlag) {
                             // structure attachment
-                            //subsceneEntity = getSubsceneMeshWithName(note.getCellName());
+                            subsceneEntity = getSubsceneMeshWithName(note.getCellName());
                         }
                         if (subsceneEntity != null) {
                             // if another non-callout note is already attached to the subscene entity,
@@ -2351,7 +2351,6 @@ public class Window3DController {
                             }
                         }
                     }
-
                 } else if (note.isBillboardFront()) {
                     if (noteGraphic instanceof Text) {
                         if (note.attachedToLocation()) {
@@ -2630,7 +2629,7 @@ public class Window3DController {
     private void consultSearchResultsList() {
         isCellSearchedFlags = new boolean[cellNames.size()];
         if (defaultEmbryoFlag) {
-            isMeshSearchedFlags = new boolean[sceneElementsAtCurrentTime.size()];
+            isMeshSearchedFlags = new boolean[currentSceneElements.size()];
         }
 
         // cells
@@ -2642,8 +2641,8 @@ public class Window3DController {
         if (defaultEmbryoFlag) {
             SceneElement sceneElement;
             String sceneName;
-            for (int i = 0; i < sceneElementsAtCurrentTime.size(); i++) {
-                sceneElement = sceneElementsAtCurrentTime.get(i);
+            for (int i = 0; i < currentSceneElements.size(); i++) {
+                sceneElement = currentSceneElements.get(i);
                 sceneName = sceneElement.getSceneName();
                 isMeshSearchedFlags[i] = localSearchResults.contains(sceneName);
             }

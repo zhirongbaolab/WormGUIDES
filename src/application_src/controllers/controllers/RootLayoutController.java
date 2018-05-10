@@ -1000,9 +1000,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 geneResultsUpdatedFlag,
                 rebuildSubsceneFlag);
         searchResultsListView.setItems(searchResultsList);
-        if (defaultEmbryoFlag) {
-            searchLayer.addDefaultInternalColorRules();
-        }
+//        if (defaultEmbryoFlag) {
+//            searchLayer.addDefaultInternalColorRules();
+//        }
         searchResultsUpdateService = searchLayer.getResultsUpdateService();
     }
 
