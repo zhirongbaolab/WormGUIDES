@@ -65,7 +65,7 @@ public class StoriesLayer {
     private static final String NEW_STORY_TITLE = "New Story";
     private static final String NEW_STORY_DESCRIPTION = "New story description here";
     private static final String TEMPLATE_STORY_NAME = "Template to Make Your Own Story";
-    private static final String TEMPLATE_STORY_DESCRIPTION = "Shows all segmented neurons without further annotation.";
+    private static final String TEMPLATE_STORY_DESCRIPTION = "";
 
     private final Stage parentStage;
 
@@ -309,21 +309,11 @@ public class StoriesLayer {
      * Adds a blank story
      */
     private void addBlankStory() {
-        if (defaultEmbryoFlag) {
-            stories.add(new Story(
-                    TEMPLATE_STORY_NAME,
-                    TEMPLATE_STORY_DESCRIPTION,
-                    "http://scene.wormguides.org/wormguides/testurlscript?/set/ash-n$@+#ff8"
-                            + "fbc8f/rib-n$@+#ff663366/avg-n$@+#ffb41919/dd-n@+#ff4a24c1/da-"
-                            + "n@+#ffc56002/dd-n$+#ffb30a95/da-n$+#ffe6b34d/rivl-n@+#ffffb366/"
-                            + "rivr-n@+#ffffe6b3/sibd-n@+#ffe6ccff/siav-n@+#ff8099ff/view/"
-                            + "time=393/rX=51.625/rY=-2.125/rZ=0.0/tX=0.0/tY=0.0/scale=2.25/dim=0.25/browser/"));
-        } else {
-            stories.add(new Story(
-                    TEMPLATE_STORY_NAME,
-                    TEMPLATE_STORY_DESCRIPTION,
-                    ""));
-        }
+        stories.add(new Story(
+                TEMPLATE_STORY_NAME,
+                TEMPLATE_STORY_DESCRIPTION,
+                ""));
+
     }
 
     /**

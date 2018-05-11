@@ -206,6 +206,9 @@ public class Window3DController {
     private final Rotate rotateX;
     private final Rotate rotateY;
     private final Rotate rotateZ;
+    private final Rotate rotateXIndicator;
+    private final Rotate rotateYIndicator;
+    private final Rotate rotateZIndicator;
     // transformation stuff
     private final Group rootEntitiesGroup;
     // switching timepoints stuff
@@ -237,6 +240,8 @@ public class Window3DController {
     private final DoubleProperty translateYProperty;
     private final IntegerProperty timeProperty;
     private final IntegerProperty totalNucleiProperty;
+    private final double[] initialRotation;
+
     /** Start timeProperty of the lineage without movie timeProperty offset */
     private final int startTime;
     /** End timeProperty of the lineage without movie timeProperty offset */
@@ -467,7 +472,7 @@ public class Window3DController {
         // set orientation indicator frames and rotation from production info
         keyFramesRotate = productionInfo.getKeyFramesRotate();
         keyValuesRotate = productionInfo.getKeyValuesRotate();
-        // double[] initialRotation = productionInfo.getInitialRotation();
+        initialRotation = productionInfo.getInitialRotation();
 
         spheres = new LinkedList<>();
         meshes = new LinkedList<>();
@@ -583,9 +588,13 @@ public class Window3DController {
 
         otherCells = new ArrayList<>();
 
-        rotateX = new Rotate(0, X_AXIS);
-        rotateY = new Rotate(0, Y_AXIS);
-        rotateZ = new Rotate(0, Z_AXIS);
+        rotateXIndicator = new Rotate(0, X_AXIS);
+        rotateYIndicator = new Rotate(0, Y_AXIS);
+        rotateZIndicator = new Rotate(0, Z_AXIS);
+
+        rotateX = new Rotate(initialRotation[0], X_AXIS);
+        rotateY = new Rotate(initialRotation[1], Y_AXIS);
+        rotateZ = new Rotate(initialRotation[2], Z_AXIS);
 
         // initialize
         this.rotateXAngleProperty = requireNonNull(rotateXAngleProperty);
@@ -658,12 +667,10 @@ public class Window3DController {
         material.setDiffuseColor(RED);
         if (defaultEmbryoFlag) {
             orientationIndicator = new Cylinder(radius, height);
-            orientationIndicator.getTransforms().addAll(rotateX, rotateY, rotateZ);
             orientationIndicator.setMaterial(material);
 
             xform.getChildren().add(createOrientationIndicator());
         }
-
 
         this.bringUpInfoFlag = requireNonNull(bringUpInfoFlag);
 
@@ -792,7 +799,7 @@ public class Window3DController {
         orientationIndicator.getTransforms().add(new Translate(270, 200, 800));
 
         // add rotation variables
-        orientationIndicator.getTransforms().addAll(rotateX, rotateY, rotateZ);
+        orientationIndicator.getTransforms().addAll(rotateXIndicator, rotateYIndicator, rotateZIndicator);
 
         // add the directional symbols to the group
         orientationIndicator.getChildren().add(middleTransformGroup);
@@ -975,11 +982,11 @@ public class Window3DController {
                 rotateXAngleProperty.set((
                         (rotateXAngleProperty.get() + mouseDeltaY * modifierFactor * modifier * 2.0)
                                 % 360 + 540) % 360 - 180);
+                rotateXIndicator.setAngle(rotateX.getAngle() - initialRotation[0]);
                 rotateYAngleProperty.set((
                         (rotateYAngleProperty.get() + mouseDeltaX * modifierFactor * modifier * 2.0)
                                 % 360 + 540) % 360 - 180);
-
-                repositionNotes();
+                rotateYIndicator.setAngle(rotateY.getAngle() - initialRotation[1]);
             }
         }
     }
@@ -2232,7 +2239,7 @@ public class Window3DController {
                     if (note.attachedToCell()) {
                         subsceneEntity = getSubsceneSphereWithName(note.getCellName());
                     } else if (note.attachedToStructure() && defaultEmbryoFlag) {
-                        //subsceneEntity = getSubsceneMeshWithName(note.getCellName());
+                        subsceneEntity = getSubsceneMeshWithName(note.getCellName());
                     }
                     if (subsceneEntity != null) {
                         switch (note.getTagDisplay()) {
@@ -2328,7 +2335,7 @@ public class Window3DController {
                             subsceneEntity = getSubsceneSphereWithName(note.getCellName());
                         } else if (note.attachedToStructure() && defaultEmbryoFlag) {
                             // structure attachment
-                            //subsceneEntity = getSubsceneMeshWithName(note.getCellName());
+                            subsceneEntity = getSubsceneMeshWithName(note.getCellName());
                         }
                         if (subsceneEntity != null) {
                             // if another non-callout note is already attached to the subscene entity,
@@ -2344,7 +2351,6 @@ public class Window3DController {
                             }
                         }
                     }
-
                 } else if (note.isBillboardFront()) {
                     if (noteGraphic instanceof Text) {
                         if (note.attachedToLocation()) {
@@ -2623,7 +2629,7 @@ public class Window3DController {
     private void consultSearchResultsList() {
         isCellSearchedFlags = new boolean[cellNames.size()];
         if (defaultEmbryoFlag) {
-            isMeshSearchedFlags = new boolean[sceneElementsAtCurrentTime.size()];
+            isMeshSearchedFlags = new boolean[currentSceneElements.size()];
         }
 
         // cells
@@ -2635,8 +2641,8 @@ public class Window3DController {
         if (defaultEmbryoFlag) {
             SceneElement sceneElement;
             String sceneName;
-            for (int i = 0; i < sceneElementsAtCurrentTime.size(); i++) {
-                sceneElement = sceneElementsAtCurrentTime.get(i);
+            for (int i = 0; i < currentSceneElements.size(); i++) {
+                sceneElement = currentSceneElements.get(i);
                 sceneName = sceneElement.getSceneName();
                 isMeshSearchedFlags[i] = localSearchResults.contains(sceneName);
             }
@@ -2844,21 +2850,30 @@ public class Window3DController {
     private ChangeListener<Number> getRotateXAngleListener() {
         return (observable, oldValue, newValue) -> {
             double newAngle = newValue.doubleValue();
-            rotateX.setAngle(newAngle);
+            this.rotateXAngleProperty.set(newAngle);
+            rotateX.setAngle(rotateXAngleProperty.get());
+            rotateXIndicator.setAngle(newAngle - initialRotation[0]);
+            repositionNotes();
         };
     }
 
     private ChangeListener<Number> getRotateYAngleListener() {
         return (observable, oldValue, newValue) -> {
             double newAngle = newValue.doubleValue();
-            rotateY.setAngle(newAngle);
+            this.rotateYAngleProperty.set(newAngle);
+            rotateY.setAngle(rotateYAngleProperty.get());
+            rotateYIndicator.setAngle(newAngle - initialRotation[1]);
+            repositionNotes();
         };
     }
 
     private ChangeListener<Number> getRotateZAngleListener() {
         return (observable, oldValue, newValue) -> {
             double newAngle = newValue.doubleValue();
-            rotateZ.setAngle(newAngle);
+            this.rotateZAngleProperty.set(newAngle);
+            rotateZ.setAngle(rotateZAngleProperty.get());;
+            rotateZIndicator.setAngle(newAngle - initialRotation[2]);
+            repositionNotes();
         };
     }
 

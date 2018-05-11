@@ -136,9 +136,9 @@ DA6	ABplpppaaap	Ventral cord motor neurons, innervate dorsal muscles
 DA7	ABprpppaaap	Ventral cord motor neurons, innervate dorsal muscles
 DA8	ABprpapappp	Ventral cord motor neurons, innervate dorsal muscles
 DA9	ABplpppaaaa	Ventral cord motor neurons, innervate dorsal muscles
-DB1/3	ABplpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
+DB1	ABplpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
 DB2	ABarappappa	Ventral cord motor neurons, innervate dorsal muscles
-DB3/1	ABprpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
+DB3	ABprpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
 DB4	ABprpappapp	Ventral cord motor neurons, innervate dorsal muscles
 DB5	ABplpapappp	Ventral cord motor neurons, innervate dorsal muscles
 DB6	ABplppaappp	Ventral cord motor neurons, innervate dorsal muscles
@@ -628,26 +628,26 @@ hyp_hook	P10.papp	Hook
 hyp_hook	P11.ppaa	Hypodermis associated with hook sensillum of male
 hyp_hook	P11.ppap	Hypodermis associated with hook sensillum of male
 hyp_hook	P11.ppp	Hypodermis associated with hook sensillum of male
-int	Ealaad	Intestinal cell
-int	Ealaav	Intestinal cell
-int	Ealap	Intestinal cell
-int	Ealpa	Intestinal cell
-int	Ealpp	Intestinal cell
-int	Earaad	Intestinal cell
-int	Earaav	Intestinal cell
-int	Earap	Intestinal cell
-int	Earpa	Intestinal cell
-int	Earpp	Intestinal cell
-int	Eplaa	Intestinal cell
-int	Eplap	Intestinal cell
-int	Eplpa	Intestinal cell
-int	Eplppa	Intestinal cell
-int	Eplppp	Intestinal cell
-int	Epraa	Intestinal cell
-int	Eprap	Intestinal cell
-int	Eprpa	Intestinal cell
-int	Eprppa	Intestinal cell
-int	Eprppp	Intestinal cell
+int1dl	Ealaad	Intestinal cell
+int1vl	Ealaav	Intestinal cell
+int3v	Ealap	Intestinal cell
+int2v	Ealpa	Intestinal cell
+int5l	Ealpp	Intestinal cell
+int1dr	Earaad	Intestinal cell
+int1vr	Earaav	Intestinal cell
+int3d	Earap	Intestinal cell
+int2d	Earpa	Intestinal cell
+int5r	Earpp	Intestinal cell
+int4v	Eplaa	Intestinal cell
+int6l	Eplap	Intestinal cell
+int7l	Eplpa	Intestinal cell
+int8l	Eplppa	Intestinal cell
+int9l	Eplppp	Intestinal cell
+int4d	Epraa	Intestinal cell
+int6r	Eprap	Intestinal cell
+int7r	Eprpa	Intestinal cell
+int8r	Eprppa	Intestinal cell
+int9r	Eprppp	Intestinal cell
 int	In.a	Postembryonic intestinal cell
 int	In.p	Postembryonic intestinal cell
 linker_killer	U.lp or U.rp	One of these cells, sometimes fused with U.l/ra, phagocytoses the male linker cell
