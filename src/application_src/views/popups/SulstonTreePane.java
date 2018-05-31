@@ -53,11 +53,11 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import application_src.application_model.logic.lineage.LineageData;
+import application_src.application_model.data.LineageData;
 import application_src.controllers.controllers.ContextMenuController;
 import application_src.controllers.layers.SearchLayer;
-import application_src.application_model.logic.color_rule.Rule;
-import application_src.application_model.logic.ColorHash;
+import application_src.application_model.annotation.color.Rule;
+import application_src.application_model.annotation.color.ColorHash;
 
 import static java.lang.Math.max;
 import static java.lang.Math.round;
@@ -81,12 +81,12 @@ import static javafx.scene.text.Font.font;
 import static javafx.scene.text.FontWeight.SEMI_BOLD;
 
 import static javax.imageio.ImageIO.write;
-import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.logic.search.SearchType.LINEAGE;
-import static application_src.application_model.logic.search.SearchType.NEIGHBOR;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
+import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.LINEAGE;
+import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.NEIGHBOR;
 import static application_src.application_model.loaders.IconImageLoader.getMinusIcon;
 import static application_src.application_model.loaders.IconImageLoader.getPlusIcon;
-import static application_src.application_model.logic.color_rule.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_NUCLEUS;
 
 public class SulstonTreePane extends ScrollPane {
     //TODO decouple rendering as separate class from WG app specific interaction -as

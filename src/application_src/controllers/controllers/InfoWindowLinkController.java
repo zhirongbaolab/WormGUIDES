@@ -19,8 +19,8 @@ import static java.awt.Desktop.getDesktop;
 import static java.awt.Desktop.isDesktopSupported;
 import static java.util.Objects.requireNonNull;
 
-import static application_src.application_model.internal_data.partslist.PartsList.getLineageNamesByFunctionalName;
-import static application_src.application_model.internal_data.anatomy.AnatomyTerm.AMPHID_SENSILLA;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNamesByFunctionalName;
+import static application_src.application_model.data.CElegansData.Anatomy.AnatomyTerm.AMPHID_SENSILLA;
 
 /**
  * Callback class for HTML pages HTML pages generated for Info Window contain links which when clicked fire a JS

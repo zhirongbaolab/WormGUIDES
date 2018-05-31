@@ -25,8 +25,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
-import application_src.application_model.internal_data.partslist.PartsList;
-import application_src.application_model.logic.color_rule.Rule;
+import application_src.application_model.data.CElegansData.PartsList.PartsList;
+import application_src.application_model.annotation.color.Rule;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
 import application_src.application_model.threeD.subscenegeometry.StructureTreeNode;
 
@@ -37,11 +37,11 @@ import static javafx.collections.FXCollections.observableArrayList;
 import static javafx.scene.control.ContentDisplay.GRAPHIC_ONLY;
 import static javafx.scene.paint.Color.WHITE;
 
-import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.internal_data.partslist.PartsList.getLineageNamesByFunctionalName;
-import static application_src.application_model.internal_data.partslist.PartsList.isLineageName;
-import static application_src.application_model.logic.AppFont.getBolderFont;
-import static application_src.application_model.logic.AppFont.getFont;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNamesByFunctionalName;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.isLineageName;
+import static application_src.application_model.resources.utilities.AppFont.getBolderFont;
+import static application_src.application_model.resources.utilities.AppFont.getFont;
 
 public class StructuresLayer {
 

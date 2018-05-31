@@ -18,7 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import application_src.application_model.loaders.IconImageLoader;
-import application_src.application_model.logic.color_rule.Rule;
+import application_src.application_model.annotation.color.Rule;
 
 import static java.awt.Toolkit.getDefaultToolkit;
 import static java.util.Objects.requireNonNull;
@@ -28,8 +28,8 @@ import static javafx.scene.control.ContentDisplay.GRAPHIC_ONLY;
 import static javafx.scene.layout.HBox.setHgrow;
 import static javafx.scene.layout.Priority.ALWAYS;
 
-import static application_src.application_model.logic.AppFont.getFont;
-import static application_src.application_model.logic.color_url.UrlGenerator.generateAndroid;
+import static application_src.application_model.resources.utilities.AppFont.getFont;
+import static application_src.application_model.annotation.color.URL.UrlGenerator.generateAndroid;
 
 public class URLShareWindow extends AnchorPane {
 

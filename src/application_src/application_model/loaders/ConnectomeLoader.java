@@ -5,9 +5,9 @@
 package application_src.application_model.loaders;
 
 import application_src.MainApp;
-import application_src.application_model.internal_data.connectome.Connectome;
-import application_src.application_model.internal_data.connectome.NeuronalSynapse;
-import application_src.application_model.internal_data.connectome.SynapseType;
+import application_src.application_model.data.CElegansData.Connectome.Connectome;
+import application_src.application_model.data.CElegansData.Connectome.NeuronalSynapse;
+import application_src.application_model.data.CElegansData.Connectome.SynapseType;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,10 +19,10 @@ import java.util.StringTokenizer;
 
 import static java.lang.Integer.parseInt;
 
-import static application_src.application_model.internal_data.connectome.SynapseType.EJ_ELECTRICAL;
-import static application_src.application_model.internal_data.connectome.SynapseType.NMJ_NEUROMUSCULAR;
-import static application_src.application_model.internal_data.connectome.SynapseType.R_POSTSYNAPTIC;
-import static application_src.application_model.internal_data.connectome.SynapseType.S_PRESYNAPTIC;
+import static application_src.application_model.data.CElegansData.Connectome.SynapseType.EJ_ELECTRICAL;
+import static application_src.application_model.data.CElegansData.Connectome.SynapseType.NMJ_NEUROMUSCULAR;
+import static application_src.application_model.data.CElegansData.Connectome.SynapseType.R_POSTSYNAPTIC;
+import static application_src.application_model.data.CElegansData.Connectome.SynapseType.S_PRESYNAPTIC;
 
 /**
  * Loader to read NeuronConnect.csv and create a connectome object.

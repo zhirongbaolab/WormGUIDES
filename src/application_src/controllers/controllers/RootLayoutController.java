@@ -46,25 +46,25 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 
-import application_src.application_model.logic.lineage.LineageData;
-import application_src.application_model.internal_data.connectome.Connectome;
-import application_src.application_model.internal_data.partslist.PartsList;
-import application_src.application_model.internal_data.partslist.celldeaths.CellDeaths;
+import application_src.application_model.data.LineageData;
+import application_src.application_model.data.CElegansData.Connectome.Connectome;
+import application_src.application_model.data.CElegansData.PartsList.PartsList;
+import application_src.application_model.data.CElegansData.CellDeaths.CellDeaths;
 import application_src.MainApp;
 import application_src.controllers.layers.DisplayLayer;
 import application_src.controllers.layers.SearchLayer;
 import application_src.controllers.layers.StoriesLayer;
 import application_src.controllers.layers.StructuresLayer;
 import application_src.application_model.loaders.IconImageLoader;
-import application_src.application_model.logic.lineage.LineageTree;
-import application_src.application_model.logic.cell_case.CasesLists;
-import application_src.application_model.logic.color_rule.Rule;
+import application_src.application_model.data.CElegansData.SulstonLineage.LineageTree;
+import application_src.application_model.cell_case_logic.CasesLists;
+import application_src.application_model.annotation.color.Rule;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
 import application_src.application_model.threeD.subscenegeometry.StructureTreeNode;
-import application_src.application_model.ProductionInfo;
-import application_src.application_model.stories.Story;
-import application_src.application_model.logic.ColorHash;
-import application_src.application_model.logic.StringCellFactory;
+import application_src.application_model.resources.ProductionInfo;
+import application_src.application_model.annotation.stories.Story;
+import application_src.application_model.annotation.color.ColorHash;
+import application_src.application_model.resources.utilities.StringCellFactory;
 import application_src.application_model.threeD.subsceneparameters.Parameters;
 import application_src.views.DraggableTab;
 import application_src.views.info_window.InfoWindow;
@@ -98,12 +98,12 @@ import static application_src.application_model.loaders.AceTreeTableLineageDataL
 import static application_src.application_model.loaders.AceTreeTableLineageDataLoader.getAvgZOffsetFromZero;
 import static application_src.application_model.loaders.AceTreeTableLineageDataLoader.loadNucFiles;
 import static application_src.application_model.loaders.AceTreeTableLineageDataLoader.setOriginToZero;
-import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.internal_data.partslist.celldeaths.CellDeaths.isInCellDeaths;
-import static application_src.application_model.logic.search.SearchUtil.getStructureComment;
-import static application_src.application_model.logic.search.SearchUtil.isMulticellularStructureByName;
-import static application_src.application_model.logic.search.SearchUtil.isStructureWithComment;
-import static application_src.application_model.logic.color_url.UrlParser.processUrl;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
+import static application_src.application_model.data.CElegansData.CellDeaths.CellDeaths.isInCellDeaths;
+import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getStructureComment;
+import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.isMulticellularStructureByName;
+import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.isStructureWithComment;
+import static application_src.application_model.annotation.color.URL.UrlParser.processUrl;
 
 /**
  * Controller for RootLayout.fxml that contains all GUI components of the main WormGUIDES application window
@@ -278,7 +278,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private InfoWindow infoWindow;
     private ImageView playIcon, pauseIcon;
 
-    // Lineage tree stuff
+    // SulstonLineage tree stuff
     private TreeItem<String> lineageTreeRoot;
     private LineageData lineageData;
 
@@ -496,7 +496,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
             // create the header line that will format the search criteria corresponding to these search results
             String searchType = "";
             if (sysRadioBtn.isSelected()) {
-                searchType = "Lineage Name";
+                searchType = "SulstonLineage Name";
             } else if (funRadioBtn.isSelected()) {
                 searchType = "Function Name";
             } else if (desRadioBtn.isSelected()) {

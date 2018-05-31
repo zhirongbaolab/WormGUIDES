@@ -6,7 +6,7 @@ package application_src.application_model.resources;
 
 import java.util.ListResourceBundle;
 
-import application_src.application_model.logic.lineage.LineageData;
+import application_src.application_model.data.LineageData;
 
 public class NucleiMgrAdapterResource extends ListResourceBundle {
 

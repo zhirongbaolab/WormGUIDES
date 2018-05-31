@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import application_src.application_model.logic.search.WormBaseQuery;
+import application_src.application_model.data.CElegansData.Gene.WormBaseQuery;
 import javafx.beans.property.BooleanProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -30,12 +30,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import application_src.application_model.internal_data.connectome.Connectome;
+import application_src.application_model.data.CElegansData.Connectome.Connectome;
 import application_src.controllers.layers.SearchLayer;
-import application_src.application_model.logic.cell_case.CasesLists;
-import application_src.application_model.logic.cell_case.TerminalCellCase;
-import application_src.application_model.logic.color_rule.Rule;
-import application_src.application_model.ProductionInfo;
+import application_src.application_model.cell_case_logic.CasesLists;
+import application_src.application_model.cell_case_logic.cases.TerminalCellCase;
+import application_src.application_model.annotation.color.Rule;
+import application_src.application_model.resources.ProductionInfo;
 
 import static java.lang.Thread.sleep;
 import static java.util.Objects.requireNonNull;
@@ -43,9 +43,9 @@ import static java.util.Objects.requireNonNull;
 import static javafx.application.Platform.runLater;
 import static javafx.scene.paint.Color.WHITE;
 
-import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.logic.search.SearchType.GENE;
-import static application_src.application_model.logic.color_rule.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
+import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.GENE;
+import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_NUCLEUS;
 
 /**
  * Controller for the context menu that shows up on right click on a 3D entity. The menu can be accessed via the 3D

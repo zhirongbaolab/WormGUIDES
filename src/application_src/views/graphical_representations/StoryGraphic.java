@@ -13,7 +13,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
-import application_src.application_model.stories.Story;
+import application_src.application_model.annotation.stories.Story;
 
 import static javafx.geometry.Insets.EMPTY;
 import static javafx.geometry.Orientation.HORIZONTAL;
@@ -22,8 +22,8 @@ import static javafx.scene.paint.Color.GREY;
 import static javafx.scene.text.FontSmoothingType.LCD;
 
 import static application_src.controllers.layers.StoriesLayer.colorTexts;
-import static application_src.application_model.logic.AppFont.getBolderFont;
-import static application_src.application_model.logic.AppFont.getFont;
+import static application_src.application_model.resources.utilities.AppFont.getBolderFont;
+import static application_src.application_model.resources.utilities.AppFont.getFont;
 
 /**
  * Graphical representation of a {@link Story}. It makes an inactive story become active when the title/description

@@ -31,18 +31,16 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-import application_src.application_model.logic.lineage.LineageData;
+import application_src.application_model.data.LineageData;
 import application_src.MainApp;
 import application_src.controllers.controllers.StoryEditorController;
-import application_src.application_model.logic.color_rule.Rule;
+import application_src.application_model.annotation.color.Rule;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
-import application_src.application_model.stories.Note;
-import application_src.application_model.stories.Story;
+import application_src.application_model.annotation.stories.Note;
+import application_src.application_model.annotation.stories.Story;
 import application_src.views.graphical_representations.NoteGraphic;
 import application_src.views.graphical_representations.StoryGraphic;
 import application_src.views.popups.TimelineChart;
-
-import javax.swing.event.ChangeListener;
 
 import static java.lang.Integer.MIN_VALUE;
 import static java.util.Objects.requireNonNull;
@@ -51,11 +49,11 @@ import static javafx.collections.FXCollections.observableArrayList;
 import static javafx.geometry.Insets.EMPTY;
 
 import static application_src.application_model.loaders.StoriesLoader.loadConfigFile;
-import static application_src.application_model.stories.StoryFileUtil.loadFromCSVFile;
-import static application_src.application_model.stories.StoryFileUtil.saveToCSVFile;
-import static application_src.application_model.logic.color_url.UrlGenerator.generateInternal;
-import static application_src.application_model.logic.color_url.UrlGenerator.generateInternalWithoutViewArgs;
-import static application_src.application_model.logic.color_url.UrlParser.parseUrlRules;
+import static application_src.application_model.annotation.stories.StoryFileUtil.loadFromCSVFile;
+import static application_src.application_model.annotation.stories.StoryFileUtil.saveToCSVFile;
+import static application_src.application_model.annotation.color.URL.UrlGenerator.generateInternal;
+import static application_src.application_model.annotation.color.URL.UrlGenerator.generateInternalWithoutViewArgs;
+import static application_src.application_model.annotation.color.URL.UrlParser.parseUrlRules;
 
 /**
  * Controller of the list view in the 'Stories' tab

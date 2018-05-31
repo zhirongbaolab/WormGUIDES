@@ -19,17 +19,17 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import netscape.javascript.JSObject;
 
-import application_src.application_model.logic.lineage.LineageData;
-import application_src.application_model.internal_data.connectome.Connectome;
-import application_src.application_model.internal_data.connectome.NeuronalSynapse;
+import application_src.application_model.data.LineageData;
+import application_src.application_model.data.CElegansData.Connectome.Connectome;
+import application_src.application_model.data.CElegansData.Connectome.NeuronalSynapse;
 import application_src.controllers.controllers.InfoWindowLinkController;
 import application_src.controllers.layers.SearchLayer;
-import application_src.application_model.internal_data.anatomy.AmphidSensillaTerm;
-import application_src.application_model.logic.cell_case.CasesLists;
-import application_src.application_model.logic.cell_case.NonTerminalCellCase;
-import application_src.application_model.logic.cell_case.TerminalCellCase;
+import application_src.application_model.data.CElegansData.Anatomy.AmphidSensillaTerm;
+import application_src.application_model.cell_case_logic.CasesLists;
+import application_src.application_model.cell_case_logic.cases.NonTerminalCellCase;
+import application_src.application_model.cell_case_logic.cases.TerminalCellCase;
 import application_src.application_model.threeD.subscenegeometry.SceneElement;
-import application_src.application_model.ProductionInfo;
+import application_src.application_model.resources.ProductionInfo;
 import application_src.views.DraggableTab;
 
 import static java.util.Objects.requireNonNull;
@@ -37,12 +37,12 @@ import static java.util.Objects.requireNonNull;
 import static javafx.application.Platform.runLater;
 import static javafx.scene.control.TabPane.TabClosingPolicy.ALL_TABS;
 
-import static application_src.application_model.internal_data.partslist.PartsList.getDescriptions;
-import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNames;
-import static application_src.application_model.internal_data.partslist.PartsList.getLineageNames;
-import static application_src.application_model.internal_data.partslist.PartsList.isLineageName;
-import static application_src.application_model.logic.search.SearchUtil.isMulticellularStructureByName;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getDescriptions;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNames;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNames;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.isLineageName;
+import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.isMulticellularStructureByName;
 
 /**
  * Top level container for the list of info window cell cases pages. This holds the tabpane of cases.

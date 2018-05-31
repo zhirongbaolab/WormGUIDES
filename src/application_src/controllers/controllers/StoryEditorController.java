@@ -29,12 +29,12 @@ import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.AnchorPane;
 
-import application_src.application_model.logic.lineage.LineageData;
-import application_src.application_model.stories.Note;
-import application_src.application_model.stories.Note.Attachment;
-import application_src.application_model.stories.Note.Display;
-import application_src.application_model.stories.Story;
-import application_src.application_model.logic.StringCellFactory;
+import application_src.application_model.data.LineageData;
+import application_src.application_model.annotation.stories.Note;
+import application_src.application_model.annotation.stories.Note.Attachment;
+import application_src.application_model.annotation.stories.Note.Display;
+import application_src.application_model.annotation.stories.Story;
+import application_src.application_model.resources.utilities.StringCellFactory;
 
 import static java.lang.Integer.MIN_VALUE;
 import static java.lang.Integer.parseInt;
@@ -46,16 +46,16 @@ import static javafx.collections.FXCollections.observableArrayList;
 import static application_src.controllers.controllers.StoryEditorController.Time.CURRENT;
 import static application_src.controllers.controllers.StoryEditorController.Time.GLOBAL;
 import static application_src.controllers.controllers.StoryEditorController.Time.RANGE;
-import static application_src.application_model.stories.Note.Attachment.BLANK;
-import static application_src.application_model.stories.Note.Attachment.CELL;
-import static application_src.application_model.stories.Note.Attachment.STRUCTURE;
-import static application_src.application_model.stories.Note.Display.BILLBOARD_FRONT;
-import static application_src.application_model.stories.Note.Display.CALLOUT_LOWER_LEFT;
-import static application_src.application_model.stories.Note.Display.CALLOUT_LOWER_RIGHT;
-import static application_src.application_model.stories.Note.Display.CALLOUT_UPPER_LEFT;
-import static application_src.application_model.stories.Note.Display.CALLOUT_UPPER_RIGHT;
-import static application_src.application_model.stories.Note.Display.OVERLAY;
-import static application_src.application_model.stories.Note.Display.SPRITE;
+import static application_src.application_model.annotation.stories.Note.Attachment.BLANK;
+import static application_src.application_model.annotation.stories.Note.Attachment.CELL;
+import static application_src.application_model.annotation.stories.Note.Attachment.STRUCTURE;
+import static application_src.application_model.annotation.stories.Note.Display.BILLBOARD_FRONT;
+import static application_src.application_model.annotation.stories.Note.Display.CALLOUT_LOWER_LEFT;
+import static application_src.application_model.annotation.stories.Note.Display.CALLOUT_LOWER_RIGHT;
+import static application_src.application_model.annotation.stories.Note.Display.CALLOUT_UPPER_LEFT;
+import static application_src.application_model.annotation.stories.Note.Display.CALLOUT_UPPER_RIGHT;
+import static application_src.application_model.annotation.stories.Note.Display.OVERLAY;
+import static application_src.application_model.annotation.stories.Note.Display.SPRITE;
 
 public class StoryEditorController extends AnchorPane implements Initializable {
 

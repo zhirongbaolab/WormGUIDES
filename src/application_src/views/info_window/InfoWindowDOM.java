@@ -8,14 +8,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import application_src.application_model.internal_data.connectome.NeuronalSynapse;
-import application_src.application_model.internal_data.partslist.PartsList;
-import application_src.application_model.internal_data.anatomy.AmphidSensillaTerm;
-import application_src.application_model.logic.cell_case.NonTerminalCellCase;
-import application_src.application_model.logic.cell_case.TerminalCellCase;
-import application_src.application_model.logic.cell_case.TerminalDescendant;
+import application_src.application_model.data.CElegansData.Connectome.NeuronalSynapse;
+import application_src.application_model.data.CElegansData.PartsList.PartsList;
+import application_src.application_model.data.CElegansData.Anatomy.AmphidSensillaTerm;
+import application_src.application_model.cell_case_logic.cases.NonTerminalCellCase;
+import application_src.application_model.cell_case_logic.cases.TerminalCellCase;
+import application_src.application_model.cell_case_logic.cases.TerminalDescendant;
 import application_src.application_model.threeD.subscenegeometry.SceneElement;
-import application_src.application_model.ProductionInfo;
+import application_src.application_model.resources.ProductionInfo;
 
 import static java.util.Collections.sort;
 
@@ -1388,7 +1388,7 @@ public class InfoWindowDOM {
         HTMLNode amphidCellsTable = new HTMLNode("table");
         HTMLNode amphidCellsTHR = new HTMLNode("tr");
         HTMLNode amphidCellsTHFuncName = new HTMLNode("th", "", "", "Functional Name");
-        HTMLNode amphidCellsTHLineageName = new HTMLNode("th", "", "", "Lineage Name");
+        HTMLNode amphidCellsTHLineageName = new HTMLNode("th", "", "", "SulstonLineage Name");
         HTMLNode amphidCellsTHDescription = new HTMLNode("th", "", "", "Description");
         amphidCellsTHR.addChild(amphidCellsTHFuncName);
         amphidCellsTHR.addChild(amphidCellsTHLineageName);

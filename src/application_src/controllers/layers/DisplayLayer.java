@@ -17,7 +17,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.util.Callback;
 
-import application_src.application_model.logic.color_rule.Rule;
+import application_src.application_model.annotation.color.Rule;
 
 import static java.util.Objects.requireNonNull;
 
