@@ -8,6 +8,8 @@
 
 package application_src.application_model.logic.cell_case;
 
+import application_src.application_model.logic.search.WormBaseQuery;
+
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ public abstract class CellCase {
 
     protected static final String WORMATLAS_URL = "http://www.wormatlas.org/neurons/Individual%20Neurons/";
 
-    private static final String WORMBASE_URL = "http://www.wormbase.org/db/get?name=";
+    private static final String WORMBASE_URL = "https://www.wormbase.org/db/get?name=";
     private static final String WORMBASE_EXT = ";class=Anatomy_term";
 
     private static final String GOOGLE_URL = "https://www.google.com/#q=";
@@ -120,24 +122,8 @@ public abstract class CellCase {
         //add the link to the list before parsing with cytoshow snippet (first link is more human readable)
         links.add(urlString);
 
-        // adapted from cytoshow
-        String[] logLines = content.split("wname=\"associations\"");
-        String restString = "";
-        if (logLines != null && logLines.length > 1 && logLines[1].split("\"").length > 1) {
-            restString = logLines[1].split("\"")[1];
-        }
-
-        try {
-            connection = new URL("http://www.wormbase.org" + restString).openConnection();
-            final Scanner scanner = new Scanner(connection.getInputStream());
-            scanner.useDelimiter("\\Z");
-            content = scanner.next();
-            scanner.close();
-
-        } catch (Exception e) {
-            //a page wasn't found on wormatlas
-            System.out.println(lineageName + " page not found on Wormbase (second URL)");
-
+        geneExpression = WormBaseQuery.issueWormBaseAnatomyTermQuery(content, lineageName);
+        if (geneExpression == null) {
             //remove the link
             for (int i = 0; i < links.size(); i++) {
                 if (links.get(i).startsWith(WORMBASE_URL)) {
@@ -145,15 +131,6 @@ public abstract class CellCase {
                 }
             }
             return;
-        }
-
-        //extract expressions
-        String[] genes = content.split("><");
-        for (String gene : genes) {
-            if (gene.startsWith("span class=\"locus\"")) {
-                gene = gene.substring(gene.indexOf(">") + 1, gene.indexOf("<"));
-                geneExpression.add(gene);
-            }
         }
     }
 

@@ -66,8 +66,8 @@ AVDL	ABalaaapalr	Ventral cord interneuron, synapses onto VA, DA, AS motorneurons
 AVDR	ABalaaapprl	Ventral cord interneuron, synapses onto VA, DA, AS motorneurons; formerly called delta
 AVEL	ABalpppaaaa	Ventral cord interneuron, like AVD but outputs restrict-ed to anterior cord
 AVER	ABpraaaaaaa	Ventral cord interneuron, like AVD but outputs restrict-ed to anterior cord
-AVFL/R	P1.aaaa	ABplapaappaaaa or ABprapaappaaaa. Interneuron, processes in ventral cord and ring, few synapses
-AVFL/R	W.aaa	ABprapaapaaaa. Interneuron, processes in ventral cord and ring, few synapses
+AVFL	P1.aaaa	ABplapaappaaaa or ABprapaappaaaa. Interneuron, processes in ventral cord and ring, few synapses
+AVFR	W.aaa	ABprapaapaaaa. Interneuron, processes in ventral cord and ring, few synapses
 AVG	ABprpapppap	Ventral cord interneuron, few synapses
 AVHL	ABalapaaaaa	Neuron, mainly postsynaptic in ventral cord and presynaptic in the ring
 AVHR	ABalappapaa	Neuron, mainly postsynaptic in ventral cord and presynaptic in the ring
@@ -154,15 +154,15 @@ DVB	K.p	ABplpapppaap. Ring interneuron, cell body in dorsorectal ganglion, inerv
 DVC	Caapaa	Ring interneurons, cell bodies in dorsorectal ganglion
 DVE	B.ppap	ABprppppapappap. Male specific neuron, cell body in dorsorectal ganglion
 DVF	B.ppppa	ABprppppapappppa. Male specific neuron, cell body in dorsorectal ganglion
-DX1/2	F.lvda	ABplppppapplvda. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
-DX1/2	F.rvda	ABplppppapprvda. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
-DX3/4	U.laa	ABplppppapalaa. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
-DX3/4	U.raa	ABplppppaparaa. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
+DX1	F.lvda	ABplppppapplvda. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
+DX2	F.rvda	ABplppppapprvda. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
+DX3	U.laa	ABplppppapalaa. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
+DX4	U.raa	ABplppppaparaa. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
 E	P0.pap	Embryonic founder cell
-EF1/2	F.lvdp	Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
-EF1/2	F.rvdp	Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
-EF3/4	U.lap	ABplppppapalap. Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
-EF3/4	U.rap	ABplppppaparap. Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
+EF1	F.lvdp	Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
+EF2	F.rvdp	Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
+EF3	U.lap	ABplppppapalap. Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
+EF4	U.rap	ABplppppaparap. Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
 F	ABplppppapp	Rectal cell, blast cell in male
 FLPL	ABplapaaapad	Neuron, ciliated ending in head, no supporting cells, associated with ILso
 FLPR	ABprapaaapad	Neuron, ciliated ending in head, no supporting cells, associated with ILso
@@ -256,17 +256,16 @@ OLQsoDR	ABarpaaaaar	Quadrant outer labial socket
 OLQsoVL	ABalppaaapp	Quadrant outer labial socket
 OLQsoVR	ABalaappapp	Quadrant outer labial socket
 P0	Z	Single cell zygote
-P4	P0.pppp	Embryonic founder cell of germ line
-P1/2L	ABplapaapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P1/2R	ABprapaapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P3/4L	ABplappaaa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P3/4R	ABprappaaa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P5/6L	ABplappaap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P5/6R	ABprappaap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P7/8L	ABplappapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P7/8R	ABprappapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P9/10L	ABplapapap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P9/10R	ABprapapap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P1	ABplapaapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P2	ABprapaapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P3	ABplappaaa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P4	ABprappaaa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P5	ABplappaap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P6	ABprappaap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P7	ABplappapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P8	ABprappapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P9	ABplapapap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P10	ABprapapap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
 P11	ABplapappa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
 P12	ABprapappa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
 PCAL	Y.plppd	ABprpppaaaaplppd. Sensory neuron of postcloacal sensilla in male
@@ -618,8 +617,8 @@ hyp7	Cpaapp	Embryonic large hypodermal syncytium
 hyp7	Cpapaa	Embryonic large hypodermal syncytium
 hyp7	Cpapap	Embryonic large hypodermal syncytium
 hyp7	Cpappd	Embryonic large hypodermal syncytium
-hyp8/9	ABplpppapap	Tail ventral hypodermis
-hyp8/9	ABprpppapap	Tail ventral hypodermis
+hyp8	ABplpppapap	Tail ventral hypodermis
+hyp9	ABprpppapap	Tail ventral hypodermis
 hyp10	ABplppppppp	Tail ventral hypodermis
 hyp10	ABprppppppp	Tail ventral hypodermis
 hyp11	Cpappv	Tail dorsal hypodermis

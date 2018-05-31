@@ -37,7 +37,7 @@ public class GeneSearchService extends Service<List<String>> {
 
     /**
      * Inserts a gene and its expressing cells into the results cache. This is used when new results need to be
-     * fetched using {@link search.WormBaseQuery} for ruled added during URL loading, without using this service as a
+     * fetched using {@link } for ruled added during URL loading, without using this service as a
      * wrapper.
      *
      * @param gene the gene

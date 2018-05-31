@@ -23,7 +23,7 @@ import static application_src.application_model.internal_data.partslist.PartsLis
 import static application_src.application_model.internal_data.partslist.PartsList.getLineageNameByIndex;
 import static application_src.application_model.internal_data.partslist.PartsList.getLineageNames;
 import static application_src.application_model.internal_data.partslist.PartsList.getLineageNamesByFunctionalName;
-import static application_src.application_model.logic.search.WormBaseQuery.issueWormBaseQuery;
+import static application_src.application_model.logic.search.WormBaseQuery.issueWormBaseGeneQuery;
 import static application_src.application_model.logic.lineage.LineageTree.isAncestor;
 import static application_src.application_model.logic.lineage.LineageTree.isDescendant;
 
@@ -192,10 +192,10 @@ public class SearchUtil {
      *
      * @return cells with the searched gene expression
      *
-     * @see WormBaseQuery#issueWormBaseQuery(String)
+     * @see WormBaseQuery#issueWormBaseGeneQuery(String)
      */
     public static List<String> getCellsWithGeneExpression(final String searched) {
-        return issueWormBaseQuery(searched);
+        return issueWormBaseGeneQuery(searched);
     }
 
     /**
@@ -579,4 +579,6 @@ public class SearchUtil {
     public static boolean isLineageName(String cellName) {
         return activeLineageNames.contains(cellName);
     }
+
+    public static boolean isFunctionalName(String cellName) {return functionalNames.contains(cellName); }
 }

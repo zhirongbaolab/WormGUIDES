@@ -71,7 +71,7 @@ import static application_src.application_model.logic.search.SearchUtil.getCells
 import static application_src.application_model.logic.search.SearchUtil.getDescendantsList;
 import static application_src.application_model.logic.search.SearchUtil.getNeighboringCells;
 import static application_src.application_model.logic.search.SearchUtil.isGeneFormat;
-import static application_src.application_model.logic.search.WormBaseQuery.issueWormBaseQuery;
+import static application_src.application_model.logic.search.WormBaseQuery.issueWormBaseGeneQuery;
 import static application_src.application_model.logic.lineage.LineageTree.getCaseSensitiveName;
 import static application_src.application_model.internal_data.anatomy.AnatomyTerm.AMPHID_SENSILLA;
 import static application_src.application_model.logic.color_rule.SearchOption.ANCESTOR;
@@ -764,7 +764,7 @@ public class SearchLayer {
                 public Task<List<String>> createTask() {
                     return new Task<List<String>>() {
                         public List<String> call() {
-                            return issueWormBaseQuery(searched);
+                            return issueWormBaseGeneQuery(searched);
                         }
                     };
                 }

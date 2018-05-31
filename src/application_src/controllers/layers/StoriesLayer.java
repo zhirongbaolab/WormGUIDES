@@ -598,13 +598,25 @@ public class StoriesLayer {
     public void setActiveStory(final Story story) {
         // disable previous active story, copy current rules changes back to story/note
         if (activeStory != null) {
+            // save the color url to the internal representation of this story, in case it has changed
             if (activeNote != null) {
-                if (!activeNote.hasColorScheme()) {
-                    activeStory.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
-                } else {
+                if (activeNote.hasColorScheme()) {
                     activeNote.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
+
+                    // slight hack to get the story's rules together
+                    if (activeStory.hasNotes()) {
+                        setActiveNoteWithSubsceneRebuild(activeStory.getNotes().get(0));
+
+                        // now the activeRulesList should be the general story colors, so save those to the active story
+                        activeStory.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
+                    }
+                } else {
+                    activeStory.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
                 }
+            } else {
+                activeStory.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
             }
+
             activeStory.setActive(false);
         }
 
