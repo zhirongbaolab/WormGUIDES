@@ -4,33 +4,38 @@
 
 package application_src.application_model.logic.search;
 
+import application_src.application_model.internal_data.partslist.PartsList;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 
+import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNameByLineageName;
+import static application_src.application_model.internal_data.partslist.PartsList.getLineageNamesByFunctionalName;
 import static java.util.Collections.sort;
 import static java.util.Objects.requireNonNull;
 import static java.util.regex.Pattern.compile;
 
 import static application_src.application_model.logic.search.SearchUtil.isLineageName;
+import static application_src.application_model.logic.search.SearchUtil.isFunctionalName;
 
 /**
- * Utility that queries the WormBase http://www.wormbase.org.
+ * Utility that queries WormBase https://www.wormbase.org.
  */
 public class WormBaseQuery {
 
     /** The WormBase URL */
     private static final String WORMBASE_URL = "https://www.wormbase.org";
+    private static final String WORMBASE_URL_NAME_FIELD = "/db/get?name=";
+
+    private static final String WORMBASE_EXT = ";class=Anatomy_term";
 
     /** Time to wait, in millis, for WormBase to respond */
     private static final int CONNECTION_TIMEOUT_MILLIS = 15000;
@@ -46,7 +51,7 @@ public class WormBaseQuery {
      *
      * @return cells with that gene
      */
-    public static List<String> issueWormBaseQuery(String searchedGene) {
+    public static List<String> issueWormBaseGeneQuery(String searchedGene) {
         final List<String> results = new ArrayList<>();
 
         if (!requireNonNull(searchedGene).isEmpty()) {
@@ -69,6 +74,7 @@ public class WormBaseQuery {
                         }
                     }
 
+
                     try (final BufferedReader restPageStream = openUrl(restString)) {
                         if (restPageStream != null) {
                             String wbGeneLine;
@@ -80,6 +86,9 @@ public class WormBaseQuery {
                                     final String name = m.group(1);
                                     if (isLineageName(name)) {
                                         results.add(name);
+                                    } else if (isFunctionalName(name)) {
+                                        ArrayList<String> names = (ArrayList<String>)getLineageNamesByFunctionalName(name);
+                                        results.add(names.get(0));
                                     }
                                 }
                             }
@@ -93,6 +102,69 @@ public class WormBaseQuery {
 
         sort(results);
         return new ArrayList<>(new HashSet<>(results));
+    }
+
+    public static List<String> issueWormBaseAnatomyTermQuery(String lineageName) {
+        final StringBuilder url = new StringBuilder();
+
+        url.append(WORMBASE_URL).append(WORMBASE_URL_NAME_FIELD).append(lineageName).append(WORMBASE_EXT);
+        System.out.println(url.toString());
+
+        final String urlString = url.toString();
+
+        String content = "";
+        URLConnection connection = null;
+
+        try {
+            connection = new URL(urlString).openConnection();
+            Scanner scanner = new Scanner(connection.getInputStream());
+            scanner.useDelimiter("\\Z");
+            content = scanner.next();
+            scanner.close();
+        } catch (Exception e) {
+            //e.printStackTrace();
+            //a page wasn't found on wormatlas
+            System.out.println(lineageName + " page not found on Wormbase");
+            return null;
+        }
+
+        return issueWormBaseAnatomyTermQuery(content, lineageName);
+    }
+
+    public static List<String> issueWormBaseAnatomyTermQuery(String content, String lineageName) {
+        ArrayList<String> geneExpression = new ArrayList<>();
+        URLConnection connection = null;
+
+        // adapted from cytoshow
+        String[] logLines = content.split("wname=\"associations\"");
+        String restString = "";
+        if (logLines != null && logLines.length > 1 && logLines[1].split("\"").length > 1) {
+            restString = logLines[1].split("\"")[1];
+        }
+
+        try {
+            connection = new URL(WORMBASE_URL + restString).openConnection();
+            final Scanner scanner = new Scanner(connection.getInputStream());
+            scanner.useDelimiter("\\Z");
+            content = scanner.next();
+            scanner.close();
+
+        } catch (Exception e) {
+            //a page wasn't found on wormatlas
+            System.out.println(lineageName + " page not found on Wormbase (second URL)");
+            return null;
+        }
+
+        //extract expressions
+        String[] genes = content.split("><");
+        for (String gene : genes) {
+            if (gene.startsWith("span class=\"locus\"")) {
+                gene = gene.substring(gene.indexOf(">") + 1, gene.indexOf("<"));
+                geneExpression.add(gene);
+            }
+        }
+
+        return geneExpression;
     }
 
     /**

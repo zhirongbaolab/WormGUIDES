@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import application_src.application_model.logic.search.WormBaseQuery;
 import javafx.beans.property.BooleanProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -196,64 +197,12 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                     protected List<String> call() throws Exception {
                         if (cellName != null && !cellName.isEmpty()) {
                             if (cases == null) {
-                                System.out.println("null cell cases");
+                                System.out.println("null cell name");
                                 return null; // error check
                             }
 
-                            String searchName = cellName;
+                            return WormBaseQuery.issueWormBaseAnatomyTermQuery(cellName);
 
-                            // translate the name if necessary
-                            String funcName = connectome.checkQueryCell(cellName).toLowerCase();
-
-                            boolean isTerminalCase = false;
-                            if (funcName != null) {
-                                isTerminalCase = true;
-                            }
-                            if (isTerminalCase) {
-                                if (!cases.containsCellCase(searchName)) {
-                                    cases.makeTerminalCase(
-                                            cellName,
-                                            funcName,
-                                            connectome.queryConnectivity(
-                                                    funcName,
-                                                    true,
-                                                    false,
-                                                    false,
-                                                    false,
-                                                    false),
-                                            connectome.queryConnectivity(
-                                                    funcName,
-                                                    false,
-                                                    true,
-                                                    false,
-                                                    false,
-                                                    false),
-                                            connectome.queryConnectivity(
-                                                    funcName,
-                                                    false,
-                                                    false,
-                                                    true,
-                                                    false,
-                                                    false),
-                                            connectome.queryConnectivity(
-                                                    funcName,
-                                                    false,
-                                                    false,
-                                                    false,
-                                                    true,
-                                                    false),
-                                            productionInfo.getNuclearInfo(),
-                                            productionInfo.getCellShapeData(cellName));
-                                }
-                                return cases.getCellCase(cellName).getExpressesWORMBASE();
-                            }
-                            if (!cases.containsCellCase(searchName)) {
-                                cases.makeNonTerminalCase(
-                                        searchName,
-                                        productionInfo.getNuclearInfo(),
-                                        productionInfo.getCellShapeData(cellName));
-                            }
-                            return cases.getCellCase(searchName).getExpressesWORMBASE();
                         }
                         return null;
                     }
