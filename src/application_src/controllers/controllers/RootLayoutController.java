@@ -596,7 +596,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
         if (infoWindow == null) {
             initInfoWindow();
         }
-        infoWindow.generateCellDeathsWindow(CellDeaths.getCellDeathsAsArray());
+        // TODO workaround to unit test, get this fixed
+        infoWindow.generateCellDeathsWindow(CellDeaths.getCellDeathsAsArray().toArray());
     }
 
     @FXML

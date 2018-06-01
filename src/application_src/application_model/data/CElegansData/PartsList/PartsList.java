@@ -23,7 +23,7 @@ import static java.util.Collections.sort;
  */
 public class PartsList {
 
-    private static final String RESOURCE_PATH = "/application_src/application_model/internal_data/partslist/partslist.txt";
+    private static final String RESOURCE_PATH = "/application_src/application_model/data/CElegansData/PartsList/partslist.txt";
 
     private static final List<String> functionalNames = new ArrayList<>();
     private static final List<String> lineageNames = new ArrayList<>();

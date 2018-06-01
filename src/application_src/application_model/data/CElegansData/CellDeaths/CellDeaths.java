@@ -28,22 +28,15 @@ public class CellDeaths {
 
             String line;
             while ((line = br.readLine()) != null) {
-                cellDeaths.add(line.toLowerCase());
+                cellDeaths.add(line);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static boolean containsCell(String cell) {
-        return cellDeaths != null && cellDeaths.contains(cell.toLowerCase());
-    }
+    // TODO remove this
+    public static boolean isInCellDeaths(String str) { return false;}
     
-    public static Object[] getCellDeathsAsArray() {
-    	return cellDeaths.toArray();
-    }
-
-    public static boolean isInCellDeaths(final String name) {
-        return cellDeaths.contains(name);
-    }
+    public static List<String> getCellDeathsAsArray() { return cellDeaths; }
 }

@@ -3,6 +3,7 @@ package application_src.application_model.search;
 
 import application_src.application_model.data.OrganismDataType;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,19 +21,19 @@ public interface OrganismSearch {
      * @param includeDescendants
      * @return
      */
-    Map<OrganismDataType, List<String>> executeLineageSearch(String searchString,
-                                                             boolean includeAncestors,
-                                                             boolean includeDescendants);
+    AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeLineageSearch(String searchString,
+                                                                      boolean includeAncestors,
+                                                                      boolean includeDescendants);
 
-    Map<OrganismDataType, List<String>> executeFunctionalSearch(String searchString,
+    AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeFunctionalSearch(String searchString,
                                                                 boolean includeAncestors,
                                                                 boolean includeDescendants);
 
-    Map<OrganismDataType, List<String>> executeDescriptionSearch(String searchString,
+    AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeDescriptionSearch(String searchString,
                                                                   boolean includeAncestors,
                                                                   boolean includeDescendans);
 
-    Map<OrganismDataType, List<String>> executeConnectomeSearch(String searchString,
+    AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeConnectomeSearch(String searchString,
                                                                 boolean includeAncestors,
                                                                 boolean includeDescendants,
                                                                 boolean includePresynapticPartners,
@@ -40,7 +41,7 @@ public interface OrganismSearch {
                                                                 boolean includeElectricalPartners,
                                                                 boolean includeNeuromuscularPartners);
 
-    Map<OrganismDataType, List<String>> executeGeneSearch(String searchString,
+    AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeGeneSearch(String searchString,
                                                           boolean isSearchTermGene,
                                                           boolean isSearchTermAnatomy);
 }
