@@ -4,6 +4,9 @@
 
 package application_src.application_model.data.CElegansData.Gene;
 
+import application_src.application_model.data.CElegansData.PartsList.PartsList;
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,8 +23,6 @@ import static java.util.Collections.sort;
 import static java.util.Objects.requireNonNull;
 import static java.util.regex.Pattern.compile;
 
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.isLineageName;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.isFunctionalName;
 
 /**
  * Utility that queries WormBase https://www.wormbase.org.
@@ -81,9 +82,9 @@ public class WormBaseQuery {
                                         .matcher(wbGeneLine);
                                 while (m.find()) {
                                     final String name = m.group(1);
-                                    if (isLineageName(name)) {
+                                    if (CElegansSearch.isValidLineageSearchTerm(name)) {
                                         results.add(name);
-                                    } else if (isFunctionalName(name)) {
+                                    } else if (CElegansSearch.isValidFunctionalSearchTerm(name)) {
                                         ArrayList<String> names = (ArrayList<String>)getLineageNamesByFunctionalName(name);
                                         results.add(names.get(0));
                                     }
@@ -104,8 +105,15 @@ public class WormBaseQuery {
     public static List<String> issueWormBaseAnatomyTermQuery(String lineageName) {
         final StringBuilder url = new StringBuilder();
 
-        url.append(WORMBASE_URL).append(WORMBASE_URL_NAME_FIELD).append(lineageName).append(WORMBASE_EXT);
-        System.out.println(url.toString());
+        // WormBase's convention seems to be to switch to functional names when that happens, so see if
+        // the entity of choice has a functional name
+        String useTerm = lineageName;
+        String funcNameAttempt = PartsList.getFunctionalNameByLineageName(lineageName);
+        if (funcNameAttempt != null) {
+            useTerm = lineageName;
+        }
+
+        url.append(WORMBASE_URL).append(WORMBASE_URL_NAME_FIELD).append(useTerm).append(WORMBASE_EXT);
 
         final String urlString = url.toString();
 

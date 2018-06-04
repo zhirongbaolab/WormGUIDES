@@ -13,8 +13,6 @@ import javafx.scene.control.TreeItem;
 
 import java.util.*;
 
-import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNamesByFunctionalName;
-
 public class CElegansSearch implements OrganismSearch {
 
 
@@ -35,21 +33,23 @@ public class CElegansSearch implements OrganismSearch {
         ArrayList<String> lineageNames = (ArrayList<String>)PartsList.getLineageNames();
         ArrayList<String> cellDeaths = (ArrayList<String>)CellDeaths.getCellDeathsAsArray();
 
+        boolean found = false;
+        String strMatch = "";
 
         // check for exact and prefix match in both lists
-        boolean found = false;
         for (String s : lineageNames) {
             if (s.toLowerCase().equals(searchString.toLowerCase()) || s.toLowerCase().startsWith(searchString.toLowerCase())) {
-                searchResults = (ArrayList<String>)executeLineageSearch(searchString, s, includeAncestors, includeDescendants);
+                strMatch = s;
                 found = true;
                 break;
             }
         }
 
+        // check in the cell deaths
         if (!found) {
             for (String s : cellDeaths) {
                 if (s.toLowerCase().equals(searchString.toLowerCase()) || s.toLowerCase().startsWith(searchString.toLowerCase())) {
-                    searchResults = (ArrayList<String>)executeLineageSearch(searchString, s, includeAncestors, includeDescendants);
+                    strMatch = s;
                     found = true;
                     break;
                 }
@@ -59,14 +59,17 @@ public class CElegansSearch implements OrganismSearch {
         // check in the special cases of the sulston lineage
         if (!found) {
             String[] specialCasesAsStringArray = SulstonLineage.getSpecialCasesAsStringArray();
-
             for (String s : specialCasesAsStringArray) {
                 if (s.toLowerCase().equals(searchString.toLowerCase())) {
-                    searchResults = (ArrayList<String>)executeLineageSearch(searchString, s, includeAncestors, includeDescendants);
+                    strMatch = s;
+                    found = true;
                 }
             }
         }
 
+        if (found) { // found indicates that this is a valid lineage name
+            searchResults = (ArrayList<String>)executeLineageSearch(searchString, strMatch, includeAncestors, includeDescendants);
+        }
 
         AbstractMap.SimpleEntry<OrganismDataType, List<String>> results =
                 new AbstractMap.SimpleEntry(lineageDataType, cleanResults(searchResults));
@@ -435,9 +438,62 @@ public class CElegansSearch implements OrganismSearch {
 
 
     ////////// GENE SEARCH SEARCH ////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     *
+     *
+     * Pass this a lineage name
+     *
+     * @param searchString
+     * @param isSearchTermGene
+     * @param isSearchTermAnatomy
+     * @param intendedResultsType
+     * @return
+     */
     @Override
-    public AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeGeneSearch(String searchString, boolean isSearchTermGene, boolean isSearchTermAnatomy, OrganismDataType intendedResultsType) {
-        return null;
+    public AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeGeneSearch(String searchString, boolean includeAncestors, boolean includeDescendants, boolean isSearchTermGene, boolean isSearchTermAnatomy, OrganismDataType intendedResultsType) {
+        ArrayList<String> searchResults = new ArrayList<>();
+
+        if (isSearchTermGene && !isSearchTermAnatomy) {
+            // search term is a gene -> find the cells (anatomy) that express this gene
+            searchResults.addAll(WormBaseQuery.issueWormBaseGeneQuery(searchString));
+
+            if (intendedResultsType.equals(OrganismDataType.FUNCTIONAL)) {
+                // convert the lineage names to functional
+                ArrayList<String> searchResultsAsFunctionalNames = new ArrayList<>();
+                searchResults.stream().forEach(s -> {
+                    searchResultsAsFunctionalNames.add(PartsList.getFunctionalNameByLineageName(s));
+                });
+
+                searchResults.clear();
+                searchResults.addAll(searchResultsAsFunctionalNames);
+            } else if (intendedResultsType.equals(OrganismDataType.LINEAGE)) {
+                ArrayList<String> ancestorsSearchResults = new ArrayList<>();
+                if (includeAncestors) {
+                    searchResults.stream().forEach(s -> {
+                       ancestorsSearchResults.addAll(executeLineageSearch(s, true, false).getValue());
+                    });
+                }
+
+                ArrayList<String> descendantsSearchResults = new ArrayList<>();
+                if (includeDescendants) {
+                    searchResults.stream().forEach(s -> {
+                       descendantsSearchResults.addAll(executeLineageSearch(s, false, true).getValue());
+                    });
+                }
+
+                searchResults.addAll(ancestorsSearchResults);
+                searchResults.addAll(descendantsSearchResults);
+            }
+        } else if (!isSearchTermGene && isSearchTermAnatomy) {
+            // search term is an anatomy term -> find the genes that are expresses in this piece of anatomy
+            searchResults.addAll(WormBaseQuery.issueWormBaseAnatomyTermQuery(searchString));
+            intendedResultsType = OrganismDataType.GENE; // it probably will already be this, but this is just a safe measure
+        }
+
+        AbstractMap.SimpleEntry<OrganismDataType, List<String>> results =
+                new AbstractMap.SimpleEntry(intendedResultsType, cleanResults(searchResults));
+        return results;
     }
 
     ////////// END GENE SEARCH ////////////////////////////////////////////////////////////////////////////////////
@@ -448,9 +504,12 @@ public class CElegansSearch implements OrganismSearch {
 
     // cell deaths search
 
-    // general utilities
+    /////////////////// GENERAL UTILITIES /////////////////////////////////////////////////
 
     /**
+     *
+     *
+     * Used by:
      *
      * @param results
      * @return
@@ -480,6 +539,71 @@ public class CElegansSearch implements OrganismSearch {
         return results;
     }
 
+    /**
+     *
+     * Used by:
+     * WormBaseQuery.java
+     *
+     * @param searchString
+     * @return
+     */
+    public static boolean isValidLineageSearchTerm(String searchString) {
+        ArrayList<String> lineageNames = (ArrayList<String>)PartsList.getLineageNames();
+        // check for exact and prefix match in both lists
+        boolean found = false;
+        for (String s : lineageNames) {
+            if (s.toLowerCase().equals(searchString.toLowerCase()) || s.toLowerCase().startsWith(searchString.toLowerCase())) {
+                return true;
+            }
+        }
+
+        // check in the cell deaths
+        ArrayList<String> cellDeaths = (ArrayList<String>)CellDeaths.getCellDeathsAsArray();
+        if (!found) {
+            for (String s : cellDeaths) {
+                if (s.toLowerCase().equals(searchString.toLowerCase()) || s.toLowerCase().startsWith(searchString.toLowerCase())) {
+                    return true;
+                }
+            }
+        }
+
+        // check in the special cases of the sulston lineage
+        if (!found) {
+            String[] specialCasesAsStringArray = SulstonLineage.getSpecialCasesAsStringArray();
+            for (String s : specialCasesAsStringArray) {
+                if (s.toLowerCase().equals(searchString.toLowerCase())) {
+                    return true;
+                }
+            }
+        }
+
+        return found;
+    }
+
+    /**
+     *
+     *
+     * Used by:
+     * WormBaseQuery.java
+     *
+     * @param searchString
+     * @return
+     */
+    public static boolean isValidFunctionalSearchTerm(String searchString) {
+        ArrayList<String> functionalNames = (ArrayList<String>)PartsList.getFunctionalNames();
+        for (String s : functionalNames) {
+            if (s.toLowerCase().startsWith(searchString.toLowerCase())
+                    || s.toLowerCase().equals(searchString.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /////////////////// END GENERAL UTILITIES /////////////////////////////////////////////////
+
+
+    /////////////////// UNIT TESTS FOR SEARCH PIPELINE ////////////////////////////////////////
 
     /**
      * unit testing main
@@ -600,17 +724,51 @@ public class CElegansSearch implements OrganismSearch {
 //        }
 //        System.out.println("");
 
-        results = search.executeConnectomeSearch("DA5", true, false, true, false, false, true, OrganismDataType.LINEAGE);
-        System.out.println("Results for connectome search on 'DA5' (a=false, d=false, pre=false, post=true, elec=false, neuromusc=false) -> DataType: " + results.getKey().getDescription());
-        System.out.println("size of results: " + results.getValue().size());
-        for (String s : results.getValue()) {
-            System.out.println(s);
-        }
-        System.out.println("");
+//        results = search.executeConnectomeSearch("DA5", true, false, true, false, false, true, OrganismDataType.LINEAGE);
+//        System.out.println("Results for connectome search on 'DA5' (a=false, d=false, pre=false, post=true, elec=false, neuromusc=false) -> DataType: " + results.getKey().getDescription());
+//        System.out.println("size of results: " + results.getValue().size());
+//        for (String s : results.getValue()) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
 
         /* GENE TESTING */
+//        results = search.executeGeneSearch("lim-4", true, false, true, false, OrganismDataType.LINEAGE);
+//        System.out.println("Results for gene search on 'lim-4' (a=true, d=false, gene=true, anatomy=false) -> DataType: " + results.getKey().getDescription());
+//        System.out.println("size of results: " + results.getValue().size());
+//        for (String s : results.getValue()) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
 
+//        results = search.executeGeneSearch("SAAVL", false, false, false, true, OrganismDataType.GENE);
+//        System.out.println("Results for gene search on 'SAAVL' (a=false, d=false, gene=false, anatomy=true) -> DataType: " + results.getKey().getDescription());
+//        System.out.println("size of results: " + results.getValue().size());
+//        for (String s : results.getValue()) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
+
+//        results = search.executeGeneSearch("SAAVL", false, false, false, true, OrganismDataType.GENE);
+//        System.out.println("Results for gene search on 'SAAVL' (a=true, d=false, gene=false, anatomy=true) -> DataType: " + results.getKey().getDescription());
+//        System.out.println("size of results: " + results.getValue().size());
+//        for (String s : results.getValue()) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
+
+//        results = search.executeGeneSearch("ABpl", false, false, false, true, OrganismDataType.GENE);
+//        System.out.println("Results for gene search on 'ABpl' (a=false, d=false, gene=false, anatomy=true) -> DataType: " + results.getKey().getDescription());
+//        System.out.println("size of results: " + results.getValue().size());
+//        for (String s : results.getValue()) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
 
         //////////// OTHER C ELEGANS METHODS ///////////////
+
+
     }
-}
+
+    /////////////////// END UNIT TESTS FOR SEARCH PIPELINE ////////////////////////////////////////
+} // end of class

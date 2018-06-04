@@ -86,6 +86,8 @@ public interface OrganismSearch {
      * @return
      */
     AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeGeneSearch(String searchString,
+                                                                              boolean includeAncestors,
+                                                                              boolean includeDescendants,
                                                                               boolean isSearchTermGene,
                                                                               boolean isSearchTermAnatomy,
                                                                               OrganismDataType intendedResultsType);
