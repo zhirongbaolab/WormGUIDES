@@ -244,24 +244,29 @@ public class CElegansSearch implements OrganismSearch {
     public AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeFunctionalSearch(String searchString, boolean includeAncestors, boolean includeDescendants, OrganismDataType intendedResultsType) {
         ArrayList<String> searchResults = new ArrayList<>();
 
-
         ArrayList<String> functionalNames = (ArrayList<String>)PartsList.getFunctionalNames();
-        functionalNames.stream().forEach(s -> {
+        for (int i = 0; i < functionalNames.size(); i++) {
+            String s = functionalNames.get(i);
             if (s.toLowerCase().startsWith(searchString.toLowerCase())
                     || s.toLowerCase().equals(searchString.toLowerCase())) {
                 if (intendedResultsType.equals(OrganismDataType.FUNCTIONAL)) {
                     searchResults.add(s);
                 } else if (intendedResultsType.equals(OrganismDataType.LINEAGE)) {
-                    searchResults.addAll(PartsList.getLineageNamesByFunctionalName(s));
-                }}});
+                    searchResults.add(PartsList.getLineageNameByIndex(i));
+                }
+            }
+        }
+
 
         if (includeAncestors) {
+            ArrayList<String> ancestorSearchResults = new ArrayList<>();
             searchResults.stream().forEach(s -> {
                 // let's only allow ancestors search on results that are lineage-based, otherwise the
                 // results will be mixed format and that's not good for anyone
                 if (intendedResultsType.equals(OrganismDataType.LINEAGE)) {
-                    searchResults.addAll(executeLineageSearch(s, true, false).getValue());
+                    ancestorSearchResults.addAll(executeLineageSearch(s, true, false).getValue());
                 }});
+            searchResults.addAll(ancestorSearchResults);
         }
 
         AbstractMap.SimpleEntry<OrganismDataType, List<String>> results =
@@ -277,12 +282,37 @@ public class CElegansSearch implements OrganismSearch {
     ////////// DESCRIPTION SEARCH ////////////////////////////////////////////////////////////////////////////////////
     @Override
     public AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeDescriptionSearch(String searchString, boolean includeAncestors, boolean includeDescendants, OrganismDataType intendedResultsType) {
-        OrganismDataType functionalDataType = OrganismDataType.FUNCTIONAL;
         ArrayList<String> searchResults = new ArrayList<>();
 
 
+        ArrayList<String> descriptions = (ArrayList<String>)PartsList.getDescriptions();
+        for (int i = 0; i < descriptions.size(); i++) {
+            String d = descriptions.get(i);
+            if (d.toLowerCase().contains(searchString.toLowerCase())
+                    || d.toLowerCase().equals(searchString.toLowerCase())) {
+                if (intendedResultsType.equals(OrganismDataType.FUNCTIONAL)) {
+                    searchResults.add(PartsList.getFunctionalNameByIndex(i));
+                } else if (intendedResultsType.equals(OrganismDataType.LINEAGE)) {
+                    searchResults.add(PartsList.getLineageNameByIndex(i));
+                }
+            }
+        }
+
+
+        if (includeAncestors) {
+            ArrayList<String> ancestorSearchResults = new ArrayList<>();
+            searchResults.stream().forEach(s -> {
+                // let's only allow ancestors search on results that are lineage-based, otherwise the
+                // results will be mixed format and that's not good for anyone
+                if (intendedResultsType.equals(OrganismDataType.LINEAGE)) {
+                    ancestorSearchResults.addAll(executeLineageSearch(s, true, false).getValue());
+                }});
+            searchResults.addAll(ancestorSearchResults);
+        }
+
+
         AbstractMap.SimpleEntry<OrganismDataType, List<String>> results =
-                new AbstractMap.SimpleEntry(functionalDataType, searchResults);
+                new AbstractMap.SimpleEntry(intendedResultsType, cleanResults(searchResults));
         return results;
     }
 
@@ -404,8 +434,8 @@ public class CElegansSearch implements OrganismSearch {
 //        }
 //        System.out.println("");
 
-//        results = search.executeFunctionalSearch("AIAL", false, false, OrganismDataType.FUNCTIONAL);
-//        System.out.println("Results for functionall search on 'AIAL' (a=false, d=false) -> DataType: " + results.getKey().getDescription());
+//        results = search.executeFunctionalSearch("AIAL", true, false, OrganismDataType.LINEAGE);
+//        System.out.println("Results for functionall search on 'AIAL' (a=true, d=false) -> DataType: " + results.getKey().getDescription());
 //        System.out.println("size of results: " + results.getValue().size());
 //        for (String s : results.getValue()) {
 //            System.out.println(s);
@@ -421,6 +451,13 @@ public class CElegansSearch implements OrganismSearch {
 //        System.out.println("");
 
         /* DESCRIPTION TESTING */
+//        results = search.executeDescriptionSearch("Cephalic neurons", true, false, OrganismDataType.LINEAGE);
+//        System.out.println("Results for description search on 'Cephalic neurons' (a=true, d=false) -> DataType: " + results.getKey().getDescription());
+//        System.out.println("size of results: " + results.getValue().size());
+//        for (String s : results.getValue()) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
 
         /* CONNECTOME TESTING */
 
