@@ -42,58 +42,5 @@ public class EmbryonicAnalogousCells {
         }
     }
 
-    /**
-     * Finds a match in the database given a query cell Case 1: matches a homologous listing Case 2: descendant of a
-     * listed homology
-     *
-     * @param cell
-     *         the query cell
-     *
-     * @return the match
-     */
-    public static String findEmbryonicHomology(String cell) {
-        for (EmbryonicHomology eh : homologues) {
-            if (cell.startsWith(eh.getCell1())) {
-
-                // check if case 1 i.e. complete match
-                if (cell.equals(eh.getCell1())) {
-                    return eh.getCell2();
-                }
-
-                // otherwise, case 1 i.e. descendant --> add suffix
-                final String suffix = cell.substring(eh.getCell2().length());
-                // list upstream parallel
-                return new StringBuilder()
-                        .append(eh.getCell2())
-                        .append(suffix)
-                        .append(" (")
-                        .append(eh.getCell1())
-                        .append(": ")
-                        .append(eh.getCell2())
-                        .append(")")
-                        .toString();
-            }
-
-            if (cell.startsWith(eh.getCell2())) {
-                // check if case 1 i.e. complete match
-                if (cell.equals(eh.getCell2())) {
-                    return eh.getCell1();
-                }
-
-                // otherwise, case 1 i.e. descendant --> add suffix
-                final String suffix = cell.substring(eh.getCell1().length());
-                // list upstream parallel
-                return new StringBuilder()
-                        .append(eh.getCell1())
-                        .append(suffix)
-                        .append(" (")
-                        .append(eh.getCell2())
-                        .append(": ")
-                        .append(eh.getCell1())
-                        .append(")")
-                        .toString();
-            }
-        }
-        return "N/A";
-    }
+    public static List<EmbryonicHomology> getHomologues() { return homologues; }
 }

@@ -34,9 +34,6 @@ public class CellDeaths {
             e.printStackTrace();
         }
     }
-
-    // TODO remove this
-    public static boolean isInCellDeaths(String str) { return false;}
     
-    public static List<String> getCellDeathsAsArray() { return cellDeaths; }
+    public static List<String> getCellDeaths() { return cellDeaths; }
 }

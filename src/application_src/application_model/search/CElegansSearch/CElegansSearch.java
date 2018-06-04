@@ -1,6 +1,9 @@
 package application_src.application_model.search.CElegansSearch;
 
 
+import application_src.application_model.data.CElegansData.AnalogousCells.EmbryonicAnalogousCells;
+import application_src.application_model.data.CElegansData.AnalogousCells.EmbryonicHomology;
+import application_src.application_model.data.CElegansData.Anatomy.Anatomy;
 import application_src.application_model.data.CElegansData.CellDeaths.CellDeaths;
 import application_src.application_model.data.CElegansData.Connectome.Connectome;
 import application_src.application_model.data.CElegansData.Connectome.NeuronalSynapse;
@@ -31,7 +34,7 @@ public class CElegansSearch implements OrganismSearch {
 
         // access the PartsList and CellDeaths arrays
         ArrayList<String> lineageNames = (ArrayList<String>)PartsList.getLineageNames();
-        ArrayList<String> cellDeaths = (ArrayList<String>)CellDeaths.getCellDeathsAsArray();
+        ArrayList<String> cellDeaths = (ArrayList<String>)CellDeaths.getCellDeaths();
 
         boolean found = false;
         String strMatch = "";
@@ -114,7 +117,7 @@ public class CElegansSearch implements OrganismSearch {
         if (includeDescendants) {
             // access the PartsList and CellDeaths arrays
             ArrayList<String> lineageNames = (ArrayList<String>)PartsList.getLineageNames();
-            ArrayList<String> cellDeaths = (ArrayList<String>)CellDeaths.getCellDeathsAsArray();
+            ArrayList<String> cellDeaths = (ArrayList<String>)CellDeaths.getCellDeaths();
 
             // first check if this is a special case
             if (Arrays.asList(SulstonLineage.getSpecialCasesAsStringArray()).contains(searchString)) {
@@ -150,7 +153,7 @@ public class CElegansSearch implements OrganismSearch {
 
         // access the PartsList and CellDeaths arrays
         ArrayList<String> lineageNames = (ArrayList<String>)PartsList.getLineageNames();
-        ArrayList<String> cellDeaths = (ArrayList<String>)CellDeaths.getCellDeathsAsArray();
+        ArrayList<String> cellDeaths = (ArrayList<String>)CellDeaths.getCellDeaths();
 
         // for every match found, generate all descendants between the search string and the match
         for (String s : lineageNames) {
@@ -427,7 +430,7 @@ public class CElegansSearch implements OrganismSearch {
      *
      * @return the functional name of that cell
      */
-    public String checkQueryCell(String searchString) {
+    public static String checkQueryCell(String searchString) {
             if (PartsList.isLineageName(searchString)) {
                 searchString = PartsList.getFunctionalNameByLineageName(searchString);
             }
@@ -498,11 +501,251 @@ public class CElegansSearch implements OrganismSearch {
 
     ////////// END GENE SEARCH ////////////////////////////////////////////////////////////////////////////////////
 
-    // analogous cells search
+    ///////////////////////////////// EMBRYONIC HOMOLOGY - ANALOGOUS CELLS SEARCH ////////////////////////////////
+    /**
+     * Finds a match in the database given a query cell Case 1: matches a homologous listing Case 2: descendant of a
+     * listed homology
+     *
+     * @param cell
+     *         the query cell
+     *
+     * @return the match
+     */
+    public static String findEmbryonicHomology(String cell) {
+        for (EmbryonicHomology eh : EmbryonicAnalogousCells.getHomologues()) {
+            if (cell.startsWith(eh.getCell1())) {
 
-    // anatomy search
+                // check if case 1 i.e. complete match
+                if (cell.equals(eh.getCell1())) {
+                    return eh.getCell2();
+                }
 
-    // cell deaths search
+                // otherwise, case 1 i.e. descendant --> add suffix
+                final String suffix = cell.substring(eh.getCell2().length());
+                // list upstream parallel
+                return new StringBuilder()
+                        .append(eh.getCell2())
+                        .append(suffix)
+                        .append(" (")
+                        .append(eh.getCell1())
+                        .append(": ")
+                        .append(eh.getCell2())
+                        .append(")")
+                        .toString();
+            }
+
+            if (cell.startsWith(eh.getCell2())) {
+                // check if case 1 i.e. complete match
+                if (cell.equals(eh.getCell2())) {
+                    return eh.getCell1();
+                }
+
+                // otherwise, case 1 i.e. descendant --> add suffix
+                final String suffix = cell.substring(eh.getCell1().length());
+                // list upstream parallel
+                return new StringBuilder()
+                        .append(eh.getCell1())
+                        .append(suffix)
+                        .append(" (")
+                        .append(eh.getCell2())
+                        .append(": ")
+                        .append(eh.getCell1())
+                        .append(")")
+                        .toString();
+            }
+        }
+        return "N/A";
+    }
+
+
+    ///////////////////////////////// END EMBRYONIC HOMOLOGY - ANALOGOUS CELLS SEARCH ////////////////////////////////
+
+    //////////////////////////// ANATOMY SEARCH /////////////////////////////////////////
+    /**
+     * Provides anatomy info for a given cell
+     *
+     * @param cellName
+     *         name of the cell
+     *
+     * @return the anatomy information for the given cell
+     */
+    public static ArrayList<String> getAnatomy(String cellName) {
+        cellName = cellName.toUpperCase();
+        ArrayList<String> anatomy = new ArrayList<>();
+
+        int idx = -1;
+
+        ArrayList<String> functionalNames = (ArrayList<String>)Anatomy.getFunctionalNames();
+        ArrayList<String> types = (ArrayList<String>)Anatomy.getTypes();
+        ArrayList<String> somaLocations = (ArrayList<String>)Anatomy.getSomaLocations();
+        ArrayList<String> neuriteLocations = (ArrayList<String>)Anatomy.getNeuriteLocations();
+        ArrayList<String> morphologicalFeatures = (ArrayList<String>)Anatomy.getMorphologicalFeatures();
+        ArrayList<String> functions = (ArrayList<String>)Anatomy.getFunctions();
+        ArrayList<String> neurotransmitters = (ArrayList<String>)Anatomy.getNeurotransmitters();
+        //exact match
+
+        for (int i = 0; i < functionalNames.size(); i++) {
+            if (functionalNames.get(i).equals(cellName)) {
+                idx = i;
+                break;
+            }
+        }
+
+        //if no exact match, update cell and search again
+        if (idx == -1) {
+            cellName = findRootOfCell(cellName);
+
+            //check for match with updated cell name
+            for (int i = 0; i < functionalNames.size(); i++) {
+                if (functionalNames.get(i).equals(cellName)) {
+                    idx = i;
+                }
+            }
+        }
+
+        if (idx != -1) {
+            //add functional name
+            anatomy.add(functionalNames.get(idx));
+
+            //add type
+            if (types.get(idx) != null) {
+                anatomy.add(types.get(idx));
+            } else {
+                anatomy.add("*");
+            }
+
+            //add soma location
+            if (somaLocations.get(idx) != null) {
+                anatomy.add(somaLocations.get(idx));
+            } else {
+                anatomy.add("*");
+            }
+
+            //add neurite location
+            if (neuriteLocations.get(idx) != null) {
+                anatomy.add(neuriteLocations.get(idx));
+            } else {
+                anatomy.add("*");
+            }
+
+            //add morphological features
+            if (morphologicalFeatures.get(idx) != null) {
+                anatomy.add(morphologicalFeatures.get(idx));
+            } else {
+                anatomy.add("*");
+            }
+
+            //add function
+            if (functions.get(idx) != null) {
+                anatomy.add(functions.get(idx));
+            } else {
+                anatomy.add("*");
+            }
+
+            //add neurotransmitter
+            if (neurotransmitters.get(idx) != null) {
+                anatomy.add(neurotransmitters.get(idx));
+            } else {
+                anatomy.add("*");
+            }
+        }
+        return anatomy;
+    }
+
+    /**
+     * Checks if the supplied cell has an anatomy description. If a lineage name is given, it is translated to a
+     * functional name first.
+     *
+     * @param cellName
+     *         name of the cell, lineage or functional
+     *
+     * @return true if cell has anatomy, false otherwise
+     */
+    public static boolean hasAnatomy(String cellName) {
+        if (cellName == null) return false;
+        cellName = checkQueryCell(cellName).toUpperCase();
+
+        ArrayList<String> functionalNames = (ArrayList<String>)Anatomy.getFunctionalNames();
+
+        //check for exact match
+        for (String funcName : functionalNames) {
+            if (funcName.equals(cellName)) {
+                return true;
+            }
+        }
+
+        cellName = findRootOfCell(cellName);
+
+        //check for match with updated cell name
+        for (String funcName : functionalNames) {
+            if (funcName.equals(cellName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Finds the base name of a cell i.e. the cell without dorsal, ventral,
+     * left, right, etc. classifiers
+     *
+     * @param cell
+     *         the cell to find the base of
+     *
+     * @return the base name of the cell
+     */
+    private static String findRootOfCell(String cell) {
+        //remove number suffixes, l/r, d/v
+        Character lastChar = cell.charAt(cell.length() - 1);
+        lastChar = Character.toLowerCase(lastChar);
+        if (lastChar == 'r' || lastChar == 'l') {
+            cell = cell.substring(0, cell.length() - 1);
+
+            // check if preceding d/v
+            lastChar = cell.charAt(cell.length() - 1);
+            lastChar = Character.toLowerCase(lastChar);
+            if (lastChar == 'd' || lastChar == 'v') {
+                cell = cell.substring(0, cell.length() - 1);
+            }
+        } else if (lastChar == 'd' || lastChar == 'v') { // will l/r ever come
+            // before d/v
+            cell = cell.substring(0, cell.length() - 1);
+
+            // check if preceding l/r
+            lastChar = cell.charAt(cell.length() - 1);
+            lastChar = Character.toLowerCase(lastChar);
+            if (lastChar == 'l' || lastChar == 'r') {
+                cell = cell.substring(0, cell.length() - 1);
+            }
+        } else if (Character.isDigit(lastChar)) {
+            cell = cell.substring(0, cell.length() - 1).toUpperCase();
+        }
+
+        return cell;
+    }
+
+    //////////////////////////// END ANATOMY SEARCH /////////////////////////////////////////
+
+
+
+
+
+    ///////////////////////// CELL DEATHS SEARCH /////////////////////////////////////////////
+    public static boolean isCellDeath(String searchString) {
+        for (String s : CellDeaths.getCellDeaths()) {
+            if (s.toLowerCase().equals(searchString.toLowerCase())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    ///////////////////////// END CELL DEATHS SEARCH /////////////////////////////////////////////
+
+
+
 
     /////////////////// GENERAL UTILITIES /////////////////////////////////////////////////
 
@@ -558,7 +801,7 @@ public class CElegansSearch implements OrganismSearch {
         }
 
         // check in the cell deaths
-        ArrayList<String> cellDeaths = (ArrayList<String>)CellDeaths.getCellDeathsAsArray();
+        ArrayList<String> cellDeaths = (ArrayList<String>)CellDeaths.getCellDeaths();
         if (!found) {
             for (String s : cellDeaths) {
                 if (s.toLowerCase().equals(searchString.toLowerCase()) || s.toLowerCase().startsWith(searchString.toLowerCase())) {
