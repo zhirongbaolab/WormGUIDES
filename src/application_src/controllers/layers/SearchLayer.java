@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import application_src.application_model.data.OrganismDataType;
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
@@ -85,6 +87,7 @@ public class SearchLayer {
     private final GeneSearchService geneSearchService;
     private final Service<Void> showLoadingService;
 
+    private final CElegansSearch CElegansSearchPipeline;
     private final ObservableList<Rule> rulesList;
 
     private final ObservableList<String> searchResultsList;
@@ -116,6 +119,7 @@ public class SearchLayer {
     private TreeItem<StructureTreeNode> structureTreeRoot;
 
     public SearchLayer(
+            final CElegansSearch CElegansSearchPipeline,
             final ObservableList<Rule> rulesList,
             final ObservableList<String> searchResultsList,
             final TextField searchTextField,
@@ -139,6 +143,7 @@ public class SearchLayer {
             final BooleanProperty geneResultsUpdatedFlag,
             final BooleanProperty rebuildSubsceneFlag) {
 
+        this.CElegansSearchPipeline = requireNonNull(CElegansSearchPipeline);
         this.rulesList = requireNonNull(rulesList);
         this.searchResultsList = requireNonNull(searchResultsList);
 
@@ -320,13 +325,15 @@ public class SearchLayer {
                 funcName,
                 isPresynapticTicked, isPostsynapticTicked, isElectricalTicked, isNeuromuscularTicked);
         final Rule rule = new Rule(rebuildSubsceneFlag, sb.toString(), color, CONNECTOME, CELL_NUCLEUS);
-        rule.setCells(connectome.queryConnectivity(
+        rule.setCells(CElegansSearchPipeline.executeConnectomeSearch(
                 funcName,
+                false,
+                false,
                 isPresynapticTicked,
                 isPostsynapticTicked,
                 isElectricalTicked,
                 isNeuromuscularTicked,
-                true));
+                OrganismDataType.LINEAGE).getValue());
         rule.setSearchedText(sb.toString());
         rule.resetLabel(sb.toString());
         rulesList.add(rule);
@@ -989,39 +996,47 @@ public class SearchLayer {
                                     // show the tab
                                 } else {
                                     // translate the name if necessary
-                                    String funcName = connectome.checkQueryCell(searchedCell).toUpperCase();
+                                    String funcName = CElegansSearchPipeline.checkQueryCell(searchedCell).toUpperCase();
                                     // add a terminal case --> pass the wiring partners
                                     casesLists.makeTerminalCase(
                                             searchedCell,
                                             funcName,
-                                            connectome.queryConnectivity(
-                                                    funcName,
-                                                    true,
-                                                    false,
-                                                    false,
-                                                    false,
-                                                    false),
-                                            connectome.queryConnectivity(
-                                                    funcName,
-                                                    false,
-                                                    true,
-                                                    false,
-                                                    false,
-                                                    false),
-                                            connectome.queryConnectivity(
+                                            CElegansSearchPipeline.executeConnectomeSearch(
                                                     funcName,
                                                     false,
                                                     false,
                                                     true,
                                                     false,
-                                                    false),
-                                            connectome.queryConnectivity(
+                                                    false,
+                                                    false,
+                                                    OrganismDataType.FUNCTIONAL).getValue(),
+                                            CElegansSearchPipeline.executeConnectomeSearch(
                                                     funcName,
                                                     false,
                                                     false,
                                                     false,
                                                     true,
-                                                    false),
+                                                    false,
+                                                    false,
+                                                    OrganismDataType.FUNCTIONAL).getValue(),
+                                            CElegansSearchPipeline.executeConnectomeSearch(
+                                                    funcName,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    false,
+                                                    OrganismDataType.FUNCTIONAL).getValue(),
+                                            CElegansSearchPipeline.executeConnectomeSearch(
+                                                    funcName,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    OrganismDataType.FUNCTIONAL).getValue(),
                                             productionInfo.getNuclearInfo(),
                                             productionInfo.getCellShapeData(searchedCell));
                                 }

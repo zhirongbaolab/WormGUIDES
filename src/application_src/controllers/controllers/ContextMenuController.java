@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import application_src.application_model.data.CElegansData.Gene.WormBaseQuery;
+import application_src.application_model.data.OrganismDataType;
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import javafx.beans.property.BooleanProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -104,7 +106,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     private ProductionInfo productionInfo;
     private Stage parentStage;
     private BooleanProperty bringUpInfoProperty;
-    private Connectome connectome;
+    private CElegansSearch CElegansSearchPipeline;
 
     /**
      * Controller constructor
@@ -129,8 +131,8 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             final SearchLayer searchLayer,
             final CasesLists cases,
             final ProductionInfo productionInfo,
-            final Connectome connectome,
-            final BooleanProperty bringUpInfoProperty) {
+            final BooleanProperty bringUpInfoProperty,
+            final CElegansSearch CElegansSearchPipeline) {
 
         super();
 
@@ -142,7 +144,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
 
         this.bringUpInfoProperty = requireNonNull(bringUpInfoProperty);
 
-        this.connectome = connectome;
+        this.CElegansSearchPipeline = requireNonNull(CElegansSearchPipeline);
 
         loadingService = new Service<Void>() {
             @Override
@@ -247,7 +249,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                             List<List<String>> results = new ArrayList<>();
 
                             // translate the name if necessary
-                            String funcName = connectome.checkQueryCell(cellName).toLowerCase();
+                            String funcName = CElegansSearchPipeline.checkQueryCell(cellName).toLowerCase();
 
                             if (cases.containsCellCase(funcName)) {
                                 TerminalCellCase terminalCase = (TerminalCellCase) cases.getCellCase(funcName);
@@ -259,40 +261,48 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                                 // these calls return functional names
                                 results.add(
                                         PRE_SYN_INDEX,
-                                        connectome.queryConnectivity(
+                                        CElegansSearchPipeline.executeConnectomeSearch(
                                                 funcName,
-                                                true,
                                                 false,
                                                 false,
                                                 false,
-                                                false));
+                                                false,
+                                                false,
+                                                false,
+                                                 OrganismDataType.FUNCTIONAL).getValue());
                                 results.add(
                                         POST_SYN_INDEX,
-                                        connectome.queryConnectivity(
+                                        CElegansSearchPipeline.executeConnectomeSearch(
                                                 funcName,
+                                                false,
+                                                false,
                                                 false,
                                                 true,
                                                 false,
                                                 false,
-                                                false));
+                                                OrganismDataType.FUNCTIONAL).getValue());
                                 results.add(
                                         ELECTR_INDEX,
-                                        connectome.queryConnectivity(
+                                        CElegansSearchPipeline.executeConnectomeSearch(
                                                 funcName,
+                                                false,
+                                                false,
                                                 false,
                                                 false,
                                                 true,
                                                 false,
-                                                false));
+                                                OrganismDataType.FUNCTIONAL).getValue());
                                 results.add(
                                         NEURO_INDEX,
-                                        connectome.queryConnectivity(
+                                        CElegansSearchPipeline.executeConnectomeSearch(
                                                 funcName,
                                                 false,
                                                 false,
                                                 false,
+                                                false,
+                                                false,
                                                 true,
-                                                false));
+                                                OrganismDataType.FUNCTIONAL).getValue());
                             }
                             return results;
                         }
@@ -307,8 +317,9 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             final List<List<String>> results = wiredToQueryService.getValue();
             if (results != null) {
                 colorAll.setOnAction(event1 -> {
+
                     // translate the name if necessary
-                    String funcName = connectome.checkQueryCell(cellName).toLowerCase();
+                    String funcName = CElegansSearchPipeline.checkQueryCell(cellName).toLowerCase();
 
                     final Rule rule = searchLayer.addConnectomeColorRuleFromContextMenu(
                             funcName,
@@ -580,7 +591,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
 
         menu.getItems().clear();
 
-        String funcName = connectome.checkQueryCell(cellName).toLowerCase();
+        String funcName = CElegansSearchPipeline.checkQueryCell(cellName).toLowerCase();
 
         if (results.isEmpty()) {
             menu.getItems().add(new MenuItem("None"));
@@ -605,7 +616,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             menu.getItems().add(item);
             item.setOnAction(event -> {
                 final Rule rule = searchLayer.addConnectomeColorRuleFromContextMenu(
-                        connectome.checkQueryCell(result).toLowerCase(),
+                        CElegansSearchPipeline.checkQueryCell(result).toLowerCase(),
                         DEFAULT_COLOR,
                         isPresynaptic,
                         isPostsynaptic,

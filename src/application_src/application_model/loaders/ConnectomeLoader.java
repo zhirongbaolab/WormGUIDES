@@ -44,7 +44,7 @@ public class ConnectomeLoader {
 
     private static final String headerLine = "Cell 1,Cell 2,Type,Nbr";
 
-    private static final String filePath = "/application_src/application_model/internal_data/connectome/NeuronConnect.csv";
+    private static final String filePath = "/application_src/application_model/data/CElegansData/Connectome/NeuronConnect.csv";
 
     public static List<NeuronalSynapse> loadConnectome() {
         final List<NeuronalSynapse> connectome = new ArrayList<>();
@@ -97,7 +97,7 @@ public class ConnectomeLoader {
                                 break;
                             case s_presynapticV2:
                                 synapseType = S_PRESYNAPTIC;
-                                synapseType.setPoyadic();
+                                synapseType.setPolyadic();
                                 break;
                             case r_postsynapticV1:
                                 synapseType = R_POSTSYNAPTIC;
@@ -105,7 +105,7 @@ public class ConnectomeLoader {
                                 break;
                             case r_postsynapticV2:
                                 synapseType = R_POSTSYNAPTIC;
-                                synapseType.setPoyadic();
+                                synapseType.setPolyadic();
                                 break;
                             case ej_electrical:
                                 synapseType = EJ_ELECTRICAL;
@@ -139,8 +139,13 @@ public class ConnectomeLoader {
 
     private static String removeZeroPad(String cell) {
         if (cell.contains("0")) {
+            // need to make sure this is a zero pad and not a double digit number that is a multiple of 10
             int zeroIDX = cell.indexOf("0");
-            cell = cell.substring(0, zeroIDX) + cell.substring(zeroIDX + 1);
+            if (zeroIDX > 0) {
+                if (!Character.isDigit(cell.charAt(zeroIDX - 1))) {
+                    cell = cell.substring(0, zeroIDX) + cell.substring(zeroIDX + 1);
+                }
+            }
         }
 
         return cell;

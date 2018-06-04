@@ -7,6 +7,8 @@ package application_src.views.info_window;
 import java.util.ArrayList;
 import java.util.List;
 
+import application_src.application_model.data.OrganismDataType;
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -61,6 +63,8 @@ public class InfoWindow {
     private ProductionInfo productionInfo;
     private String nameToQuery;
 
+    private CElegansSearch CElegansSearchPipeline;
+
     private SearchLayer searchLayer;
 
     private Service<Void> addNameService;
@@ -81,7 +85,7 @@ public class InfoWindow {
             final StringProperty cellNameProperty,
             final CasesLists casesLists,
             final ProductionInfo productionInfo,
-            final Connectome connectome,
+            final CElegansSearch CElegansSearchPipeline,
             final boolean defaultEmbryoFlag,
             final LineageData lineageData,
             final SearchLayer searchLayer) {
@@ -90,6 +94,7 @@ public class InfoWindow {
         infoWindowStage.setTitle("Cell Info Window");
 
         this.productionInfo = requireNonNull(productionInfo);
+        this.CElegansSearchPipeline = requireNonNull(CElegansSearchPipeline);
 
         tabPane = new TabPane();
         tabPane.setTabClosingPolicy(ALL_TABS);
@@ -196,73 +201,89 @@ public class InfoWindow {
                                 } else {
                                     // if no tab exists, check default flag for image series info validation
                                     if (defaultEmbryoFlag) {
-                                        String funcName = connectome.checkQueryCell(lineageName).toLowerCase();
+                                        String funcName = CElegansSearchPipeline.checkQueryCell(lineageName).toLowerCase();
                                         casesLists.makeTerminalCase(
                                                 lineageName,
                                                 funcName,
-                                                connectome.queryConnectivity(
-                                                        funcName,
-                                                        true,
-                                                        false,
-                                                        false,
-                                                        false,
-                                                        false),
-                                                connectome.queryConnectivity(
-                                                        funcName,
-                                                        false,
-                                                        true,
-                                                        false,
-                                                        false,
-                                                        false),
-                                                connectome.queryConnectivity(
+                                                CElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
                                                         true,
                                                         false,
-                                                        false),
-                                                connectome.queryConnectivity(
+                                                        false,
+                                                        false,
+                                                        OrganismDataType.FUNCTIONAL).getValue(),
+                                                CElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
                                                         false,
                                                         true,
-                                                        false),
+                                                        false,
+                                                        false,
+                                                        OrganismDataType.FUNCTIONAL).getValue(),
+                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                        funcName,
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        true,
+                                                        false,
+                                                        OrganismDataType.FUNCTIONAL).getValue(),
+                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                        funcName,
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        true,
+                                                        OrganismDataType.FUNCTIONAL).getValue(),
                                                 productionInfo.getNuclearInfo(),
                                                 productionInfo.getCellShapeData(funcName));
                                     } else {
-                                        String funcName = connectome.checkQueryCell(lineageName).toLowerCase();
+                                        String funcName = CElegansSearchPipeline.checkQueryCell(lineageName).toLowerCase();
                                         casesLists.makeTerminalCase(
                                                 lineageName,
                                                 funcName,
-                                                connectome.queryConnectivity(
-                                                        funcName,
-                                                        true,
-                                                        false,
-                                                        false,
-                                                        false,
-                                                        false),
-                                                connectome.queryConnectivity(
-                                                        funcName,
-                                                        false,
-                                                        true,
-                                                        false,
-                                                        false,
-                                                        false),
-                                                connectome.queryConnectivity(
+                                                CElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
                                                         true,
                                                         false,
-                                                        false),
-                                                connectome.queryConnectivity(
+                                                        false,
+                                                        false,
+                                                        OrganismDataType.FUNCTIONAL).getValue(),
+                                                CElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
                                                         false,
                                                         true,
-                                                        false),
+                                                        false,
+                                                        false,
+                                                        OrganismDataType.FUNCTIONAL).getValue(),
+                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                        funcName,
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        true,
+                                                        false,
+                                                        OrganismDataType.FUNCTIONAL).getValue(),
+                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                        funcName,
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        true,
+                                                        OrganismDataType.FUNCTIONAL).getValue(),
                                                 new ArrayList<>(),
                                                 new ArrayList<>());
                                     }

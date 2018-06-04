@@ -12,6 +12,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import application_src.views.popups.TimelineChart;
 
 import javafx.beans.property.BooleanProperty;
@@ -260,6 +262,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private Window3DController window3DController;
     private DoubleProperty subsceneWidth;
     private DoubleProperty subsceneHeight;
+
+    // the search pipeline
+    private CElegansSearch CElegansSearchPipeline;
 
     private SearchLayer searchLayer;
 
@@ -978,6 +983,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private void initSearchLayer() {
         cellNucleusCheckBox.setSelected(true);
         searchLayer = new SearchLayer(
+                CElegansSearchPipeline,
                 rulesList,
                 searchResultsList,
                 searchField,
@@ -1095,7 +1101,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 selectedNameLabeledProperty,
                 casesLists,
                 productionInfo,
-                connectome,
+                CElegansSearchPipeline,
                 defaultEmbryoFlag,
                 lineageData,
                 searchLayer);
@@ -1218,6 +1224,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
         // takes ~20ms
         connectome = new Connectome();
 
+        CElegansSearchPipeline = new CElegansSearch();
+
         // takes ~140ms
         initSearchLayer();
         searchLayer.initDatabases(lineageData, sceneElementsList, connectome, casesLists, productionInfo);
@@ -1295,8 +1303,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
                     searchLayer,
                     casesLists,
                     productionInfo,
-                    connectome,
-                    bringUpInfoFlag);
+                    bringUpInfoFlag,
+                    CElegansSearchPipeline);
 
             final FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("/application_src/views/layouts/ContextMenuLayout.fxml"));

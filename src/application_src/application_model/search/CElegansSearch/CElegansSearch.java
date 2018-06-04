@@ -3,6 +3,7 @@ package application_src.application_model.search.CElegansSearch;
 
 import application_src.application_model.data.CElegansData.CellDeaths.CellDeaths;
 import application_src.application_model.data.CElegansData.Connectome.Connectome;
+import application_src.application_model.data.CElegansData.Connectome.NeuronalSynapse;
 import application_src.application_model.data.CElegansData.Gene.WormBaseQuery;
 import application_src.application_model.data.CElegansData.SulstonLineage.SulstonLineage;
 import application_src.application_model.data.CElegansData.PartsList.PartsList;
@@ -11,6 +12,8 @@ import application_src.application_model.search.OrganismSearch;
 import javafx.scene.control.TreeItem;
 
 import java.util.*;
+
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNamesByFunctionalName;
 
 public class CElegansSearch implements OrganismSearch {
 
@@ -322,13 +325,110 @@ public class CElegansSearch implements OrganismSearch {
     ////////// CONNECTOME SEARCH ////////////////////////////////////////////////////////////////////////////////////
     @Override
     public AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeConnectomeSearch(String searchString, boolean includeAncestors, boolean includeDescendants, boolean includePresynapticPartners, boolean includePostsynapticPartners, boolean includeElectricalPartners, boolean includeNeuromuscularPartners, OrganismDataType intendedResultsType) {
-        OrganismDataType functionalDataType = OrganismDataType.FUNCTIONAL;
         ArrayList<String> searchResults = new ArrayList<>();
+
+        searchString = checkQueryCell(searchString);
+        // //iterate over synapses
+        for (NeuronalSynapse ns : Connectome.getSynapseList()) {
+            // check if synapse contains query cell
+            if (ns.getCell1().toLowerCase().contains(searchString.toLowerCase())
+                    || ns.getCell2().toLowerCase().contains(searchString.toLowerCase())) {
+
+                String cell1 = ns.getCell1();
+                String cell2 = ns.getCell2();
+
+                // processUrl type code
+                String synapseTypeDescription = ns.getSynapseType().getDescription();
+
+                // find synapse type code for connection, compare to toggle ticks
+                switch (synapseTypeDescription) {
+                    case Connectome.S_PRESYNAPTIC_DESCRIPTION:
+                        if (includePresynapticPartners) {
+                            // don't add duplicates
+                            if (!searchResults.contains(cell1)) {
+                                searchResults.add(cell1);
+                            }
+                            if (!searchResults.contains(cell2)) {
+                                searchResults.add(cell2);
+                            }
+                        }
+                        break;
+                    case Connectome.R_POSTSYNAPTIC_DESCRIPTION:
+                        if (includePostsynapticPartners) {
+                            // don't add duplicates
+                            if (!searchResults.contains(cell1)) {
+                                searchResults.add(cell1);
+                            }
+                            if (!searchResults.contains(cell2)) {
+                                searchResults.add(cell2);
+                            }
+                        }
+                        break;
+                    case Connectome.EJ_ELECTRICAL_DESCRIPTION:
+                        if (includeElectricalPartners) {
+                            // don't add duplicates
+                            if (!searchResults.contains(cell1)) {
+                                searchResults.add(cell1);
+                            }
+                            if (!searchResults.contains(cell2)) {
+                                searchResults.add(cell2);
+                            }
+                        }
+                        break;
+                    case Connectome.NMJ_NEUROMUSCULAR_DESCRPITION:
+                        if (includeNeuromuscularPartners) {
+                            // don't add duplicates
+                            if (!searchResults.contains(cell1)) {
+                                searchResults.add(cell1);
+                            }
+                            if (!searchResults.contains(cell2)) {
+                                searchResults.add(cell2);
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+
+        if (intendedResultsType.equals(OrganismDataType.LINEAGE)) {
+            ArrayList<String> lineageNameResults = new ArrayList<>();
+            for (String result : searchResults) {
+                lineageNameResults.addAll(PartsList.getLineageNamesByFunctionalName(result));
+            }
+
+            ArrayList<String> ancestorSearchResults = new ArrayList<>();
+            if (includeAncestors) {
+                lineageNameResults.stream().forEach(s -> {
+                    // let's only allow ancestors search on results that are lineage-based, otherwise the
+                    // results will be mixed format and that's not good for anyone
+                    if (intendedResultsType.equals(OrganismDataType.LINEAGE)) {
+                        ancestorSearchResults.addAll(executeLineageSearch(s, true, false).getValue());
+                    }});
+            }
+            searchResults.clear();
+            searchResults.addAll(lineageNameResults);
+            searchResults.addAll(ancestorSearchResults);
+        }
 
 
         AbstractMap.SimpleEntry<OrganismDataType, List<String>> results =
-                new AbstractMap.SimpleEntry(functionalDataType, searchResults);
+                new AbstractMap.SimpleEntry(intendedResultsType, cleanResults(searchResults));
         return results;
+    }
+
+    /**
+     * Retrieves the functional name of an input cell name, whether it is a lineage or functional name.
+     *
+     * @param searchString
+     *         the cell to check
+     *
+     * @return the functional name of that cell
+     */
+    public String checkQueryCell(String searchString) {
+            if (PartsList.isLineageName(searchString)) {
+                searchString = PartsList.getFunctionalNameByLineageName(searchString);
+            }
+            return searchString;
     }
 
     ////////// END CONNECTOME SEARCH ////////////////////////////////////////////////////////////////////////////////////
@@ -347,7 +447,6 @@ public class CElegansSearch implements OrganismSearch {
     // anatomy search
 
     // cell deaths search
-
 
     // general utilities
 
@@ -368,6 +467,14 @@ public class CElegansSearch implements OrganismSearch {
             if (results.get(i).endsWith(".")) {
                 results.remove(i);
             }
+
+            if (results.get(i).isEmpty()) {
+                results.remove(i);
+            }
+
+            if (results.get(i).length() <= 1) {
+                results.remove(i);
+            }
         }
 
         return results;
@@ -381,6 +488,7 @@ public class CElegansSearch implements OrganismSearch {
         SulstonLineage.init();
         PartsList.init();
         CellDeaths.init();
+        Connectome.init();
 
         CElegansSearch search = new CElegansSearch();
         AbstractMap.SimpleEntry<OrganismDataType, List<String>> results;
@@ -460,6 +568,45 @@ public class CElegansSearch implements OrganismSearch {
 //        System.out.println("");
 
         /* CONNECTOME TESTING */
+//        results = search.executeConnectomeSearch("DA5", false, false, true, false, false, false, OrganismDataType.LINEAGE);
+//        System.out.println("Results for connectome search on 'DA5' (a=false, d=false, pre=true, post=false, elec=false, neuromusc=false) -> DataType: " + results.getKey().getDescription());
+//        System.out.println("size of results: " + results.getValue().size());
+//        for (String s : results.getValue()) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
+
+//        results = search.executeConnectomeSearch("DA5", false, false, false, true, false, false, OrganismDataType.LINEAGE);
+//        System.out.println("Results for connectome search on 'DA5' (a=false, d=false, pre=false, post=true, elec=false, neuromusc=false) -> DataType: " + results.getKey().getDescription());
+//        System.out.println("size of results: " + results.getValue().size());
+//        for (String s : results.getValue()) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
+
+//        results = search.executeConnectomeSearch("DA5", false, false, false, false, true, false, OrganismDataType.LINEAGE);
+//        System.out.println("Results for connectome search on 'DA5' (a=false, d=false, pre=false, post=true, elec=false, neuromusc=false) -> DataType: " + results.getKey().getDescription());
+//        System.out.println("size of results: " + results.getValue().size());
+//        for (String s : results.getValue()) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
+
+//        results = search.executeConnectomeSearch("DA5", false, false, false, false, false, true, OrganismDataType.FUNCTIONAL);
+//        System.out.println("Results for connectome search on 'DA5' (a=false, d=false, pre=false, post=true, elec=false, neuromusc=false) -> DataType: " + results.getKey().getDescription());
+//        System.out.println("size of results: " + results.getValue().size());
+//        for (String s : results.getValue()) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
+
+        results = search.executeConnectomeSearch("DA5", true, false, true, false, false, true, OrganismDataType.LINEAGE);
+        System.out.println("Results for connectome search on 'DA5' (a=false, d=false, pre=false, post=true, elec=false, neuromusc=false) -> DataType: " + results.getKey().getDescription());
+        System.out.println("size of results: " + results.getValue().size());
+        for (String s : results.getValue()) {
+            System.out.println(s);
+        }
+        System.out.println("");
 
         /* GENE TESTING */
 

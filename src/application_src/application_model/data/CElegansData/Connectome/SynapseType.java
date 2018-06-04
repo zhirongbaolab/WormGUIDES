@@ -17,28 +17,28 @@ public enum SynapseType {
     NMJ_NEUROMUSCULAR("Nmj neuromuscular");
 
     private final String description;
-    private boolean isPoyadic;
+    private boolean isPolyadic;
     private boolean isMonadic;
 
     SynapseType() {
         this("");
-        this.isPoyadic = false;
+        this.isPolyadic = false;
         this.isMonadic = false;
     }
 
     SynapseType(final String description) {
         this.description = requireNonNull(description);
-        this.isPoyadic = false;
+        this.isPolyadic = false;
         this.isMonadic = false;
     }
 
-    public void setPoyadic() {
-        this.isPoyadic = true;
+    public void setPolyadic() {
+        this.isPolyadic = true;
         this.isMonadic = false;
     }
 
     public void setMonadic() {
-        this.isPoyadic = false;
+        this.isPolyadic = false;
         this.isMonadic = true;
     }
 
@@ -46,8 +46,8 @@ public enum SynapseType {
         return isMonadic;
     }
 
-    public boolean isPoyadic() {
-        return isPoyadic;
+    public boolean isPolyadic() {
+        return isPolyadic;
     }
 
     public String getDescription() {

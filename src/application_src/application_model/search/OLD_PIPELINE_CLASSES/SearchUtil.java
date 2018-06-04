@@ -269,13 +269,15 @@ public class SearchUtil {
             final boolean isPostsynapticQueried,
             final boolean isNeuromuscularQueried,
             final boolean isElectricalQueried) {
-        final List<String> cells = new ArrayList<>(connectome.queryConnectivity(
-                searched,
-                isPresynapticQueried,
-                isPostsynapticQueried,
-                isNeuromuscularQueried,
-                isElectricalQueried,
-                true));
+//        final List<String> cells = new ArrayList<>(connectome.queryConnectivity(
+//                searched,
+//                isPresynapticQueried,
+//                isPostsynapticQueried,
+//                isNeuromuscularQueried,
+//                isElectricalQueried,
+//                true));
+        // TODO made this completely empty
+        final List<String> cells = new ArrayList<>();
         cells.remove(searched);
         sort(cells);
         return cells;
