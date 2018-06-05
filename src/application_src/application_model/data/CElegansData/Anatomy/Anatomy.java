@@ -39,7 +39,7 @@ public class Anatomy {
         neurotransmitters = new ArrayList<>();
     }
 
-    public static void initAnatomy() {
+    public static void init() {
         final URL url = MainApp.class.getResource("/application_src/application_model/data/CElegansData/Anatomy/anatomy.csv");
         try (InputStream input = url.openStream();
              InputStreamReader isr = new InputStreamReader(input);

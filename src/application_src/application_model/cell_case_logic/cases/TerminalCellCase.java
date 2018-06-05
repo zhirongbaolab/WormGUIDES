@@ -22,8 +22,6 @@ import static java.lang.Character.toLowerCase;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getDescriptionByLineageName;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNames;
-import static application_src.application_model.data.CElegansData.Anatomy.Anatomy.getAnatomy;
-import static application_src.application_model.data.CElegansData.Anatomy.Anatomy.hasAnatomy;
 
 /**
  * Cell case for a terminal cell. The case contains information for the info window

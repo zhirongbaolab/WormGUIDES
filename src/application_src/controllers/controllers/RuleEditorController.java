@@ -20,11 +20,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-import application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.ANCESTOR;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_BODY;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_NUCLEUS;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.DESCENDANT;
+import application_src.application_model.search.SearchConfiguration.SearchOption;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.ANCESTOR;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.DESCENDANT;
 
 public class RuleEditorController extends AnchorPane implements Initializable {
 

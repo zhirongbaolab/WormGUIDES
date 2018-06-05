@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption;
+import application_src.application_model.search.SearchConfiguration.SearchOption;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
@@ -22,7 +22,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType;
+import application_src.application_model.search.SearchConfiguration.SearchType;
 import application_src.MainApp;
 import application_src.controllers.controllers.RuleEditorController;
 import application_src.controllers.layers.SearchLayer;
@@ -39,15 +39,15 @@ import static javafx.stage.Modality.NONE;
 
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.isLineageName;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.GENE;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.STRUCTURES_BY_HEADING;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.STRUCTURE_BY_SCENE_NAME;
+import static application_src.application_model.search.SearchConfiguration.SearchType.GENE;
+import static application_src.application_model.search.SearchConfiguration.SearchType.STRUCTURES_BY_HEADING;
+import static application_src.application_model.search.SearchConfiguration.SearchType.STRUCTURE_BY_SCENE_NAME;
 import static application_src.application_model.data.CElegansData.SulstonLineage.LineageTree.isAncestor;
 import static application_src.application_model.data.CElegansData.SulstonLineage.LineageTree.isDescendant;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.ANCESTOR;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_BODY;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_NUCLEUS;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.DESCENDANT;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.ANCESTOR;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.DESCENDANT;
 
 /**
  * This class is the color rule that determines the coloring/striping of cell, cell bodies, and multicellular

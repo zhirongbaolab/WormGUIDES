@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import application_src.application_model.annotation.AnnotationManager;
+import application_src.application_model.data.CElegansData.Gene.GeneSearchManager;
 import application_src.application_model.data.OrganismDataType;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import javafx.beans.property.BooleanProperty;
@@ -32,16 +34,14 @@ import javafx.scene.paint.Color;
 import application_src.application_model.data.LineageData;
 import application_src.application_model.data.CElegansData.Connectome.Connectome;
 import application_src.application_model.data.CElegansData.PartsList.PartsList;
-import application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType;
-import application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil;
+import application_src.application_model.search.SearchConfiguration.SearchType;
 import application_src.application_model.data.CElegansData.Anatomy.AnatomyTerm;
 import application_src.application_model.cell_case_logic.CasesLists;
 import application_src.application_model.annotation.color.Rule;
-import application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption;
+import application_src.application_model.search.SearchConfiguration.SearchOption;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
 import application_src.application_model.threeD.subscenegeometry.StructureTreeNode;
 import application_src.application_model.resources.ProductionInfo;
-import application_src.application_model.data.CElegansData.Gene.GeneSearchService;
 
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
@@ -55,64 +55,55 @@ import static javafx.scene.paint.Color.web;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNamesByFunctionalName;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.isLineageName;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.CONNECTOME;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.DESCRIPTION;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.FUNCTIONAL;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.GENE;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.LINEAGE;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.MULTICELLULAR_STRUCTURE_CELLS;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.STRUCTURES_BY_HEADING;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.STRUCTURE_BY_SCENE_NAME;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getAncestorsList;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getCellBodiesList;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getCellsInMulticellularStructure;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getCellsWithConnectivity;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getCellsWithFunctionalDescription;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getCellsWithFunctionalName;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getCellsWithLineageName;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getDescendantsList;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getNeighboringCells;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.isGeneFormat;
-import static application_src.application_model.data.CElegansData.Gene.WormBaseQuery.issueWormBaseGeneQuery;
+import static application_src.application_model.search.SearchConfiguration.SearchType.CONNECTOME;
+import static application_src.application_model.search.SearchConfiguration.SearchType.DESCRIPTION;
+import static application_src.application_model.search.SearchConfiguration.SearchType.FUNCTIONAL;
+import static application_src.application_model.search.SearchConfiguration.SearchType.GENE;
+import static application_src.application_model.search.SearchConfiguration.SearchType.LINEAGE;
+import static application_src.application_model.search.SearchConfiguration.SearchType.MULTICELLULAR_STRUCTURE_CELLS;
+import static application_src.application_model.search.SearchConfiguration.SearchType.STRUCTURES_BY_HEADING;
+import static application_src.application_model.search.SearchConfiguration.SearchType.STRUCTURE_BY_SCENE_NAME;
 import static application_src.application_model.data.CElegansData.SulstonLineage.LineageTree.getCaseSensitiveName;
 import static application_src.application_model.data.CElegansData.Anatomy.AnatomyTerm.AMPHID_SENSILLA;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.ANCESTOR;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_BODY;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_NUCLEUS;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.DESCENDANT;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.ANCESTOR;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.DESCENDANT;
 
 public class SearchLayer {
 
     private final Service<Void> resultsUpdateService;
-    private final GeneSearchService geneSearchService;
     private final Service<Void> showLoadingService;
 
     private final CElegansSearch CElegansSearchPipeline;
-    private final ObservableList<Rule> rulesList;
+    private final AnnotationManager annotationManager;
 
     private final ObservableList<String> searchResultsList;
 
     // gui components
     private final TextField searchTextField;
+
+    // the Search Type components
     private final ToggleGroup searchTypeToggleGroup;
+
     private final CheckBox presynapticCheckBox;
     private final CheckBox postsynapticCheckBox;
     private final CheckBox neuromuscularCheckBox;
     private final CheckBox electricalCheckBox;
+
     private final CheckBox cellNucleusCheckBox;
     private final CheckBox cellBodyCheckBox;
+
     private final CheckBox ancestorCheckBox;
     private final CheckBox descendantCheckBox;
+
     private final ColorPicker colorPicker;
     private final Button addRuleButton;
 
-    /** Tells the subscene controller to rebuild the 3D subscene according to the fetched gene results */
-    private final BooleanProperty geneResultsUpdatedFlag;
     /** Tells the subscene controller to rebuild the 3D subscene */
     private final BooleanProperty rebuildSubsceneFlag;
 
     // queried databases
-    private Connectome connectome;
     private CasesLists casesLists;
     private ProductionInfo productionInfo;
     private WiringService wiringService;
@@ -120,7 +111,7 @@ public class SearchLayer {
 
     public SearchLayer(
             final CElegansSearch CElegansSearchPipeline,
-            final ObservableList<Rule> rulesList,
+            final AnnotationManager annotationManager,
             final ObservableList<String> searchResultsList,
             final TextField searchTextField,
             final RadioButton systematicRadioButton,
@@ -143,25 +134,20 @@ public class SearchLayer {
             final BooleanProperty geneResultsUpdatedFlag,
             final BooleanProperty rebuildSubsceneFlag) {
 
+        // the API through which all search of C Elegans data is completed
         this.CElegansSearchPipeline = requireNonNull(CElegansSearchPipeline);
-        this.rulesList = requireNonNull(rulesList);
+
+        // the internal representation of the annotation rules list in the "Display Options" tab
+        this.annotationManager = requireNonNull(annotationManager);
+
+        // the internal representation of the search results that are displayed in the Find Cells tab
         this.searchResultsList = requireNonNull(searchResultsList);
 
         // text field
         this.searchTextField = requireNonNull(searchTextField);
         this.searchTextField.textProperty().addListener(getTextFieldListener());
 
-        // search options
-        final ChangeListener<Boolean> optionsCheckBoxListener = getOptionsCheckBoxListener();
-        this.cellNucleusCheckBox = requireNonNull(cellNucleusCheckBox);
-        this.cellNucleusCheckBox.selectedProperty().addListener(optionsCheckBoxListener);
-        this.cellBodyCheckBox = requireNonNull(cellBodyCheckBox);
-        this.cellBodyCheckBox.selectedProperty().addListener(optionsCheckBoxListener);
-        this.ancestorCheckBox = requireNonNull(ancestorCheckBox);
-        this.ancestorCheckBox.selectedProperty().addListener(optionsCheckBoxListener);
-        this.descendantCheckBox = requireNonNull(descendantCheckBox);
-        this.descendantCheckBox.selectedProperty().addListener(optionsCheckBoxListener);
-
+        /** The UI components that correspond to {@Link SearchOptions} */
         final ChangeListener<Boolean> connectomeCheckBoxListener = getConnectomeCheckBoxListener();
         this.presynapticCheckBox = requireNonNull(presynapticCheckBox);
         this.presynapticCheckBox.selectedProperty().addListener(connectomeCheckBoxListener);
@@ -171,6 +157,17 @@ public class SearchLayer {
         this.neuromuscularCheckBox.selectedProperty().addListener(connectomeCheckBoxListener);
         this.electricalCheckBox = requireNonNull(electricalCheckBox);
         this.electricalCheckBox.selectedProperty().addListener(connectomeCheckBoxListener);
+
+        final ChangeListener<Boolean> optionsCheckBoxListener = getOptionsCheckBoxListener();
+        this.cellNucleusCheckBox = requireNonNull(cellNucleusCheckBox);
+        this.cellNucleusCheckBox.selectedProperty().addListener(optionsCheckBoxListener);
+        this.cellBodyCheckBox = requireNonNull(cellBodyCheckBox);
+        this.cellBodyCheckBox.selectedProperty().addListener(optionsCheckBoxListener);
+
+        this.ancestorCheckBox = requireNonNull(ancestorCheckBox);
+        this.ancestorCheckBox.selectedProperty().addListener(optionsCheckBoxListener);
+        this.descendantCheckBox = requireNonNull(descendantCheckBox);
+        this.descendantCheckBox.selectedProperty().addListener(optionsCheckBoxListener);
 
         // color
         this.colorPicker = requireNonNull(colorPicker);
@@ -200,11 +197,14 @@ public class SearchLayer {
         };
 
         this.rebuildSubsceneFlag = requireNonNull(rebuildSubsceneFlag);
-        this.geneResultsUpdatedFlag = requireNonNull(geneResultsUpdatedFlag);
-
         showLoadingService = new ShowLoadingService();
 
-        geneSearchService = new GeneSearchService();
+
+        // TODO all of this to be redone
+        // the loading service is an open problem
+        // the set on succeeded is an operation that should happen with the annotation manager
+        // --> after a search is complete, it should be propogated to a holding area in the
+        // annotation manager so that it is ready if a user decides to create a rule
         geneSearchService.setOnScheduled(event -> showLoadingService.restart());
         geneSearchService.setOnCancelled(event -> {
             showLoadingService.cancel();
@@ -270,7 +270,6 @@ public class SearchLayer {
         searchTypeToggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
             // if toggle was previously on 'gene' then cancel whatever wormbase search was issued
             if (oldValue != null && oldValue.getUserData() == GENE) {
-                geneSearchService.cancel();
                 searchResultsList.clear();
             }
             final SearchType type = (SearchType) newValue.getUserData();
@@ -294,6 +293,20 @@ public class SearchLayer {
     public void setStructureTreeRoot(final TreeItem<StructureTreeNode> root) {
         structureTreeRoot = requireNonNull(root);
     }
+
+
+    /**
+     * This is the primary method through which the search layer works.
+     * 1. Parse all search criteria
+     * 2. Dispatch search to appropriate subroutines
+     * 3. Pass the results to the CElegansSearchResults class
+     * 4. Trigger the EstablishCorrespondence class to run on the update results
+     * 5. Alert the AnnotationManager that there are new results to display
+     */
+     public void performSearchAndAlertAnnotationManager() {
+
+    }
+
 
     /**
      * Adds a giant connectome rule that contains all the cell results retrieved based on the input query parameters
@@ -340,44 +353,11 @@ public class SearchLayer {
         return rule;
     }
 
-    private StringBuilder createLabelForConnectomeRule(
-            String funcName,
-            final boolean isPresynapticTicked,
-            final boolean isPostsynapticTicked,
-            final boolean isElectricalTicked,
-            final boolean isNeuromuscularTicked) {
 
-        final StringBuilder sb = new StringBuilder("'");
-        sb.append(funcName.toLowerCase()).append("' Connectome");
-
-        final List<String> types = new ArrayList<>();
-        if (isPresynapticTicked) {
-            types.add("presynaptic");
-        }
-        if (isPostsynapticTicked) {
-            types.add("postsynaptic");
-        }
-        if (isElectricalTicked) {
-            types.add("electrical");
-        }
-        if (isNeuromuscularTicked) {
-            types.add("neuromuscular");
-        }
-        if (!types.isEmpty()) {
-            sb.append(" - ");
-
-            for (int i = 0; i < types.size(); i++) {
-                sb.append(types.get(i));
-                if (i != types.size() - 1) {
-                    sb.append(", ");
-                }
-            }
-        }
-
-        return sb;
-    }
-
+    // TODO -> this is a search method, so we want to move this to CElegansSearch
     private void updateGeneResults(final String searchedGene) {
+        // check what kind of gene search this was first. if the results are genes, then we can't do
+        // any further work on this search
         final List<String> results = geneSearchService.getPreviouslyFetchedGeneResults(searchedGene);
         if (results == null || results.isEmpty()) {
             return;
@@ -409,6 +389,11 @@ public class SearchLayer {
         geneResultsUpdatedFlag.set(true);
     }
 
+
+    /**
+     * This is to populate the SearchResults list view with more useful data
+     * @param list
+     */
     private void appendFunctionalToLineageNames(final List<String> list) {
         searchResultsList.clear();
         for (String result : list) {
@@ -419,68 +404,18 @@ public class SearchLayer {
         }
     }
 
+    /**
+     * Access the text in the search bar
+     *
+     * @return
+     */
     private String getSearchedText() {
         final String searched = searchTextField.getText().toLowerCase();
         return searched;
     }
 
-    /**
-     * Adds the app's internal color rules. These rules are used when the active story does not have its own color
-     * scheme.
-     */
-    public void addDefaultInternalColorRules() {
-        addColorRule(FUNCTIONAL, "ash", DARKSEAGREEN, CELL_BODY);
-        addColorRule(FUNCTIONAL, "rib", web("0x663366"), CELL_BODY);
-        addColorRule(FUNCTIONAL, "avg", web("0xb41919"), CELL_BODY);
 
-        addColorRule(FUNCTIONAL, "dd", web("0x4a24c1", 0.60), CELL_BODY);
-        addColorRule(FUNCTIONAL, "da", web("0xc56002"), CELL_BODY);
-
-        addColorRule(FUNCTIONAL, "rivl", web("0xff9966"), CELL_BODY);
-        addColorRule(FUNCTIONAL, "rivr", web("0xffe6b4"), CELL_BODY);
-        addColorRule(FUNCTIONAL, "sibd", web("0xe6ccff"), CELL_BODY);
-        addColorRule(FUNCTIONAL, "siav", web("0x99b3ff"), CELL_BODY);
-
-        addColorRule(FUNCTIONAL, "dd1", web("0xb30a95"), CELL_NUCLEUS);
-        addColorRule(FUNCTIONAL, "dd2", web("0xb30a95"), CELL_NUCLEUS);
-        addColorRule(FUNCTIONAL, "dd3", web("0xb30a95"), CELL_NUCLEUS);
-        addColorRule(FUNCTIONAL, "dd4", web("0xb30a95"), CELL_NUCLEUS);
-        addColorRule(FUNCTIONAL, "dd5", web("0xb30a95"), CELL_NUCLEUS);
-        addColorRule(FUNCTIONAL, "dd6", web("0xb30a95"), CELL_NUCLEUS);
-
-        addColorRule(FUNCTIONAL, "da2", web("0xe6b34d"), CELL_NUCLEUS);
-        addColorRule(FUNCTIONAL, "da3", web("0xe6b34d"), CELL_NUCLEUS);
-        addColorRule(FUNCTIONAL, "da4", web("0xe6b34d"), CELL_NUCLEUS);
-        addColorRule(FUNCTIONAL, "da5", web("0xe6b34d"), CELL_NUCLEUS);
-
-        addStructureRuleBySceneName("lim4_bundle_left", web("0xe6ccff"));
-        addStructureRuleBySceneName("lim4_bundle_left", web("0x99b3ff"));
-        addStructureRuleBySceneName("lim4_bundle_right", web("0xe6ccff"));
-        addStructureRuleBySceneName("lim4_bundle_right", web("0x99b3ff"));
-        addStructureRuleBySceneName("lim4_nerve_ring", web("0xff9966"));
-        addStructureRuleBySceneName("lim4_nerve_ring", web("0xffe6b4"));
-        addStructureRuleBySceneName("Amphid Commissure Right", DARKSEAGREEN);
-        addStructureRuleBySceneName("Amphid Commissure Right", web("0x663366"));
-        addStructureRuleBySceneName("Amphid Commissure Left", DARKSEAGREEN);
-        addStructureRuleBySceneName("Amphid Commissure Left", web("0x663366"));
-    }
-
-    /**
-     * Adds a color rule for a multicellular structure to the currently active rules list. Adding a rule does not
-     * rebuild the subscene. In order for any changes to be visible, the calling class must set the
-     * 'rebuildSubsceneFlag' to true or set a property that triggers a subscene rebuild.
-     *
-     * @param searched
-     *         the searched structure
-     * @param color
-     *         the color to apply to the structure
-     *
-     * @return the multicellular structure rule added
-     */
-    public Rule addStructureRuleBySceneName(final String searched, final Color color) {
-        return addColorRule(STRUCTURE_BY_SCENE_NAME, searched, color, new ArrayList<>());
-    }
-
+    // TODO -> move this to structures search class --> no actual searching done in this class, just a controller
     /**
      * Adds a color rule for a collection of multicellular structures under a heading in the structures tree in the
      * Find Structures tab. All the structures under sub-headings are affected by the rule as well. Adding a rule does
@@ -537,139 +472,6 @@ public class SearchLayer {
             rule.setCells(structuresToAdd);
         }
         return rule;
-    }
-
-    /**
-     * Adds a color rule to the currently active rules list. Adding a rule does not rebuild the subscene. In order
-     * for any changes to be visible, the calling class must set the 'rebuildSubsceneFlag' to true or set a property
-     * that triggers a subscene rebuild.
-     *
-     * @param searchType
-     *         the search type
-     * @param searched
-     *         the searched term
-     * @param color
-     *         the color to apply to the cells in the search results
-     * @param options
-     *         the search options
-     *
-     * @return the rule added to the active rules list
-     */
-    public Rule addColorRule(
-            final SearchType searchType,
-            String searched,
-            final Color color,
-            final SearchOption... options) {
-        return addColorRule(searchType, searched, color, new ArrayList<>(asList(options)));
-    }
-
-    /**
-     * Adds a color rule to the currently active rules list. Adding a rule does not rebuild the subscene. In order
-     * for any changes to be visible, the calling class must set the 'rebuildSubsceneFlag' to true or set a property
-     * that triggers a subscene rebuild.
-     *
-     * @param searchType
-     *         the search type
-     * @param searched
-     *         the searched term
-     * @param color
-     *         the color to apply to the cells in the search results
-     * @param options
-     *         the search options
-     *
-     * @return the rule added to the active rules list
-     */
-    public Rule addColorRule(
-            final SearchType searchType,
-            final String searched,
-            final Color color,
-            List<SearchOption> options) {
-
-        // default search options is cell
-        if (options == null) {
-            options = new ArrayList<>();
-            options.add(CELL_NUCLEUS);
-        }
-
-        final Rule rule = new Rule(
-                rebuildSubsceneFlag,
-                createRuleLabel(searched, searchType),
-                color,
-                searchType,
-                options);
-        rule.setCells(getCellsList(searchType, searched));
-        rulesList.add(rule);
-        searchResultsList.clear();
-        return rule;
-    }
-
-    /**
-     * Adds a color rule to the currently active rules list, specified only by URL.
-     * This is not a searchable rule. It is a Manually Specified List (MSL) that can
-     * only be defined in URL format. See documentation in code_README
-     *
-     * @param names
-     * @param color
-     * @param options
-     * @return
-     */
-    public Rule addColorRule(
-            final List<String> names,
-            final Color color,
-            final List<SearchOption> options) {
-
-        //
-        final Rule rule = new Rule(
-                rebuildSubsceneFlag,
-                createRuleLabel(names),
-                color,
-                SearchType.MSL,
-                options
-        );
-        rule.setCells(getCellsList(names));
-        rulesList.add(rule);
-        return rule;
-
-    }
-
-    private String createRuleLabel(List<String> names) {
-        StringBuilder labelBuilder = new StringBuilder();
-        labelBuilder.append("'");
-        for (String name : names) {
-            labelBuilder.append(name);
-            labelBuilder.append("; ");
-        }
-        // remove last two characters after last name
-        labelBuilder.deleteCharAt(labelBuilder.length()-1);
-        labelBuilder.deleteCharAt(labelBuilder.length()-1);
-
-        labelBuilder.append("' ").append(SearchType.MSL.toString());
-        return labelBuilder.toString();
-    }
-
-    private String createRuleLabel(String searched, final SearchType searchType) {
-        searched = searched.trim();
-        StringBuilder labelBuilder = new StringBuilder();
-        if (searchType != null) {
-            if (searchType == LINEAGE) {
-                labelBuilder.append(getCaseSensitiveName(searched));
-                if (labelBuilder.toString().isEmpty()) {
-                    labelBuilder.append(searched);
-                }
-            } else if (searchType == CONNECTOME) {
-                labelBuilder = createLabelForConnectomeRule(
-                        searched,
-                        presynapticCheckBox.isSelected(),
-                        postsynapticCheckBox.isSelected(),
-                        neuromuscularCheckBox.isSelected(),
-                        electricalCheckBox.isSelected());
-            } else {
-                labelBuilder.append("'").append(searched).append("' ").append(searchType.toString());
-            }
-        } else {
-            labelBuilder.append(searched);
-        }
-        return labelBuilder.toString();
     }
 
     private List<String> getCellsList(final List<String> names) {
@@ -752,41 +554,7 @@ public class SearchLayer {
         return cells;
     }
 
-    public Rule addGeneColorRuleFromUrl(final String searched, final Color color, final SearchOption... options) {
-        return addGeneColorRuleFromUrl(searched, color, new ArrayList<>(asList(options)));
-    }
 
-    public Rule addGeneColorRuleFromUrl(final String searched, final Color color, List<SearchOption> options) {
-        if (options == null) {
-            options = new ArrayList<>();
-            options.add(CELL_NUCLEUS);
-        }
-        final String label = createRuleLabel(searched, GENE);
-        final Rule rule = new Rule(rebuildSubsceneFlag, searched, color, GENE, options);
-        final List<String> cells = geneSearchService.getPreviouslyFetchedGeneResults(searched);
-        if (cells != null) {
-            rule.setCells(cells);
-        } else {
-            final Service<List<String>> queryService = new Service<List<String>>() {
-                public Task<List<String>> createTask() {
-                    return new Task<List<String>>() {
-                        public List<String> call() {
-                            return issueWormBaseGeneQuery(searched);
-                        }
-                    };
-                }
-            };
-            queryService.setOnSucceeded(event -> {
-                final List<String> results = queryService.getValue();
-                rule.setCells(results);
-                rebuildSubsceneFlag.set(true);
-                geneSearchService.cacheGeneResults(searched, results);
-            });
-            queryService.start();
-        }
-        rulesList.add(rule);
-        return rule;
-    }
 
     public EventHandler<ActionEvent> getAddButtonClickHandler() {
         return event -> {
@@ -822,15 +590,28 @@ public class SearchLayer {
     public ChangeListener<Boolean> getOptionsCheckBoxListener() {
         return (observableValue, oldValud, newValue) -> {
             if (searchTypeToggleGroup.getSelectedToggle().getUserData() == GENE) {
-                updateGeneResults(getSearchedText());
+                if (!getSearchedText().isEmpty()) {
+                    if (CElegansSearchPipeline.isGeneFormat(getSearchedText())) {
+                        CElegansSearchPipeline.startGeneSearch(getSearchedText(),
+                                false,
+                                false,
+                                true,
+                                false,
+                                OrganismDataType.GENE);
+                    } else {
+                        CElegansSearchPipeline.startGeneSearch(getSearchedText(),
+                                ancestorCheckBox.isSelected(),
+                                descendantCheckBox.isSelected(),
+                                false,
+                                false,
+                                OrganismDataType.LINEAGE);
+                        updateGeneResults(getSearchedText());
+                    }
+                }
             } else {
                 resultsUpdateService.restart();
             }
         };
-    }
-
-    public ObservableList<String> getSearchResultsList() {
-        return searchResultsList;
     }
 
     private ChangeListener<String> getTextFieldListener() {
@@ -885,40 +666,6 @@ public class SearchLayer {
         }
     }
 
-    /**
-     * Sets the databases that are queried during a search
-     *
-     * @param lineageData
-     *         the lineage data
-     * @param sceneElementsList
-     *         the list of scene elements
-     * @param connectome
-     *         the connectome
-     * @param casesList
-     *         the list of cell cases
-     * @param productionInfo
-     *         the production info
-     */
-    public void initDatabases(
-            final LineageData lineageData,
-            final SceneElementsList sceneElementsList,
-            final Connectome connectome,
-            final CasesLists casesList,
-            final ProductionInfo productionInfo) {
-
-        SearchUtil.initDatabases(lineageData, sceneElementsList, connectome, casesList);
-
-        if (connectome != null) {
-            this.connectome = connectome;
-        }
-        if (casesList != null) {
-            this.casesLists = casesList;
-        }
-        if (productionInfo != null) {
-            this.productionInfo = productionInfo;
-        }
-    }
-
     public boolean hasCellCase(final String cellName) {
         return casesLists != null && casesLists.hasCellCase(cellName);
     }
@@ -957,6 +704,8 @@ public class SearchLayer {
         return resultsUpdateService;
     }
 
+    // TODO -> this just generally needs figuring out. Why is this search in a thread? It's not computationally expensive. Why was it here
+    // and not in the connectome class? Probably just get rid of it entirely and route this back through the CElegansSearchPipeline
     private final class WiringService extends Service<Void> {
 
         private String searchString;
@@ -1061,7 +810,7 @@ public class SearchLayer {
     }
 
     /**
-     * Service that shows when gene results are being fetched by the {@link GeneSearchService} so that the user does
+     * Service that shows when gene results are being fetched by the {@link GeneSearchManager} so that the user does
      * not think that the application is not responding.
      */
     private final class ShowLoadingService extends Service<Void> {

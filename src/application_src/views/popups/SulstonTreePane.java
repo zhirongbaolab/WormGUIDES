@@ -82,11 +82,11 @@ import static javafx.scene.text.FontWeight.SEMI_BOLD;
 
 import static javax.imageio.ImageIO.write;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.LINEAGE;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.NEIGHBOR;
+import static application_src.application_model.search.SearchConfiguration.SearchType.LINEAGE;
+import static application_src.application_model.search.SearchConfiguration.SearchType.NEIGHBOR;
 import static application_src.application_model.loaders.IconImageLoader.getMinusIcon;
 import static application_src.application_model.loaders.IconImageLoader.getPlusIcon;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
 
 public class SulstonTreePane extends ScrollPane {
     //TODO decouple rendering as separate class from WG app specific interaction -as

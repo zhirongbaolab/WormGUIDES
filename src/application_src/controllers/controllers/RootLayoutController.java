@@ -13,7 +13,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import application_src.application_model.annotation.AnnotationManager;
+import application_src.application_model.data.CElegansData.AnalogousCells.EmbryonicAnalogousCells;
+import application_src.application_model.data.CElegansData.Anatomy.Anatomy;
+import application_src.application_model.data.CElegansData.Gene.GeneSearchManager;
+import application_src.application_model.data.CElegansData.SulstonLineage.SulstonLineage;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.NeighborsSearch;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
 import application_src.views.popups.TimelineChart;
 
 import javafx.beans.property.BooleanProperty;
@@ -101,10 +108,6 @@ import static application_src.application_model.loaders.AceTreeTableLineageDataL
 import static application_src.application_model.loaders.AceTreeTableLineageDataLoader.loadNucFiles;
 import static application_src.application_model.loaders.AceTreeTableLineageDataLoader.setOriginToZero;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.data.CElegansData.CellDeaths.CellDeaths.isInCellDeaths;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getStructureComment;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.isMulticellularStructureByName;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.isStructureWithComment;
 import static application_src.application_model.annotation.color.URL.UrlParser.processUrl;
 
 /**
@@ -249,7 +252,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private Stage contextMenuStage;
     private Popup exitSavePopup;
     private Stage timelineStage;
-
     private TimelineChart<Number, String> chart;
 
     // URL generation/loading
@@ -257,25 +259,26 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private URLLoadWindow urlLoadWindow;
     private URLLoadWarningDialog warning;
 
-    private RotationController rotationController;
-
     private Window3DController window3DController;
+    private RotationController rotationController;
     private DoubleProperty subsceneWidth;
     private DoubleProperty subsceneHeight;
 
-    // the search pipeline
-    private CElegansSearch CElegansSearchPipeline;
+    // the model-agnostic search pipeline
+    private CElegansSearch CElegansSearchPipeline; // model agnostic
+
+    // the model specific search pipelines
+    private StructuresSearch structuresSearch;
+    private NeighborsSearch neighborsSearch;
+
+    // the annotation manager
+    private AnnotationManager annotationManager;
 
     private SearchLayer searchLayer;
-
-    private Connectome connectome;
-
     private StoriesLayer storiesLayer;
-
-    private SceneElementsList sceneElementsList;
-
     private DisplayLayer displayLayer;
 
+    private SceneElementsList sceneElementsList;
     private ProductionInfo productionInfo;
 
     // Info window stuff
@@ -593,7 +596,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         if (infoWindow == null) {
             initInfoWindow();
         }
-        infoWindow.generateConnectomeWindow(connectome.getSynapseList());
+        infoWindow.generateConnectomeWindow(Connectome.getSynapseList());
     }
 
     @FXML
@@ -601,8 +604,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         if (infoWindow == null) {
             initInfoWindow();
         }
-        // TODO workaround to unit test, get this fixed
-        infoWindow.generateCellDeathsWindow(CellDeaths.getCellDeathsAsArray().toArray());
+        infoWindow.generateCellDeathsWindow(CellDeaths.getCellDeaths().toArray());
     }
 
     @FXML
@@ -733,7 +735,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 lineageData,
                 casesLists,
                 productionInfo,
-                connectome,
                 sceneElementsList,
                 structuresLayer.getStructuresTreeRoot(),
                 storiesLayer,
@@ -882,8 +883,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
         // Note
         displayedDescription.setText(storiesLayer.getNoteComments(name));
         // Cell body/structue
-        if (isStructureWithComment(name)) {
-            displayedDescription.setText(getStructureComment(name));
+        if (StructuresSearch.isStructureWithComment(name)) {
+            displayedDescription.setText(StructuresSearch.getStructureComment(name));
         } else { // Cell lineage name
             String functionalName = getFunctionalNameByLineageName(name);
             if (functionalName != null) {
@@ -984,7 +985,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         cellNucleusCheckBox.setSelected(true);
         searchLayer = new SearchLayer(
                 CElegansSearchPipeline,
-                rulesList,
+                annotationManager,
                 searchResultsList,
                 searchField,
                 sysRadioBtn,
@@ -1159,8 +1160,24 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle bundle) {
-        productionInfo = new ProductionInfo();
+        // initialize the static C Elegans data
+        SulstonLineage.init();
+        PartsList.init();
+        CellDeaths.init();
+        Connectome.init();
+        Anatomy.init();
+        EmbryonicAnalogousCells.init();
+        GeneSearchManager.init();
 
+        // now set up the Search pipeline for the static C Elegans data
+        CElegansSearchPipeline = new CElegansSearch();
+
+        // transition to model and program specific data initialization
+        Parameters.init();
+        initSharedVariables();
+        annotationManager = new AnnotationManager(rulesList);
+
+        productionInfo = new ProductionInfo();
         casesLists = new CasesLists();
 
         if (bundle != null) {
@@ -1190,65 +1207,37 @@ public class RootLayoutController extends BorderPane implements Initializable {
         endTime = lineageData.getNumberOfTimePoints() - 1;
         movieTimeOffset = productionInfo.getMovieTimeOffset();
 
-        // takes about 58ms
+
+
         replaceTabsWithDraggableTabs();
-
-        // takes about 10ms
-        PartsList.init();
-
-        // takes about 6ms
-        CellDeaths.init();
-
-        Parameters.init();
-
-        initSharedVariables();
-
-        // takes about 3ms
         initDisplayLayer();
-
         setSlidersProperties();
 
         mainTabPane.getSelectionModel().select(colorAndDisplayTab);
 
-        // takes about 1050ms
         initializeWithLineageData();
     }
 
     private void initializeWithLineageData() {
-        // takes about 65ms
         initLineageTree(lineageData.getAllCellNames());
 
-        // takes ~170ms
+        neighborsSearch = new NeighborsSearch(lineageData);
+
         sceneElementsList = new SceneElementsList(lineageData, this.defaultEmbryoFlag);
+        structuresSearch = new StructuresSearch(sceneElementsList);
 
-        // takes ~20ms
-        connectome = new Connectome();
-
-        CElegansSearchPipeline = new CElegansSearch();
-
-        // takes ~140ms
         initSearchLayer();
-        searchLayer.initDatabases(lineageData, sceneElementsList, connectome, casesLists, productionInfo);
-
-        // takes ~5ms
         initStructuresLayer();
-
-        // takes TODO ms
         initTimelineChart();
-
-        // takes ~120ms
         initStoriesLayer();
-
         initContextMenuStage();
 
         addListeners();
-
         setIcons();
 
         sizeSubscene();
         sizeInfoPane();
 
-        // takes ~50ms
         initWindow3DController();
 
         setLabels();

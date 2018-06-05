@@ -22,7 +22,6 @@ import javafx.stage.Stage;
 import netscape.javascript.JSObject;
 
 import application_src.application_model.data.LineageData;
-import application_src.application_model.data.CElegansData.Connectome.Connectome;
 import application_src.application_model.data.CElegansData.Connectome.NeuronalSynapse;
 import application_src.controllers.controllers.InfoWindowLinkController;
 import application_src.controllers.layers.SearchLayer;
@@ -44,7 +43,6 @@ import static application_src.application_model.data.CElegansData.PartsList.Part
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNames;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNames;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.isLineageName;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.isMulticellularStructureByName;
 
 /**
  * Top level container for the list of info window cell cases pages. This holds the tabpane of cases.

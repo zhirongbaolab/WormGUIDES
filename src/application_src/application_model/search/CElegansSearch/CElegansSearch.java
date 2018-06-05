@@ -7,6 +7,7 @@ import application_src.application_model.data.CElegansData.Anatomy.Anatomy;
 import application_src.application_model.data.CElegansData.CellDeaths.CellDeaths;
 import application_src.application_model.data.CElegansData.Connectome.Connectome;
 import application_src.application_model.data.CElegansData.Connectome.NeuronalSynapse;
+import application_src.application_model.data.CElegansData.Gene.GeneSearchManager;
 import application_src.application_model.data.CElegansData.Gene.WormBaseQuery;
 import application_src.application_model.data.CElegansData.SulstonLineage.SulstonLineage;
 import application_src.application_model.data.CElegansData.PartsList.PartsList;
@@ -16,7 +17,7 @@ import javafx.scene.control.TreeItem;
 
 import java.util.*;
 
-public class CElegansSearch implements OrganismSearch {
+public class CElegansSearch implements OrganismSearch, Runnable {
 
 
     ////////// LINEAGE SEARCH ////////////////////////////////////////////////////////////////////////////////////
@@ -148,6 +149,11 @@ public class CElegansSearch implements OrganismSearch {
         return results;
     }
 
+    /**
+     *
+     * @param searchString
+     * @return
+     */
     private List<String> addAllDescendants(String searchString) {
         ArrayList<String> results = new ArrayList<>();
 
@@ -222,12 +228,23 @@ public class CElegansSearch implements OrganismSearch {
         }
     }
 
+    /**
+     *
+     * @param root
+     * @return
+     */
     private List<TreeItem<String>> findChildren(TreeItem<String> root) {
         List<TreeItem<String>> children = new ArrayList<>();
         children = findChildren(children, root);
         return children;
     }
 
+    /**
+     *
+     * @param children
+     * @param root
+     * @return
+     */
     private List<TreeItem<String>> findChildren(List<TreeItem<String>> children, TreeItem<String> root) {
         if (root == null) {
             return children;
@@ -241,6 +258,19 @@ public class CElegansSearch implements OrganismSearch {
         children = findChildren(children, root.getChildren().get(0));
         children = findChildren(children, root.getChildren().get(1));
         return children;
+    }
+
+    /**
+     *
+     * @param searchString
+     * @return
+     */
+    public List<String> findTerminalDescendants(String searchString) {
+        ArrayList<String> terminalDescendants = new ArrayList<>();
+
+
+
+        return terminalDescendants;
     }
     ////////// END LINEAGE SEARCH /////////////////////////////////////////////////////////////////////////////////////
 
@@ -443,7 +473,11 @@ public class CElegansSearch implements OrganismSearch {
     ////////// GENE SEARCH SEARCH ////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * Search either for the anatomy that expresses a given gene, or the gene expression of a given anatomical entity
      *
+     * This is a unique search mode, because it makes an http request to WormBase. It requires a dedicated thread to
+     * avoid locking up the program. To call this search, the SearchLayer sets the desires gene search term to the
+     * static variable in {@Link GeneSearchManager}, and then the
      *
      * Pass this a lineage name
      *
@@ -497,6 +531,54 @@ public class CElegansSearch implements OrganismSearch {
         AbstractMap.SimpleEntry<OrganismDataType, List<String>> results =
                 new AbstractMap.SimpleEntry(intendedResultsType, cleanResults(searchResults));
         return results;
+    }
+
+    /**
+     * This the method that is called to initiate gene search. It sets the seach term and options in the manager class,
+     * and then begins the search by running the thread that the search takes place on.
+     *
+     * @param searchString
+     * @param includeAncestors
+     * @param includeDescendants
+     * @param isSearchTermGene
+     * @param isSearchTermAnatomy
+     * @param intendedResultsType
+     */
+    public void startGeneSearch(String searchString, boolean includeAncestors, boolean includeDescendants, boolean isSearchTermGene, boolean isSearchTermAnatomy, OrganismDataType intendedResultsType) {
+        GeneSearchManager.setSearchTerm(searchString.toLowerCase());
+        GeneSearchManager.setSearchOptions(includeAncestors, includeDescendants, isSearchTermGene, isSearchTermAnatomy, intendedResultsType);
+        if (!GeneSearchManager.getGeneResultsCache().containsKey(searchString.toLowerCase())) {
+            run();
+        }
+    }
+
+    /**
+     * The thread that makes the request to WormBase and stores the results in the cache
+     */
+    @Override
+    public void run() {
+        GeneSearchManager.cacheGeneResults(GeneSearchManager.getSearchTerm(),
+                executeGeneSearch(GeneSearchManager.getSearchTerm(),
+                        GeneSearchManager.getIncludeAncestorsParam(),
+                        GeneSearchManager.getIncludeDescendantsParam(),
+                        GeneSearchManager.getIsSearchTermGene(),
+                        GeneSearchManager.getIsSearchTermAnatomy(),
+                        GeneSearchManager.getIntendedResultsType()));
+    }
+
+    /**
+     * Checks whether a name is a gene name with the format SOME_STRING-SOME_NUMBER.
+     *
+     * @param name
+     *         the name to check
+     *
+     * @return true if the name is a gene name, false otherwise
+     */
+    public static boolean isGeneFormat(String name) {
+        name = name.trim();
+        final int hyphenIndex = name.indexOf("-");
+        // check that there is a hyphen and there is a string preceeding it
+        return hyphenIndex > 1 && name.substring(hyphenIndex + 1).matches("^-?\\d+$");
     }
 
     ////////// END GENE SEARCH ////////////////////////////////////////////////////////////////////////////////////
@@ -556,8 +638,6 @@ public class CElegansSearch implements OrganismSearch {
         }
         return "N/A";
     }
-
-
     ///////////////////////////////// END EMBRYONIC HOMOLOGY - ANALOGOUS CELLS SEARCH ////////////////////////////////
 
     //////////////////////////// ANATOMY SEARCH /////////////////////////////////////////
@@ -856,6 +936,9 @@ public class CElegansSearch implements OrganismSearch {
         PartsList.init();
         CellDeaths.init();
         Connectome.init();
+        Anatomy.init();
+        EmbryonicAnalogousCells.init();
+        GeneSearchManager.init();
 
         CElegansSearch search = new CElegansSearch();
         AbstractMap.SimpleEntry<OrganismDataType, List<String>> results;
@@ -976,13 +1059,14 @@ public class CElegansSearch implements OrganismSearch {
 //        System.out.println("");
 
         /* GENE TESTING */
-//        results = search.executeGeneSearch("lim-4", true, false, true, false, OrganismDataType.LINEAGE);
-//        System.out.println("Results for gene search on 'lim-4' (a=true, d=false, gene=true, anatomy=false) -> DataType: " + results.getKey().getDescription());
-//        System.out.println("size of results: " + results.getValue().size());
-//        for (String s : results.getValue()) {
-//            System.out.println(s);
-//        }
-//        System.out.println("");
+        search.startGeneSearch("lim-4", true, false, true, false, OrganismDataType.LINEAGE);
+        results = GeneSearchManager.getGeneResultsCache().get("lim-4");
+        System.out.println("Results for gene search on 'lim-4' (a=true, d=false, gene=true, anatomy=false) -> DataType: " + results.getKey().getDescription());
+        System.out.println("size of results: " + results.getValue().size());
+        for (String s : results.getValue()) {
+            System.out.println(s);
+        }
+        System.out.println("");
 
 //        results = search.executeGeneSearch("SAAVL", false, false, false, true, OrganismDataType.GENE);
 //        System.out.println("Results for gene search on 'SAAVL' (a=false, d=false, gene=false, anatomy=true) -> DataType: " + results.getKey().getDescription());
@@ -991,7 +1075,7 @@ public class CElegansSearch implements OrganismSearch {
 //            System.out.println(s);
 //        }
 //        System.out.println("");
-
+//
 //        results = search.executeGeneSearch("SAAVL", false, false, false, true, OrganismDataType.GENE);
 //        System.out.println("Results for gene search on 'SAAVL' (a=true, d=false, gene=false, anatomy=true) -> DataType: " + results.getKey().getDescription());
 //        System.out.println("size of results: " + results.getValue().size());
@@ -999,7 +1083,7 @@ public class CElegansSearch implements OrganismSearch {
 //            System.out.println(s);
 //        }
 //        System.out.println("");
-
+//
 //        results = search.executeGeneSearch("ABpl", false, false, false, true, OrganismDataType.GENE);
 //        System.out.println("Results for gene search on 'ABpl' (a=false, d=false, gene=false, anatomy=true) -> DataType: " + results.getKey().getDescription());
 //        System.out.println("size of results: " + results.getValue().size());
@@ -1009,6 +1093,19 @@ public class CElegansSearch implements OrganismSearch {
 //        System.out.println("");
 
         //////////// OTHER C ELEGANS METHODS ///////////////
+
+        // embryonic homology
+        ArrayList<String> resultsList = search.getAnatomy("ASH");
+        System.out.println("Results for anatomy search on 'ASH'");
+        System.out.println("size of results: " + resultsList.size());
+        for (String s : resultsList) {
+            System.out.println(s);
+        }
+        System.out.println("");
+
+        // anatomy
+
+        // cell deaths
 
 
     }

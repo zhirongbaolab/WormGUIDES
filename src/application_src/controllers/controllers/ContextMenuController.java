@@ -32,7 +32,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import application_src.application_model.data.CElegansData.Connectome.Connectome;
 import application_src.controllers.layers.SearchLayer;
 import application_src.application_model.cell_case_logic.CasesLists;
 import application_src.application_model.cell_case_logic.cases.TerminalCellCase;
@@ -46,8 +45,8 @@ import static javafx.application.Platform.runLater;
 import static javafx.scene.paint.Color.WHITE;
 
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.GENE;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.search.SearchConfiguration.SearchType.GENE;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
 
 /**
  * Controller for the context menu that shows up on right click on a 3D entity. The menu can be accessed via the 3D

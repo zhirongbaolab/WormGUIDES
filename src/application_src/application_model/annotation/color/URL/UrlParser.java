@@ -15,7 +15,7 @@ import javafx.collections.ObservableList;
 
 import application_src.controllers.layers.SearchLayer;
 import application_src.application_model.annotation.color.Rule;
-import application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption;
+import application_src.application_model.search.SearchConfiguration.SearchOption;
 
 import static java.lang.Double.parseDouble;
 import static java.lang.Integer.parseInt;
@@ -23,17 +23,16 @@ import static java.util.Objects.requireNonNull;
 
 import static javafx.scene.paint.Color.web;
 
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.LINEAGE;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.FUNCTIONAL;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.DESCRIPTION;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.CONNECTOME;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.MULTICELLULAR_STRUCTURE_CELLS;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.NEIGHBOR;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.isGeneFormat;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.ANCESTOR;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_BODY;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_NUCLEUS;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.DESCENDANT;
+import static application_src.application_model.search.SearchConfiguration.SearchType.LINEAGE;
+import static application_src.application_model.search.SearchConfiguration.SearchType.FUNCTIONAL;
+import static application_src.application_model.search.SearchConfiguration.SearchType.DESCRIPTION;
+import static application_src.application_model.search.SearchConfiguration.SearchType.CONNECTOME;
+import static application_src.application_model.search.SearchConfiguration.SearchType.MULTICELLULAR_STRUCTURE_CELLS;
+import static application_src.application_model.search.SearchConfiguration.SearchType.NEIGHBOR;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.ANCESTOR;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.DESCENDANT;
 
 /** Utility methods that parse a URL specifying the subscene color scheme and parameters */
 public class UrlParser {

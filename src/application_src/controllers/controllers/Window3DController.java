@@ -92,6 +92,8 @@ import application_src.application_model.annotation.color.ColorHash;
 import application_src.application_model.threeD.subscenesaving.JavaPicture;
 import application_src.application_model.threeD.subscenesaving.JpegImagesToMovie;
 
+import static application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.ModelSpecificSearchUtil.getFirstOccurenceOf;
+import static application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.ModelSpecificSearchUtil.getLastOccurenceOf;
 import static java.lang.Math.pow;
 import static java.lang.Math.round;
 import static java.lang.Math.sqrt;
@@ -128,13 +130,11 @@ import static javafx.scene.transform.Rotate.Z_AXIS;
 import static com.sun.javafx.scene.CameraHelper.project;
 import static javax.imageio.ImageIO.write;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.LINEAGE;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchType.NEIGHBOR;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getFirstOccurenceOf;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getLastOccurenceOf;
+import static application_src.application_model.search.SearchConfiguration.SearchType.LINEAGE;
+import static application_src.application_model.search.SearchConfiguration.SearchType.NEIGHBOR;
 import static application_src.application_model.loaders.NoteImageLoader.createImageView;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_BODY;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
 import static application_src.application_model.annotation.stories.Note.Display.CALLOUT_LOWER_LEFT;
 import static application_src.application_model.annotation.stories.Note.Display.CALLOUT_LOWER_RIGHT;
 import static application_src.application_model.annotation.stories.Note.Display.CALLOUT_UPPER_LEFT;
@@ -253,7 +253,6 @@ public class Window3DController {
     private final StringProperty selectedNameLabeledProperty;
     private final Stage contextMenuStage;
     private final ContextMenuController contextMenuController;
-    private final CasesLists casesLists;
     private final BooleanProperty cellClickedProperty;
     private final ObservableList<String> searchResultsList;
     private final ObservableList<Rule> rulesList;
@@ -289,7 +288,6 @@ public class Window3DController {
     // orientation indicator
     private Cylinder orientationIndicator;
     private final ProductionInfo productionInfo;
-    private final Connectome connectome;
     private final BooleanProperty bringUpInfoFlag;
     private final SubsceneSizeListener subsceneSizeListener;
 
@@ -367,9 +365,7 @@ public class Window3DController {
             final SubScene subscene,
             final AnchorPane parentPane,
             final LineageData lineageData,
-            final CasesLists casesLists,
             final ProductionInfo productionInfo,
-            final Connectome connectome,
             final SceneElementsList sceneElementsList,
             final TreeItem<StructureTreeNode> structureTreeRoot,
             final StoriesLayer storiesLayer,
@@ -430,7 +426,6 @@ public class Window3DController {
         this.rootEntitiesGroup = requireNonNull(rootEntitiesGroup);
         this.lineageData = lineageData;
         this.productionInfo = requireNonNull(productionInfo);
-        this.connectome = requireNonNull(connectome);
         this.sceneElementsList = requireNonNull(sceneElementsList);
         this.storiesLayer = requireNonNull(storiesLayer);
         this.searchLayer = requireNonNull(searchLayer);
@@ -652,8 +647,6 @@ public class Window3DController {
         subscene.setOnScroll(mouseScrollHandler);
 
         setNotesPane(parentPane);
-
-        this.casesLists = requireNonNull(casesLists);
 
         movieFiles = new Vector<>();
         javaPictures = new Vector<>();

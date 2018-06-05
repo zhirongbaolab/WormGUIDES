@@ -10,9 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getDescriptionByLineageName;
-import static application_src.application_model.data.CElegansData.CellDeaths.CellDeaths.isInCellDeaths;
-import static application_src.application_model.search.OLD_PIPELINE_CLASSES.SearchUtil.getDescendantsList;
-import static application_src.application_model.data.CElegansData.AnalogousCells.EmbryonicAnalogousCells.findEmbryonicHomology;
 
 
 /**

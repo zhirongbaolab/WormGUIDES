@@ -35,7 +35,6 @@ public class CasesLists {
     public CasesLists() {
         this.cellCases = new ArrayList<>();
         this.anatomyTermCases = new ArrayList<>();
-        Anatomy.initAnatomy();
     }
 
     public void setInfoWindow(final InfoWindow infoWindow) {
