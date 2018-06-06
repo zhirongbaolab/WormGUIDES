@@ -48,6 +48,7 @@ public class GeneSearchManager {
         intendedResultsType = OrganismDataType.GENE;
 
         geneResultsUpdatedFlag = new SimpleBooleanProperty();
+        geneResultsUpdatedFlag.set(false);
     }
 
     /**
@@ -61,7 +62,9 @@ public class GeneSearchManager {
     public static void cacheGeneResults(final String gene, final AbstractMap.SimpleEntry<OrganismDataType, List<String>> results) {
         if (gene != null && results != null) {
             geneResultsCache.put(gene, results);
+            geneResultsUpdatedFlag.set(true);
         }
+        geneResultsUpdatedFlag.set(false);
     }
 
     public static void setSearchTerm(String term) { searchTerm = term; }

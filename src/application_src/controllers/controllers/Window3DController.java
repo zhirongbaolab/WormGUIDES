@@ -1788,6 +1788,7 @@ public class Window3DController {
         // End search stuff
     }
 
+    // TODO -> this should tap the annotation manager which has just been populated with these results
     private void updateLocalSearchResults() {
         if (searchResultsList == null) {
             return;

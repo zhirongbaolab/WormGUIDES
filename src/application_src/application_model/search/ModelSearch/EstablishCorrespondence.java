@@ -2,6 +2,7 @@ package application_src.application_model.search.ModelSearch;
 
 import application_src.application_model.data.LineageData;
 import application_src.application_model.data.OrganismDataType;
+import application_src.application_model.search.OrganismSearchResults;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
 
 import java.util.AbstractMap;
@@ -21,16 +22,15 @@ import java.util.List;
 public class EstablishCorrespondence {
     // representations of the underlying model
     private static LineageData lineageData;
-    private List<String> activeFunctionalNames;
     private static SceneElementsList sceneElementsList;
 
-    public EstablishCorrespondence(LineageData lineageData, List<String> activeFunctionalNames, SceneElementsList sceneElementsList) {
+    public EstablishCorrespondence(LineageData lineageData, SceneElementsList sceneElementsList) {
         this.lineageData = lineageData;
-        this.activeFunctionalNames = activeFunctionalNames;
         this.sceneElementsList = sceneElementsList;
     }
 
-    public List<String> establishCorrespondence(AbstractMap.SimpleEntry<OrganismDataType, List<String>> searchResults) {
+    public List<String> establishCorrespondence(OrganismSearchResults searchResults,
+                                                boolean includeCellNuc, boolean includeCellBody) {
         ArrayList<String> correspondenceList = new ArrayList<>();
 
         // iterate over the search results, and find the entities that have overlap in the underlying model. Add these

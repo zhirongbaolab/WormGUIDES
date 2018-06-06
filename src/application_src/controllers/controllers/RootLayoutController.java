@@ -19,6 +19,7 @@ import application_src.application_model.data.CElegansData.Anatomy.Anatomy;
 import application_src.application_model.data.CElegansData.Gene.GeneSearchManager;
 import application_src.application_model.data.CElegansData.SulstonLineage.SulstonLineage;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
+import application_src.application_model.search.ModelSearch.EstablishCorrespondence;
 import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.NeighborsSearch;
 import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
 import application_src.views.popups.TimelineChart;
@@ -270,6 +271,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
     // the model specific search pipelines
     private StructuresSearch structuresSearch;
     private NeighborsSearch neighborsSearch;
+
+    // the module that establishes the correspondence between C elegans search results and the model
+    private EstablishCorrespondence establishCorrespondence;
 
     // the annotation manager
     private AnnotationManager annotationManager;
@@ -985,6 +989,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
         cellNucleusCheckBox.setSelected(true);
         searchLayer = new SearchLayer(
                 CElegansSearchPipeline,
+                neighborsSearch,
+                structuresSearch,
+                establishCorrespondence,
                 annotationManager,
                 searchResultsList,
                 searchField,
@@ -1221,10 +1228,11 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private void initializeWithLineageData() {
         initLineageTree(lineageData.getAllCellNames());
 
-        neighborsSearch = new NeighborsSearch(lineageData);
+        neighborsSearch = new NeighborsSearch(this.lineageData);
 
-        sceneElementsList = new SceneElementsList(lineageData, this.defaultEmbryoFlag);
+        sceneElementsList = new SceneElementsList(this.lineageData, this.defaultEmbryoFlag);
         structuresSearch = new StructuresSearch(sceneElementsList);
+        establishCorrespondence = new EstablishCorrespondence(this.lineageData, this.sceneElementsList);
 
         initSearchLayer();
         initStructuresLayer();

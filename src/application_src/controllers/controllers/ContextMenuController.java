@@ -9,12 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import application_src.application_model.annotation.AnnotationManager;
 import application_src.application_model.data.CElegansData.Gene.WormBaseQuery;
 import application_src.application_model.data.OrganismDataType;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
+import application_src.application_model.search.ModelSearch.EstablishCorrespondence;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.NeighborsSearch;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
+import application_src.application_model.search.SearchConfiguration.SearchType;
 import javafx.beans.property.BooleanProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -70,7 +76,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
 
     private final Stage ownStage;
 
-    private final SearchLayer searchLayer;
+
 
     @FXML
     private VBox mainVBox;
@@ -91,59 +97,57 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     @FXML
     private Button colorNeighbors;
 
+
+    private List<String> searchResults;
+    private SearchType searchType;
     private int count; // to show loading in progress
     private String cellName; // lineage name of cell
     private ContextMenu expressesMenu;
     private MenuItem expressesTitle;
     private MenuItem loadingMenuItem;
-    private Service<List<String>> expressesQueryService;
+    private Service<Void> searchService;
     private Service<Void> loadingService;
     private ContextMenu wiredToMenu;
     private MenuItem colorAll;
     private Menu preSyn, postSyn, electr, neuro;
     private Service<List<List<String>>> wiredToQueryService;
-    private ProductionInfo productionInfo;
     private Stage parentStage;
     private BooleanProperty bringUpInfoProperty;
     private CElegansSearch CElegansSearchPipeline;
 
     /**
-     * Controller constructor
      *
      * @param parentStage
-     *         the parent stage (or popup window) that the context menu lives
-     *         in, used for rule editing window popups
-     * @param bringUpInfoProperty
-     *         when set to true, RootLayoutController brings up the cell info
-     *         window
+     * @param ownStage
      * @param cases
-     *         list of cell cases (terminal and non-terminal) that are
-     *         currently in the program
-     * @param productionInfo
-     *         production information about WormGUIDES
-     * @param connectome
-     *         connectome object that has information about cell connectome
+     * @param bringUpInfoProperty
+     * @param CElegansSearchPipeline
+     * @param neighborsSearch
+     * @param establishCorrespondence
+     * @param annotationManager
      */
     public ContextMenuController(
             final Stage parentStage,
             final Stage ownStage,
-            final SearchLayer searchLayer,
             final CasesLists cases,
-            final ProductionInfo productionInfo,
             final BooleanProperty bringUpInfoProperty,
-            final CElegansSearch CElegansSearchPipeline) {
+            final CElegansSearch CElegansSearchPipeline,
+            final NeighborsSearch neighborsSearch,
+            final EstablishCorrespondence establishCorrespondence,
+            final AnnotationManager annotationManager) {
 
         super();
 
         this.parentStage = requireNonNull(parentStage);
         this.ownStage = requireNonNull(ownStage);
 
-        this.searchLayer = requireNonNull(searchLayer);
-        this.productionInfo = requireNonNull(productionInfo);
-
         this.bringUpInfoProperty = requireNonNull(bringUpInfoProperty);
 
         this.CElegansSearchPipeline = requireNonNull(CElegansSearchPipeline);
+
+        searchResults = new ArrayList<>();
+        searchType = SearchType.LINEAGE;
+
 
         loadingService = new Service<Void>() {
             @Override
@@ -190,50 +194,53 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             }
         };
 
-        expressesQueryService = new Service<List<String>>() {
+        // the service that will perform the searches available in the context menu:
+        // Lineage
+        // Neighbors
+        // Gene
+        // Connectome
+        this.searchService= new Service<Void>() {
             @Override
-            protected Task<List<String>> createTask() {
-                final Task<List<String>> task = new Task<List<String>>() {
+            protected final Task<Void> createTask() {
+                final Task<Void> task = new Task<Void>() {
                     @Override
-                    protected List<String> call() throws Exception {
-                        if (cellName != null && !cellName.isEmpty()) {
-                            if (cases == null) {
-                                System.out.println("null cell name");
-                                return null; // error check
-                            }
-
-                            return WormBaseQuery.issueWormBaseAnatomyTermQuery(cellName);
-
-                        }
+                    protected Void call() throws Exception {
+                        runLater(() -> performSearch());
                         return null;
                     }
                 };
                 return task;
             }
         };
+        this.searchService.setOnScheduled(event -> loadingService.restart());
 
-        expressesQueryService.setOnSucceeded(event -> {
+
+        searchService.setOnSucceeded(event -> {
             loadingService.cancel();
             resetLoadingMenuItem();
-            final List<String> results = expressesQueryService.getValue();
-            if (results != null) {
-                for (String result : results) {
-                    final MenuItem item = new MenuItem(result);
-                    item.setOnAction(event12 -> {
-                        final Rule rule = searchLayer.addColorRule(GENE, result, DEFAULT_COLOR, CELL_NUCLEUS);
-                        rule.showEditStage(this.parentStage);
-                    });
-                    expressesMenu.getItems().add(item);
+            if (!searchResults.isEmpty()) {
+                if (searchType.equals(SearchType.GENE)) {
+                    // set an on action command for each gene so that it can be clicked and made a rule
+                    for (String result : searchResults) {
+                        final MenuItem item = new MenuItem(result);
+                        item.setOnAction(event12 -> {
+                            final Rule rule = annotationManager.addColorRule(GENE, result, DEFAULT_COLOR, CELL_NUCLEUS);
+                            rule.showEditStage(this.parentStage);
+                        });
+                        expressesMenu.getItems().add(item);
+                    }
+                } else if (searchType.equals(SearchType.CONNECTOME)) {
+
                 }
             }
         });
 
-        expressesQueryService.setOnScheduled(event -> {
+        searchService.setOnScheduled(event -> {
             runLater(() -> expressesMenu.getItems().addAll(loadingMenuItem));
             loadingService.restart();
         });
 
-        expressesQueryService.setOnCancelled(event -> {
+        searchService.setOnCancelled(event -> {
             resetLoadingMenuItem();
             loadingService.cancel();
         });
@@ -320,7 +327,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                     // translate the name if necessary
                     String funcName = CElegansSearchPipeline.checkQueryCell(cellName).toLowerCase();
 
-                    final Rule rule = searchLayer.addConnectomeColorRuleFromContextMenu(
+                    final Rule rule = searchLayer.addConnectomeColorRule(
                             funcName,
                             DEFAULT_COLOR,
                             true,
@@ -367,49 +374,100 @@ public class ContextMenuController extends AnchorPane implements Initializable {
         });
     }
 
-    /**
-     * Sets the listener for the 'more info' button click in the menu
-     *
-     * @param handler
-     *         the handler (provided by RootLayoutController) that handles the 'more info' button click action
-     */
-    public void setMoreInfoButtonListener(final EventHandler<MouseEvent> handler) {
-        info.setOnMouseClicked(handler);
+    private void performSearch() {
+        searchResults.clear();
+        switch (searchType) {
+            case LINEAGE:
+                break;
+            case NEIGHBOR:
+                break;
+            case GENE:
+                break;
+            case CONNECTOME:
+                break;
+        }
     }
 
-    /**
-     * Sets te listener for the 'color this cell' button click in the menu. Called by Window3DController and
-     * SulstonTreePane since they handle the click differently. A different mouse click listener is set depending on
-     * where the menu pops up (whether in the 3D subscene or the sulston tree)
-     *
-     * @param handler
-     *         the handler (provided by Window3DController or SulstonTreePane) that handles the 'color this cell'
-     *         button click action
-     */
-    public void setColorButtonListener(EventHandler<MouseEvent> handler) {
-        color.setOnMouseClicked(handler);
+    ////////////////////////////////// BUTTON HANDLERS ///////////////////////////////////////////
+    public EventHandler<ActionEvent> getMoreInfoButtonListener() {
+        return event -> {
+
+        };
     }
 
+    public EventHandler<ActionEvent> getColorCellButtonListener() {
+        return event -> {
+
+        };
+    }
+
+    public EventHandler<ActionEvent> getColorNeighborsButtonListener() {
+        return event -> {
+            searchType = SearchType.NEIGHBOR;
+            searchService.restart();
+        };
+    }
+
+    public EventHandler<ActionEvent> getGeneExpressionButtonListener() {
+        return event -> {
+            searchType = SearchType.GENE;
+            searchService.restart();
+        };
+    }
+
+    public EventHandler<ActionEvent> getWiredToButtonListener() {
+        return event -> {
+            searchType = SearchType.CONNECTOME;
+            searchService.restart();
+        };
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+//    /**
+//     * Sets the listener for the 'more info' button click in the menu
+//     *
+//     * @param handler
+//     *         the handler (provided by RootLayoutController) that handles the 'more info' button click action
+//     */
+//    public void setMoreInfoButtonListener(final EventHandler<MouseEvent> handler) {
+//        info.setOnMouseClicked(handler);
+//    }
+
+//    /**
+//     * Sets te listener for the 'color this cell' button click in the menu. Called by Window3DController and
+//     * SulstonTreePane since they handle the click differently. A different mouse click listener is set depending on
+//     * where the menu pops up (whether in the 3D subscene or the sulston tree)
+//     *
+//     * @param handler
+//     *         the handler (provided by Window3DController or SulstonTreePane) that handles the 'color this cell'
+//     *         button click action
+//     */
+//    public void setColorButtonListener(EventHandler<MouseEvent> handler) {
+//        color.setOnMouseClicked(handler);
+//    }
+//
+//    /**
+//     * Sets the listener for the 'color neighbors' button click in the menu. Called by Window3DController and
+//     * SulstonTreePane since they handle the click differently. A different mouse click listener is set depending on
+//     * where the menu pops up (whether in the 3D subscene or the sulston tree)
+//     *
+//     * @param handler
+//     *         the handler (provided by Window3DController or
+//     *         SulstonTreePane) that handles the 'color neighbors' button
+//     *         click action
+//     */
+//    public void setColorNeighborsButtonListener(EventHandler<MouseEvent> handler) {
+//        colorNeighbors.setOnMouseClicked(handler);
+//    }
+
+
+    /////////////////////////////////////////// UTILITY METHODS //////////////////////////
     public void setColorButtonText(final boolean isStructure) {
         if (isStructure) {
             color.setText("Color Structure");
         } else {
             color.setText("Color Cell");
         }
-    }
-
-    /**
-     * Sets te listener for the 'color neighbors' button click in the menu. Called by Window3DController and
-     * SulstonTreePane since they handle the click differently. A different mouse click listener is set depending on
-     * where the menu pops up (whether in the 3D subscene or the sulston tree)
-     *
-     * @param handler
-     *         the handler (provided by Window3DController or
-     *         SulstonTreePane) that handles the 'color neighbors' button
-     *         click action
-     */
-    public void setColorNeighborsButtonListener(EventHandler<MouseEvent> handler) {
-        colorNeighbors.setOnMouseClicked(handler);
     }
 
     /**
@@ -445,6 +503,91 @@ public class ContextMenuController extends AnchorPane implements Initializable {
         nameText.setText(name);
     }
 
+    /**
+     * Removes the MenuItem that shows that gene expression web querying is in
+     * progress.
+     */
+    private void resetLoadingMenuItem() {
+        if (loadingMenuItem != null) {
+            runLater(() -> {
+                if (wiredToMenu != null && wiredToMenu.getItems().contains(loadingMenuItem)) {
+                    wiredToMenu.getItems().remove(loadingMenuItem);
+                } else if (expressesMenu != null && expressesMenu.getItems().contains(loadingMenuItem)) {
+                    expressesMenu.getItems().remove(loadingMenuItem);
+                }
+
+                loadingMenuItem.setText("Loading");
+            });
+        }
+    }
+
+    /**
+     * Populates the input menu with MenuItems for each of the 'wired-to' results.
+     *
+     * @param results
+     *         Results from either a pre-synaptic, post-synaptic, electrical, or neuromuscular query to the connectome
+     * @param menu
+     *         The pre-synaptic, post-synaptic, eletrical, or neuromuscular menu that should be populated with these
+     *         results
+     * @param isPresynaptic
+     *         true if a pre-synaptic query to the connectome was issued, false otherwise
+     * @param isPostsynaptic
+     *         true if a pose-synaptic query to the connectome was issued, false otherwise
+     * @param isElectrical
+     *         true if an electrical query to the connectome was issued, false otherwise
+     * @param isNeuromuscular
+     *         true if a neuromuscular query to the connectome was issued, false otherwise
+     */
+    private void populateWiredToMenu(
+            final List<String> results,
+            final Menu menu,
+            final boolean isPresynaptic,
+            final boolean isPostsynaptic,
+            final boolean isElectrical,
+            final boolean isNeuromuscular) {
+
+        menu.getItems().clear();
+
+        String funcName = CElegansSearchPipeline.checkQueryCell(cellName).toLowerCase();
+
+        if (results.isEmpty()) {
+            menu.getItems().add(new MenuItem("None"));
+            return;
+        }
+
+        final MenuItem all = new MenuItem("Color All");
+        menu.getItems().add(all);
+        all.setOnAction(event -> {
+            final Rule rule = searchLayer.addConnectomeColorRule(
+                    funcName,
+                    DEFAULT_COLOR,
+                    isPresynaptic,
+                    isPostsynaptic,
+                    isElectrical,
+                    isNeuromuscular);
+            rule.showEditStage(parentStage);
+        });
+
+        for (String result : results) {
+            final MenuItem item = new MenuItem(result);
+            menu.getItems().add(item);
+            item.setOnAction(event -> {
+                final Rule rule = searchLayer.addConnectomeColorRule(
+                        CElegansSearchPipeline.checkQueryCell(result).toLowerCase(),
+                        DEFAULT_COLOR,
+                        isPresynaptic,
+                        isPostsynaptic,
+                        isElectrical,
+                        isNeuromuscular);
+                rule.showEditStage(parentStage);
+            });
+        }
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      * Disables/enables the 'More Info' functionality depending on whether the entity is a terminal cell/cell body
      *
@@ -484,6 +627,9 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     public void disableColorNeighborsFunction(final boolean disable) {
         colorNeighbors.setDisable(disable);
     }
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
     /**
      * Initializer for the loading of ContextMenuLayout.fxml. Sets 'wired to'
@@ -543,87 +689,6 @@ public class ContextMenuController extends AnchorPane implements Initializable {
 
             wiredToQueryService.restart();
         });
-    }
-
-    /**
-     * Removes the MenuItem that shows that gene expression web querying is in
-     * progress.
-     */
-    private void resetLoadingMenuItem() {
-        if (loadingMenuItem != null) {
-            runLater(() -> {
-                if (wiredToMenu != null && wiredToMenu.getItems().contains(loadingMenuItem)) {
-                    wiredToMenu.getItems().remove(loadingMenuItem);
-                } else if (expressesMenu != null && expressesMenu.getItems().contains(loadingMenuItem)) {
-                    expressesMenu.getItems().remove(loadingMenuItem);
-                }
-
-                loadingMenuItem.setText("Loading");
-            });
-        }
-    }
-
-    /**
-     * Populates the input menu with MenuItems for each of the 'wired-to' results.
-     *
-     * @param results
-     *         Results from either a pre-synaptic, post-synaptic, electrical, or neuromuscular query to the connectome
-     * @param menu
-     *         The pre-synaptic, post-synaptic, eletrical, or neuromuscular menu that should be populated with these
-     *         results
-     * @param isPresynaptic
-     *         true if a pre-synaptic query to the connectome was issued, false otherwise
-     * @param isPostsynaptic
-     *         true if a pose-synaptic query to the connectome was issued, false otherwise
-     * @param isElectrical
-     *         true if an electrical query to the connectome was issued, false otherwise
-     * @param isNeuromuscular
-     *         true if a neuromuscular query to the connectome was issued, false otherwise
-     */
-    private void populateWiredToMenu(
-            final List<String> results,
-            final Menu menu,
-            final boolean isPresynaptic,
-            final boolean isPostsynaptic,
-            final boolean isElectrical,
-            final boolean isNeuromuscular) {
-
-        menu.getItems().clear();
-
-        String funcName = CElegansSearchPipeline.checkQueryCell(cellName).toLowerCase();
-
-        if (results.isEmpty()) {
-            menu.getItems().add(new MenuItem("None"));
-            return;
-        }
-
-        final MenuItem all = new MenuItem("Color All");
-        menu.getItems().add(all);
-        all.setOnAction(event -> {
-            final Rule rule = searchLayer.addConnectomeColorRuleFromContextMenu(
-                    funcName,
-                    DEFAULT_COLOR,
-                    isPresynaptic,
-                    isPostsynaptic,
-                    isElectrical,
-                    isNeuromuscular);
-            rule.showEditStage(parentStage);
-        });
-
-        for (String result : results) {
-            final MenuItem item = new MenuItem(result);
-            menu.getItems().add(item);
-            item.setOnAction(event -> {
-                final Rule rule = searchLayer.addConnectomeColorRuleFromContextMenu(
-                        CElegansSearchPipeline.checkQueryCell(result).toLowerCase(),
-                        DEFAULT_COLOR,
-                        isPresynaptic,
-                        isPostsynaptic,
-                        isElectrical,
-                        isNeuromuscular);
-                rule.showEditStage(parentStage);
-            });
-        }
     }
 
     /**

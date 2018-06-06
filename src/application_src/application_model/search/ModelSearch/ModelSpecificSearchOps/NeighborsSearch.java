@@ -13,7 +13,7 @@ import static java.util.Collections.sort;
 
 public class NeighborsSearch {
 
-    private static LineageData lineageData;
+    private LineageData lineageData;
 
     public NeighborsSearch(LineageData lineageData) {
         this.lineageData = lineageData;
@@ -33,7 +33,7 @@ public class NeighborsSearch {
      *
      * @return lineage names of all neighboring cells
      */
-    public static List<String> getNeighboringCells(final String cellName) {
+    public List<String> getNeighboringCells(final String cellName) {
         final Set<String> cellsSet = new HashSet<>();
 
         if (cellName == null || !lineageData.isCellName(cellName)) {
