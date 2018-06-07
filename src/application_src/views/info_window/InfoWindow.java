@@ -6,10 +6,10 @@ package application_src.views.info_window;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import application_src.application_model.data.CElegansData.Anatomy.AnatomyTerm;
 import application_src.application_model.data.OrganismDataType;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -21,7 +21,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import netscape.javascript.JSObject;
-
 import application_src.application_model.data.LineageData;
 import application_src.application_model.data.CElegansData.Connectome.NeuronalSynapse;
 import application_src.controllers.controllers.InfoWindowLinkController;
@@ -33,11 +32,9 @@ import application_src.application_model.cell_case_logic.cases.TerminalCellCase;
 import application_src.application_model.threeD.subscenegeometry.SceneElement;
 import application_src.application_model.resources.ProductionInfo;
 import application_src.views.DraggableTab;
-
 import static application_src.application_model.data.CElegansData.Anatomy.AnatomyTerm.AMPHID_SENSILLA;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.*;
 import static java.util.Objects.requireNonNull;
-
 import static javafx.application.Platform.runLater;
 import static javafx.scene.control.TabPane.TabClosingPolicy.ALL_TABS;
 
@@ -58,12 +55,14 @@ public class InfoWindow {
     private ProductionInfo productionInfo;
     private String nameToQuery;
 
-    private CElegansSearch cElegansSearchPipeline;
+    private CasesLists casesLists;
 
-    private SearchLayer searchLayer;
+    private CElegansSearch cElegansSearchPipeline;
+    private StructuresSearch structuresSearch;
 
     private Service<Void> addNameService;
     private Service<Void> showLoadingService;
+    private WiringService wiringService;
 
     // stages for various info windows
     private Stage cellShapesIndexStage;
@@ -83,13 +82,14 @@ public class InfoWindow {
             final CElegansSearch CElegansSearchPipeline,
             final boolean defaultEmbryoFlag,
             final LineageData lineageData,
-            final CElegansSearch cElegansSearchPipeline) {
+            final CElegansSearch cElegansSearchPipeline,
+            final StructuresSearch structuresSearch) {
 
         infoWindowStage = new Stage();
         infoWindowStage.setTitle("Cell Info Window");
 
         this.productionInfo = requireNonNull(productionInfo);
-        this.cElegansSearchPipeline = requireNonNull(CElegansSearchPipeline);
+        this.casesLists = requireNonNull(casesLists);
 
         tabPane = new TabPane();
         tabPane.setTabClosingPolicy(ALL_TABS);
@@ -97,7 +97,8 @@ public class InfoWindow {
         scene = new Scene(new Group());
         scene.setRoot(tabPane);
 
-        this.searchLayer = requireNonNull(searchLayer);
+        this.cElegansSearchPipeline = requireNonNull(cElegansSearchPipeline);
+        this.structuresSearch = requireNonNull(structuresSearch);
 
         infoWindowStage.setScene(scene);
 
@@ -109,7 +110,7 @@ public class InfoWindow {
         infoWindowStage.setResizable(true);
 
         parentStage = stage;
-        linkController = new InfoWindowLinkController(parentStage, searchLayer, cellNameProperty);
+        linkController = new InfoWindowLinkController(parentStage, cellNameProperty, casesLists, this);
 
         count = 0;
         showLoadingService = new Service<Void>() {
@@ -335,7 +336,7 @@ public class InfoWindow {
     }
 
     public void addName(final String name) {
-        if (name != null && !isMulticellularStructureByName(name)) {
+        if (name != null && !structuresSearch.isMulticellularStructureByName(name)) {
             nameToQuery = name;
             addNameService.restart();
         }
@@ -359,7 +360,7 @@ public class InfoWindow {
 
     public void addToInfoWindow(final String name) {
         if (wiringService == null) {
-            wiringService = new SearchLayer.WiringService();
+            wiringService = new WiringService();
         }
         wiringService.setSearchString(name);
         wiringService.restart();
@@ -403,7 +404,7 @@ public class InfoWindow {
             tab.setOnClosed(e -> {
                 final Tab t = (Tab) e.getSource();
                 String cellName = t.getId();
-                searchLayer.removeCellCase(cellName);
+                casesLists.removeCellCase(cellName);
             });
 
             tabPane.setFocusTraversable(true);
@@ -575,12 +576,12 @@ public class InfoWindow {
                                     // show the tab
                                 } else {
                                     // translate the name if necessary
-                                    String funcName = CElegansSearchPipeline.checkQueryCell(searchedCell).toUpperCase();
+                                    String funcName = CElegansSearch.checkQueryCell(searchedCell).toUpperCase();
                                     // add a terminal case --> pass the wiring partners
                                     casesLists.makeTerminalCase(
                                             searchedCell,
                                             funcName,
-                                            CElegansSearchPipeline.executeConnectomeSearch(
+                                            cElegansSearchPipeline.executeConnectomeSearch(
                                                     funcName,
                                                     false,
                                                     false,
@@ -589,7 +590,7 @@ public class InfoWindow {
                                                     false,
                                                     false,
                                                     OrganismDataType.FUNCTIONAL).getValue(),
-                                            CElegansSearchPipeline.executeConnectomeSearch(
+                                            cElegansSearchPipeline.executeConnectomeSearch(
                                                     funcName,
                                                     false,
                                                     false,
@@ -598,7 +599,7 @@ public class InfoWindow {
                                                     false,
                                                     false,
                                                     OrganismDataType.FUNCTIONAL).getValue(),
-                                            CElegansSearchPipeline.executeConnectomeSearch(
+                                            cElegansSearchPipeline.executeConnectomeSearch(
                                                     funcName,
                                                     false,
                                                     false,
@@ -607,7 +608,7 @@ public class InfoWindow {
                                                     true,
                                                     false,
                                                     OrganismDataType.FUNCTIONAL).getValue(),
-                                            CElegansSearchPipeline.executeConnectomeSearch(
+                                            cElegansSearchPipeline.executeConnectomeSearch(
                                                     funcName,
                                                     false,
                                                     false,

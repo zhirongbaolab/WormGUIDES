@@ -313,7 +313,7 @@ public class SulstonTreePane extends ScrollPane {
 
     /**
      * Adds the tree drawing as well as timeline marks to the tree window. This is called after the scene for this
-     * tree pane is set by the {@link wormguides.controllers.RootLayoutController}.
+     * tree pane is set by the {RootLayoutController}.
      */
     public void addDrawing() {
         addLines(lineageTreeRoot, mainPane);
@@ -339,7 +339,7 @@ public class SulstonTreePane extends ScrollPane {
     }
 
     /**
-     * Called by {@link wormguides.controllers.RootLayoutController} to resizes this scrollpane and
+     * Called by {RootLayoutController} to resizes this scrollpane and
      * canvas to fit the window. Gets rid of extraneous space outside of the
      * tree.
      */
@@ -421,22 +421,22 @@ public class SulstonTreePane extends ScrollPane {
                 contextMenuController.disableWiredToFunction(false);
             }
 
-            contextMenuController.setColorButtonListener(event -> {
-                final Rule rule = searchLayer.addColorRule(
-                        LINEAGE,
-                        name,
-                        WHITE,
-                        CELL_NUCLEUS);
-                rule.showEditStage(ownStage);
-                contextMenuStage.hide();
-            });
-
-            contextMenuController.setColorNeighborsButtonListener(event -> {
-                // call distance SearchLayer method
-                final Rule rule = searchLayer.addColorRule(NEIGHBOR, name, WHITE, CELL_NUCLEUS);
-                rule.showEditStage(ownStage);
-                contextMenuStage.hide();
-            });
+//            contextMenuController.setColorButtonListener(event -> {
+//                final Rule rule = searchLayer.addColorRule(
+//                        LINEAGE,
+//                        name,
+//                        WHITE,
+//                        CELL_NUCLEUS);
+//                rule.showEditStage(ownStage);
+//                contextMenuStage.hide();
+//            });
+//
+//            contextMenuController.setColorNeighborsButtonListener(event -> {
+//                // call distance SearchLayer method
+//                final Rule rule = searchLayer.addColorRule(NEIGHBOR, name, WHITE, CELL_NUCLEUS);
+//                rule.showEditStage(ownStage);
+//                contextMenuStage.hide();
+//            });
 
             contextMenuStage.setX(sceneX);
             contextMenuStage.setY(sceneY);

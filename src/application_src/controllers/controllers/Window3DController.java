@@ -183,10 +183,6 @@ import static application_src.application_model.threeD.subsceneparameters.Parame
  * particular entity, then queries the {@link ColorHash} for the {@link Material} to use for the entity.
  */
 public class Window3DController {
-
-    private static final double CANNONICAL_ORIENTATION_X = 145.0;
-    private static final double CANNONICAL_ORIENTATION_Y = -166.0;
-    private static final double CANNONICAL_ORIENTATION_Z = 24.0;
     private static final String CS = ", ";
     private static final String ACTIVE_LABEL_COLOR_HEX = "#ffff66",
             SPRITE_COLOR_HEX = "#ffffff",
@@ -1196,28 +1192,28 @@ public class Window3DController {
             contextMenuController.disableWiredToFunction(true);
         }
 
-        contextMenuController.setColorButtonListener(event -> {
-            contextMenuStage.hide();
-            if (isStructure) {
-                if (hasFunctionalName) {
-                    searchLayer.addStructureRuleBySceneName(getFunctionalNameByLineageName(name), WHITE)
-                            .showEditStage(parentStage);
-                } else {
-                    searchLayer.addStructureRuleBySceneName(name, WHITE)
-                            .showEditStage(parentStage);
-                }
-            } else {
-                searchLayer.addColorRule(LINEAGE, name, WHITE, CELL_NUCLEUS, CELL_BODY)
-                        .showEditStage(parentStage);
-            }
-        });
-
-        contextMenuController.setColorNeighborsButtonListener(event -> {
-            contextMenuStage.hide();
-            // color neighboring cell bodies, multicellular structures, as well as nuclei
-            searchLayer.addColorRule(NEIGHBOR, name, WHITE, CELL_NUCLEUS, CELL_BODY)
-                    .showEditStage(parentStage);
-        });
+//        contextMenuController.setColorButtonListener(event -> {
+//            contextMenuStage.hide();
+//            if (isStructure) {
+//                if (hasFunctionalName) {
+//                    searchLayer.addStructureRuleBySceneName(getFunctionalNameByLineageName(name), WHITE)
+//                            .showEditStage(parentStage);
+//                } else {
+//                    searchLayer.addStructureRuleBySceneName(name, WHITE)
+//                            .showEditStage(parentStage);
+//                }
+//            } else {
+//                searchLayer.addColorRule(LINEAGE, name, WHITE, CELL_NUCLEUS, CELL_BODY)
+//                        .showEditStage(parentStage);
+//            }
+//        });
+//
+//        contextMenuController.setColorNeighborsButtonListener(event -> {
+//            contextMenuStage.hide();
+//            // color neighboring cell bodies, multicellular structures, as well as nuclei
+//            searchLayer.addColorRule(NEIGHBOR, name, WHITE, CELL_NUCLEUS, CELL_BODY)
+//                    .showEditStage(parentStage);
+//        });
 
         contextMenuStage.setX(sceneX);
         contextMenuStage.setY(sceneY);

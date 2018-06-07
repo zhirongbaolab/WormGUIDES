@@ -77,8 +77,6 @@ public class ContextMenuController extends AnchorPane implements Initializable {
 
     private final Stage ownStage;
 
-
-
     @FXML
     private VBox mainVBox;
     @FXML
@@ -234,6 +232,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                                                                             searchResults,
                                                                             options);
                             rule.showEditStage(this.parentStage);
+                            ownStage.hide();
                         });
                         expressesMenu.getItems().add(item);
                     }
@@ -301,8 +300,6 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                         rule.showEditStage(this.parentStage);
                         wiredToMenu.show(wiredTo, Side.RIGHT, 0, 0);
                     });
-                    } else if (searchType.equals(SearchType.NEIGHBOR)) {
-
                     }
                 }
         });
@@ -312,6 +309,13 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             resetLoadingMenuItem();
             loadingService.cancel();
         });
+
+        // set handlers
+//        info.setOnAction(setMoreInfoButtonListener());
+//        color.setOnAction(setColorCellButtonListener());
+//        colorNeighbors.setOnAction(setColorNeighborsButtonListener());
+//        expresses.setOnAction(setGeneExpressionButtonListener());
+//        wiredTo.setOnAction(setWiredToButtonListener());
     }
 
     private void performSearch() {
@@ -322,6 +326,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             case NEIGHBOR:
                 break;
             case GENE:
+                searchResults.addAll(cElegansSearchPipeline.executeGeneSearch(cellName, false, false, false, true, OrganismDataType.LINEAGE).getValue());
                 break;
             case CONNECTOME:
                 break;
@@ -448,70 +453,40 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                     isNeuromuscular,
                     options);
             rule.showEditStage(parentStage);
+            ownStage.hide();
         });
-
-        for (String result : results) {
-            final MenuItem item = new MenuItem(result);
-            menu.getItems().add(item);
-            item.setOnAction(event -> {
-
-                // perform a local search
-                List<String> searchResultsLcl = cElegansSearchPipeline.executeConnectomeSearch(
-                        CElegansSearch.checkQueryCell(result).toLowerCase(),
-                        false,
-                        false,
-                        isPresynaptic,
-                        isPostsynaptic,
-                        isElectrical,
-                        isNeuromuscular,
-                        OrganismDataType.LINEAGE).getValue();
-
-                // add the rule through the annotation manager
-                ArrayList<SearchOption> options = new ArrayList<>();
-                options.add(CELL_NUCLEUS);
-                final Rule rule = annotationManager.addConnectomeColorRule(
-                        funcName,
-                        DEFAULT_COLOR,
-                        searchResultsLcl,
-                        isPresynaptic,
-                        isPostsynaptic,
-                        isElectrical,
-                        isNeuromuscular,
-                        options);
-                rule.showEditStage(parentStage);
-            });
-        }
     }
 
     ////////////////////////////////// BUTTON HANDLERS ///////////////////////////////////////////
-    public EventHandler<ActionEvent> getMoreInfoButtonListener() {
+    public EventHandler<ActionEvent> setMoreInfoButtonListener() {
+        // TODO -> figure out how to generate info window page from here
         return event -> {
-
+            System.out.println("info window from context menu not working right now");
         };
     }
 
-    public EventHandler<ActionEvent> getColorCellButtonListener() {
+    public EventHandler<ActionEvent> setColorCellButtonListener() {
         return event -> {
             searchType = SearchType.LINEAGE;
             searchService.restart();
         };
     }
 
-    public EventHandler<ActionEvent> getColorNeighborsButtonListener() {
+    public EventHandler<ActionEvent> setColorNeighborsButtonListener() {
         return event -> {
             searchType = SearchType.NEIGHBOR;
             searchService.restart();
         };
     }
 
-    public EventHandler<ActionEvent> getGeneExpressionButtonListener() {
+    public EventHandler<ActionEvent> setGeneExpressionButtonListener() {
         return event -> {
             searchType = SearchType.GENE;
             searchService.restart();
         };
     }
 
-    public EventHandler<ActionEvent> getWiredToButtonListener() {
+    public EventHandler<ActionEvent> setWiredToButtonListener() {
         return event -> {
             searchType = SearchType.CONNECTOME;
             searchService.restart();
@@ -710,9 +685,6 @@ public class ContextMenuController extends AnchorPane implements Initializable {
 //     * @param handler
 //     *         the handler (provided by RootLayoutController) that handles the 'more info' button click action
 //     */
-//    public void setMoreInfoButtonListener(final EventHandler<MouseEvent> handler) {
-//        info.setOnMouseClicked(handler);
-//    }
 
 //    /**
 //     * Sets te listener for the 'color this cell' button click in the menu. Called by Window3DController and

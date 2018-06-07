@@ -2,6 +2,7 @@ package application_src.application_model.search.ModelSearch;
 
 import application_src.application_model.data.LineageData;
 import application_src.application_model.data.OrganismDataType;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
 import application_src.application_model.search.OrganismSearchResults;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
 
@@ -35,6 +36,14 @@ public class EstablishCorrespondence {
 
         // iterate over the search results, and find the entities that have overlap in the underlying model. Add these
         // to the correspondence list
+        List<String> names = lineageData.getAllCellNames();
+        for(String name : names) {
+            if (searchResults.getSearchResults().contains(name)) {
+                correspondenceList.add(name);
+            }
+        }
+
+        correspondenceList.addAll(StructuresSearch.getCellBodiesList(searchResults.getSearchResults()));
 
         return correspondenceList;
     }

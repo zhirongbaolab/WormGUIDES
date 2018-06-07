@@ -8,6 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import application_src.application_model.annotation.AnnotationManager;
+import application_src.application_model.data.OrganismDataType;
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.NeighborsSearch;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -47,24 +52,26 @@ public class UrlParser {
      */
     public static void parseUrlRules(
             final String url,
-            final ObservableList<Rule> rulesList,
-            final SearchLayer searchLayer) {
+            final CElegansSearch cElegansSearchPipeline,
+            final StructuresSearch structuresSearch,
+            final NeighborsSearch neighborsSearch,
+            final AnnotationManager annotationManager) {
 
         final List<String> ruleStrings = parseRuleArgs(url);
-        rulesList.clear();
+        annotationManager.clearRulesList();
 
         final List<String> types = new ArrayList<>();
         final List<SearchOption> options = new ArrayList<>();
         StringBuilder sb;
         boolean noTypeSpecified;
-        boolean isMLS; // flag denoting whether this is \a Manually Specified List
+        boolean isMSL; // flag denoting whether this is \a Manually Specified List
         String wholeColorString;
         String name;
         for (String ruleString : ruleStrings) {
             types.clear();
             sb = new StringBuilder(ruleString);
             noTypeSpecified = false;
-            isMLS = false;
+            isMSL = false;
             // determine if rule is a cell/cellbody rule, or a multicelllar structure rule
             try {
                 // multicellular structure rules have a null SearchType
@@ -109,7 +116,7 @@ public class UrlParser {
                 if (sb.indexOf("MSL") > -1) {
                     types.clear(); // remove any other types
                     types.add("-MSL");
-                    isMLS = true;
+                    isMSL = true;
                 }
 
                 // remove type arguments from url string
@@ -170,60 +177,69 @@ public class UrlParser {
                 name = sb.substring(0, sb.indexOf("+"));
 
                 // if this is a manually specified list, extract each name and its options for
-                if (isMLS) {
+                if (isMSL) {
                     List<String> names = new ArrayList<>();
                     StringTokenizer st = new StringTokenizer(name, ";");
                     while (st.hasMoreTokens()) {
                         names.add(st.nextToken());
                     }
-                    searchLayer.addColorRule(names, web(colorHex, alpha), options);
+                    annotationManager.addMSLColorRule(names, web(colorHex, alpha), names, options);
                 } else {
                     // add regular ColorRule
                     if (types.contains("-s")) {
-                        searchLayer.addColorRule(LINEAGE, name, web(colorHex, alpha), options);
+                        List<String> lineageSearchResults = cElegansSearchPipeline.executeLineageSearch(name, options.contains(ANCESTOR), options.contains(DESCENDANT)).getValue();
+                        annotationManager.addColorRule(LINEAGE, name, web(colorHex, alpha), lineageSearchResults, options);
                     }
                     if (types.contains("-n")) {
-                        searchLayer.addColorRule(FUNCTIONAL, name, web(colorHex, alpha), options);
+                        List<String> functionalSearchResults = cElegansSearchPipeline.executeFunctionalSearch(name, options.contains(ANCESTOR), options.contains(DESCENDANT), OrganismDataType.LINEAGE).getValue();
+                        annotationManager.addColorRule(FUNCTIONAL, name, web(colorHex, alpha), functionalSearchResults, options);
                     }
                     if (types.contains("-d")) {
-                        searchLayer.addColorRule(DESCRIPTION, name, web(colorHex, alpha), options);
+                        List<String> descriptionSearchResults = cElegansSearchPipeline.executeDescriptionSearch(name, options.contains(ANCESTOR), options.contains(DESCENDANT), OrganismDataType.LINEAGE).getValue();
+                        annotationManager.addColorRule(DESCRIPTION, name, web(colorHex, alpha), descriptionSearchResults, options);
                     }
                     if (types.contains("-g")) {
-                        searchLayer.addGeneColorRuleFromUrl(name, web(colorHex, alpha), options);
+                        List<String> geneSearchResults = cElegansSearchPipeline.executeGeneSearch(name, false, false, true, false, OrganismDataType.GENE).getValue();
+                        annotationManager.addGeneColorRule(name, web(colorHex, alpha), geneSearchResults, options);
                     }
                     if (types.contains("-m")) {
-                        searchLayer.addColorRule(
+                        // TODO -> not implemented
+                        annotationManager.addColorRule(
                                 MULTICELLULAR_STRUCTURE_CELLS,
                                 name,
                                 web(colorHex, alpha),
+                                new ArrayList<>(),
                                 options);
                     }
                     if (types.contains("-M")) {
-                        searchLayer.addStructureRuleBySceneName(
+                        annotationManager.addStructureRuleBySceneName(
                                 name.replace("=", " "),
                                 web(colorHex, alpha));
                     }
                     if (types.contains("-H")) {
-                        searchLayer.addStructureRuleByHeading(
+                        List<String> structuresToAdd = structuresSearch.executeStructureSearchUnderHeading(name.replace("=", " "));
+                        annotationManager.addStructureRuleByHeading(
                                 name.replace("=", " "),
-                                web(colorHex, alpha));
+                                web(colorHex, alpha),
+                                structuresToAdd);
                     }
-                    if (types.contains("-c")) {
-                        searchLayer.addColorRule(CONNECTOME, name, web(colorHex, alpha), options);
+                    if (types.contains("-c")) { // TODO -> currently not supported because there aren't tags for the options
+                        //annotationManager.addColorRule(CONNECTOME, name, web(colorHex, alpha), options);
                     }
                     if (types.contains("-b")) {
-                        searchLayer.addColorRule(NEIGHBOR, name, web(colorHex, alpha), options);
+                        List<String> neighboringCells = neighborsSearch.getNeighboringCells(name);
+                        annotationManager.addColorRule(NEIGHBOR, name, web(colorHex, alpha), neighboringCells, options);
                     }
                 }
 
-                // if no type present, default is systematic or gene
-                if (noTypeSpecified) {
-                    if (isGeneFormat(name)) {
-                        searchLayer.addGeneColorRuleFromUrl(name, web(colorHex, alpha), options);
-                    } else {
-                        searchLayer.addColorRule(LINEAGE, name, web(colorHex, alpha), options);
-                    }
-                }
+//                // if no type present, default is systematic or gene
+//                if (noTypeSpecified) {
+//                    if (CElegansSearch.isGeneFormat(name)) {
+//                        annotationManager.addGeneColorRuleFromUrl(name, web(colorHex, alpha), options);
+//                    } else {
+//                        annotationManager.addColorRule(LINEAGE, name, web(colorHex, alpha), options);
+//                    }
+//                }
 
             } catch (StringIndexOutOfBoundsException e) {
                 System.out.println("Invalid color rule format");
@@ -308,7 +324,7 @@ public class UrlParser {
 
     /**
      * Processes a URL string and sets the correct view parameters in the 3D subscene. Called by
-     * {@link wormguides.layers.StoriesLayer} and {@link wormguides.controllers.RootLayoutController} for scene
+     * StoriesLayer and RootLayoutController for scene
      * sharing/loading and when changing active/inactive wormguides.stories. Documentation for URL (old and new APIs)
      * formatting and syntax can be found in URLDocumentation.txt inside the package wormguides.model.
      *
@@ -317,8 +333,10 @@ public class UrlParser {
      */
     public static void processUrl(
             final String url,
-            final ObservableList<Rule> rulesList,
-            final SearchLayer searchLayer,
+            final CElegansSearch cElegansSearchPipeline,
+            final NeighborsSearch neighborsSearch,
+            final StructuresSearch structuresSearch,
+            final AnnotationManager annotationManager,
             final IntegerProperty timeProperty,
             final DoubleProperty rotateXAngleProperty,
             final DoubleProperty rotateYAngleProperty,
@@ -329,7 +347,7 @@ public class UrlParser {
             final DoubleProperty othersOpacityProperty,
             final BooleanProperty rebuildSubsceneFlag) {
 
-        parseUrlRules(url, rulesList, searchLayer);
+        parseUrlRules(url, cElegansSearchPipeline, structuresSearch, neighborsSearch, annotationManager);
 
         // process view arguments
         final List<String> viewArgs = parseViewArgs(url);

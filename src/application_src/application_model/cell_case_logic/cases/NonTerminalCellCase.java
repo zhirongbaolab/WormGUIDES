@@ -4,6 +4,8 @@
 
 package application_src.application_model.cell_case_logic.cases;
 
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -41,7 +43,7 @@ public class NonTerminalCellCase extends CellCase {
         super(lineageName, nuclearProductionInfo, cellShapeProductionInfo);
 
         // reference embryonic analogues cells db for homology
-        this.embryonicHomology = findEmbryonicHomology(getLineageName());
+        this.embryonicHomology = CElegansSearch.findEmbryonicHomology(getLineageName());
 
         this.terminalDescendants = buildTerminalDescendants();
 
@@ -56,13 +58,13 @@ public class NonTerminalCellCase extends CellCase {
     private List<TerminalDescendant> buildTerminalDescendants() {
         final List<TerminalDescendant> terminalDescendants = new ArrayList<>();
 
-        final List<String> descendantsList = getDescendantsList(getLineageName());
+        final List<String> descendantsList = CElegansSearch.findTerminalDescendants(getLineageName());
 
         // add each descendant as terminal descendant object
         for (String descendant : descendantsList) {
             String partsListDescription = getDescriptionByLineageName(descendant);
             if (partsListDescription == null) {
-                if (isInCellDeaths(descendant)) {
+                if (CElegansSearch.isCellDeath(descendant)) {
                     partsListDescription = "Cell Death";
                 } else {
                     partsListDescription = "";

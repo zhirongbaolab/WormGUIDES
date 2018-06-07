@@ -86,10 +86,10 @@ public class GeneSearchManager {
      *
      * @return cells with that gene expression
      */
-    public static List<String> getPreviouslyFetchedGeneResults(String term) {
+    public static AbstractMap.SimpleEntry<OrganismDataType, List<String>> getPreviouslyFetchedGeneResults(String term) {
         term = term.trim().toLowerCase();
         if (geneResultsCache.containsKey(term)) {
-            return new ArrayList<>(geneResultsCache.get(term).getValue());
+            return geneResultsCache.get(term);
         }
         return null;
     }

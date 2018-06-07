@@ -330,25 +330,26 @@ public class SearchLayer {
                     break;
                 case GENE: // C Elegans data
                     if (CElegansSearch.isGeneFormat(searchedTerm)) {
-                        cElegansDataSearchResults = new CElegansSearchResults(
-                                cElegansSearchPipeline.executeGeneSearch(searchedTerm,
-                                        areAncestorsFetched,
-                                        areDescendantsFetched,
-                                        true,
-                                        false,
-                                        OrganismDataType.LINEAGE));
+                        cElegansSearchPipeline.startGeneSearch(searchedTerm,
+                                areAncestorsFetched,
+                                areDescendantsFetched,
+                                true,
+                                false,
+                                OrganismDataType.LINEAGE);
+                        cElegansDataSearchResults = new CElegansSearchResults(GeneSearchManager.getPreviouslyFetchedGeneResults(searchedTerm));
+
                     } else {
                         // before issuing gene search, make sure the search is either a valid
                         // lineage name or a valid functional name so the thread doesn't run unnecessarily
                         if (CElegansSearch.isValidLineageSearchTerm(searchedTerm)
                                 || CElegansSearch.isValidFunctionalSearchTerm(searchedTerm)) {
-                            cElegansDataSearchResults = new CElegansSearchResults(
-                                    cElegansSearchPipeline.executeGeneSearch(searchedTerm,
-                                            areAncestorsFetched,
-                                            areDescendantsFetched,
-                                            false,
-                                            true,
-                                            OrganismDataType.GENE));
+                            cElegansSearchPipeline.startGeneSearch(searchedTerm,
+                                    areAncestorsFetched,
+                                    areDescendantsFetched,
+                                    false,
+                                    true,
+                                    OrganismDataType.GENE);
+                            cElegansDataSearchResults = new CElegansSearchResults(GeneSearchManager.getPreviouslyFetchedGeneResults(searchedTerm));
                         }
                     }
                     break;
@@ -370,30 +371,36 @@ public class SearchLayer {
                     break;
             }
 
+            System.out.println("C elegans search produced " + cElegansDataSearchResults.getSearchResults().size() + " results");
             final List<String> entitiesForAnnotation = new ArrayList<>();
 
             if (cElegansDataSearchResults.hasResults()) {
                 // find the correspondence between the C elegans search results
-                entitiesForAnnotation.addAll(establishCorrespondence.establishCorrespondence(cElegansDataSearchResults,
-                                                                                                isCellNucleusFetched,
-                                                                                                isCellBodyFetched));
+//                entitiesForAnnotation.addAll(establishCorrespondence.establishCorrespondence(cElegansDataSearchResults,
+//                                                                                                isCellNucleusFetched,
+//                                                                                                   isCellBodyFetched));
+                System.out.println("before: " + entitiesForAnnotation.size());
+                entitiesForAnnotation.addAll(cElegansDataSearchResults.getSearchResults());
+                System.out.println("after: " + entitiesForAnnotation.size());
             }
 
             if (!modelDataSearchResults.isEmpty()) {
                 // this comes directly from the model and should be formatted correctly,
                 // so there is no need to pass it through the correspondence pipeline.
                 // Simply add it to the cellsForListView
+                System.out.println("before: " + entitiesForAnnotation.size());
                 entitiesForAnnotation.addAll(modelDataSearchResults);
+                System.out.println("after: " + entitiesForAnnotation.size());
             }
 
             sort(entitiesForAnnotation);
 
-            // pass the results to the annotation manager so that
-            annotationManager.updateAnnotation(entitiesForAnnotation);
+            //annotationManager.updateAnnotation(entitiesForAnnotation);
 
             // this appends functional names to the lineage names (unless they are gene names),
             // and then places in the ObservableList<String> searchResultsListView -> this triggers
             // RootLayoutController to populate the results window with them
+            System.out.println("Passing " + entitiesForAnnotation.size() + " number of items to populate list view");
             appendFunctionalToLineageNames(entitiesForAnnotation);
         }
     }

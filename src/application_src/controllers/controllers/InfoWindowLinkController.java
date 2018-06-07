@@ -10,6 +10,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import application_src.application_model.cell_case_logic.CasesLists;
+import application_src.views.info_window.InfoWindow;
 import javafx.beans.property.StringProperty;
 import javafx.stage.Stage;
 
@@ -33,19 +35,20 @@ import static application_src.application_model.data.CElegansData.Anatomy.Anatom
 public class InfoWindowLinkController {
 
     private final Stage parentStage;
-
-    private final SearchLayer searchLayer;
-
     private final StringProperty labeledCellProperty;
+    private final CasesLists cases;
+    private InfoWindow infoWindow; // need this for callback to generate new page
 
     public InfoWindowLinkController(
             final Stage parentStage,
-            final SearchLayer searchLayer,
-            final StringProperty labeledCellProperty) {
+            final StringProperty labeledCellProperty,
+            CasesLists cases,
+            InfoWindow infoWindow) {
 
         this.parentStage = requireNonNull(parentStage);
-        this.searchLayer = requireNonNull(searchLayer);
         this.labeledCellProperty = requireNonNull(labeledCellProperty);
+        this.cases = requireNonNull(cases);
+        this.infoWindow = requireNonNull(infoWindow);
     }
 
     /**
@@ -91,9 +94,9 @@ public class InfoWindowLinkController {
             }
             // view in 3D
             viewInCellTheater(cell);
-            if (!searchLayer.hasCellCase(cell)) {
+            if (!cases.hasCellCase(cell)) {
                 // generate a new cell case
-                searchLayer.addToInfoWindow(cell);
+                infoWindow.addToInfoWindow(cell);
             } else {
                 // TODO focus the tab if it already exists
             }
@@ -104,7 +107,7 @@ public class InfoWindowLinkController {
      * Call back controller for keyword "amphid" click Generates the "Amphid Sensilla" default info window page for now
      */
     public void handleAmphidClick() {
-        searchLayer.addToInfoWindow(AMPHID_SENSILLA);
+        infoWindow.addToInfoWindow(AMPHID_SENSILLA);
     }
 
     /**

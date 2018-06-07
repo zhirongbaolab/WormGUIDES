@@ -99,7 +99,6 @@ public class CElegansSearch implements OrganismSearch, Runnable {
              * with each variation of the string, check if it is a special case in the
              * sulston lineage
              */
-            TreeItem<String> P0_root = SulstonLineage.getP0_root();
             String[] specialCasesAsStringArray = SulstonLineage.getSpecialCasesAsStringArray();
 
             for (int i = searchString.length(); i >= 0; i--) {
@@ -265,10 +264,15 @@ public class CElegansSearch implements OrganismSearch, Runnable {
      * @param searchString
      * @return
      */
-    public List<String> findTerminalDescendants(String searchString) {
+    public static List<String> findTerminalDescendants(String searchString) {
         ArrayList<String> terminalDescendants = new ArrayList<>();
 
-
+        List<String> lineageNames = PartsList.getLineageNames();
+        lineageNames.stream().forEach(s -> {
+            if (s.toLowerCase().startsWith(searchString.toLowerCase()) || s.toLowerCase().equals(searchString.toLowerCase())) {
+                terminalDescendants.add(s);
+            }
+        });
 
         return terminalDescendants;
     }
@@ -1059,14 +1063,14 @@ public class CElegansSearch implements OrganismSearch, Runnable {
 //        System.out.println("");
 
         /* GENE TESTING */
-        search.startGeneSearch("lim-4", true, false, true, false, OrganismDataType.LINEAGE);
-        results = GeneSearchManager.getGeneResultsCache().get("lim-4");
-        System.out.println("Results for gene search on 'lim-4' (a=true, d=false, gene=true, anatomy=false) -> DataType: " + results.getKey().getDescription());
-        System.out.println("size of results: " + results.getValue().size());
-        for (String s : results.getValue()) {
-            System.out.println(s);
-        }
-        System.out.println("");
+//        search.startGeneSearch("lim-4", true, false, true, false, OrganismDataType.LINEAGE);
+//        results = GeneSearchManager.getGeneResultsCache().get("lim-4");
+//        System.out.println("Results for gene search on 'lim-4' (a=true, d=false, gene=true, anatomy=false) -> DataType: " + results.getKey().getDescription());
+//        System.out.println("size of results: " + results.getValue().size());
+//        for (String s : results.getValue()) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
 
 //        results = search.executeGeneSearch("SAAVL", false, false, false, true, OrganismDataType.GENE);
 //        System.out.println("Results for gene search on 'SAAVL' (a=false, d=false, gene=false, anatomy=true) -> DataType: " + results.getKey().getDescription());
@@ -1095,20 +1099,17 @@ public class CElegansSearch implements OrganismSearch, Runnable {
         //////////// OTHER C ELEGANS METHODS ///////////////
 
         // embryonic homology
-        ArrayList<String> resultsList = search.getAnatomy("ASH");
-        System.out.println("Results for anatomy search on 'ASH'");
-        System.out.println("size of results: " + resultsList.size());
-        for (String s : resultsList) {
-            System.out.println(s);
-        }
-        System.out.println("");
+//        ArrayList<String> resultsList = search.getAnatomy("ASH");
+//        System.out.println("Results for anatomy search on 'ASH'");
+//        System.out.println("size of results: " + resultsList.size());
+//        for (String s : resultsList) {
+//            System.out.println(s);
+//        }
+//        System.out.println("");
 
         // anatomy
 
         // cell deaths
-
-
     }
-
     /////////////////// END UNIT TESTS FOR SEARCH PIPELINE ////////////////////////////////////////
 } // end of class

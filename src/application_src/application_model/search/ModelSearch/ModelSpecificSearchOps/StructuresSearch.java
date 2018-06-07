@@ -2,6 +2,7 @@ package application_src.application_model.search.ModelSearch.ModelSpecificSearch
 
 import application_src.application_model.annotation.AnnotationManager;
 import application_src.application_model.annotation.color.Rule;
+import application_src.application_model.data.CElegansData.PartsList.PartsList;
 import application_src.application_model.threeD.subscenegeometry.SceneElement;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
 import application_src.application_model.threeD.subscenegeometry.StructureTreeNode;
@@ -10,6 +11,7 @@ import javafx.scene.paint.Color;
 
 import java.util.*;
 
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNamesByFunctionalName;
 import static application_src.application_model.search.SearchConfiguration.SearchType.STRUCTURES_BY_HEADING;
 import static java.util.Collections.sort;
 import static java.util.Objects.requireNonNull;
@@ -19,6 +21,9 @@ public class StructuresSearch {
     private static SceneElementsList sceneElementsList;
     private TreeItem<StructureTreeNode> structureTreeRoot;
     private AnnotationManager annotationManager;
+    private Map<String, List<String>> nameToCellsMap;
+    private Map<String, String> nameToCommentsMap;
+    private Map<String, String> nameToMarkerMap;
 
     public StructuresSearch(SceneElementsList sceneElementsList,
                             TreeItem<StructureTreeNode> structureTreeRoot,
@@ -26,7 +31,111 @@ public class StructuresSearch {
         this.sceneElementsList = sceneElementsList;
         this.structureTreeRoot = structureTreeRoot;
         this.annotationManager = annotationManager;
+        this.nameToCellsMap = this.sceneElementsList.getNameToCellsMap();
+        this.nameToCommentsMap = this.sceneElementsList.getNameToCommentsMap();
+        this.nameToMarkerMap = this.sceneElementsList.getNameToMarkerMap();
     }
+
+
+    /**
+     * The main structures search. Performs string matching on the sceneElementsList
+     *
+     * @param searchString
+     * @return
+     */
+    public List<String> searchStructures(String searchString) {
+        List<String> searchResults = new ArrayList<>();
+        if (searchString == null || searchString.isEmpty()) {
+            return searchResults;
+        }
+
+        final String[] terms = searchString.toLowerCase().split(" ");
+
+        String nameLower;
+        for (String name : sceneElementsList.getAllSceneNames()) {
+            if (!searchResults.contains(name)) {
+                nameLower = name.toLowerCase();
+
+                boolean appliesToName = false;
+                boolean appliesToCell = false;
+                boolean appliesToMarker = false;
+                boolean appliesToComment = false;
+
+                // search in structure scene names
+                for (String term : terms) {
+                    if (nameLower.contains(term)) {
+                        appliesToName = true;
+                        break;
+                    }
+                }
+
+                // search in cells
+                final List<String> cells = nameToCellsMap.get(nameLower);
+                if (cells != null) {
+                    for (String cell : cells) {
+                        // use the first term
+                        if (terms.length > 0) {
+                            // check if search term is a functional name
+                            final List<String> lineageNames = new ArrayList<>(
+                                    getLineageNamesByFunctionalName(terms[0]));
+                            for (String lineageName : lineageNames) {
+                                if (lineageName != null) {
+                                    if (cell.toLowerCase().startsWith(lineageName.toLowerCase())) {
+                                        appliesToCell = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (cell.toLowerCase().startsWith(terms[0].toLowerCase())) {
+                                appliesToCell = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (nameToMarkerMap.get(nameLower).startsWith(terms[0].toLowerCase())) {
+                    appliesToMarker = true;
+                }
+
+                // search in comments if name does not already apply
+                if (nameToCommentsMap.containsKey(nameLower)) {
+                    final String commentLowerCase = nameToCommentsMap.get(nameLower).toLowerCase();
+                    for (String term : terms) {
+                        if (commentLowerCase.contains(term)) {
+                            appliesToComment = true;
+                        } else {
+                            appliesToComment = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (appliesToName || appliesToCell || appliesToMarker || appliesToComment) {
+                    // use functional name in structure search results instead of lineage names
+                    String functionalName = PartsList.getFunctionalNameByLineageName(name);
+                    if (functionalName == null) {
+                        functionalName = name;
+                    }
+                    searchResults.add(functionalName);
+                }
+            }
+        }
+
+        return searchResults;
+    }
+
+    public static boolean isMulticellularStructureByName(final String name) {
+        for (SceneElement se : sceneElementsList.getElementsList()) {
+            if (se.getSceneName().toLowerCase().equals(name.toLowerCase())
+                    && se.isMulticellular()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 
     /**
      * Retrieves all the scene elements that are the cell bodies of a list of cells
@@ -55,19 +164,11 @@ public class StructuresSearch {
     }
 
     /**
-     * Adds a color rule for a collection of multicellular structures under a heading in the structures tree in the
-     * Find Structures tab. All the structures under sub-headings are affected by the rule as well. Adding a rule does
-     * not rebuild the subscene. In order for any changes to be visible, the calling class must set the
-     * 'rebuildSubsceneFlag' to true or set a property that triggers a subscene rebuild.
      *
      * @param heading
-     *         the structures heading
-     * @param color
-     *         the color to apply to all structures under the heading
-     *
-     * @return the color rule, null if there was no heading
+     * @return
      */
-    public Rule addStructureRuleByHeading(final String heading, final Color color) {
+    public List<String> executeStructureSearchUnderHeading(final String heading) {
         final List<String> structuresToAdd = new ArrayList<>();
         final Queue<TreeItem<StructureTreeNode>> nodeQueue = new LinkedList<>();
         nodeQueue.add(structureTreeRoot);
@@ -107,14 +208,7 @@ public class StructuresSearch {
             }
         }
 
-        if (!structuresToAdd.isEmpty()) {
-            return annotationManager.addColorRule(STRUCTURES_BY_HEADING,
-                    heading,
-                    color,
-                    structuresToAdd,
-                    new ArrayList<>());
-        }
-        return null;
+        return structuresToAdd;
     }
 
 
@@ -208,5 +302,9 @@ public class StructuresSearch {
             return appliesToComment;
         }
         return false;
+    }
+
+    public void setStructureTreeRoot(TreeItem<StructureTreeNode> root) {
+        this.structureTreeRoot = root;
     }
 }

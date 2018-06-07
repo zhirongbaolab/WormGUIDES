@@ -11,5 +11,5 @@ public class CElegansSearchResults extends OrganismSearchResults {
         super(results);
     }
 
-    public boolean hasResults() { return getSearchResults().isEmpty(); }
+    public boolean hasResults() { return !getSearchResults().isEmpty(); }
 }

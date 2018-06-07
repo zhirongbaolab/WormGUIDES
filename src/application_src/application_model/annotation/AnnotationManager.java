@@ -1,28 +1,16 @@
 package application_src.application_model.annotation;
 
-
 import application_src.application_model.annotation.color.Rule;
-
-import application_src.application_model.data.CElegansData.Gene.GeneSearchManager;
-import application_src.application_model.data.OrganismDataType;
 import application_src.application_model.search.SearchConfiguration.SearchOption;
 import application_src.application_model.search.SearchConfiguration.SearchType;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Service;
-import javafx.concurrent.Task;
 import javafx.scene.paint.Color;
-
 import java.util.*;
-
-import static application_src.application_model.data.CElegansData.Gene.WormBaseQuery.issueWormBaseGeneQuery;
 import static application_src.application_model.data.CElegansData.SulstonLineage.LineageTree.getCaseSensitiveName;
 import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
 import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
 import static application_src.application_model.search.SearchConfiguration.SearchType.*;
-import static java.util.Arrays.asList;
-import static javafx.scene.paint.Color.DARKSEAGREEN;
-import static javafx.scene.paint.Color.web;
 
 /**
  * This class is one of two main interfaces between the model-agnostic Search pipeline
@@ -37,7 +25,7 @@ import static javafx.scene.paint.Color.web;
 public class AnnotationManager {
 
     // primary location for rules list
-    ObservableList<Rule> rulesList;
+    private ObservableList<Rule> rulesList;
 
     private BooleanProperty rebuildSubsceneFlag;
 
@@ -180,6 +168,13 @@ public class AnnotationManager {
         return addColorRule(STRUCTURE_BY_SCENE_NAME, searched, color, new ArrayList<>(), new ArrayList<>());
     }
 
+    public Rule addStructureRuleByHeading(final String heading, final Color color, List<String> structuresToAdd) {
+        List<SearchOption> options = new ArrayList<>();
+        options.add(CELL_NUCLEUS);
+        options.add(CELL_BODY);
+        return addColorRule(STRUCTURES_BY_HEADING, heading, color, structuresToAdd, options);
+    }
+
 
     /**
      *
@@ -305,50 +300,5 @@ public class AnnotationManager {
     //////////////////////////////////////////////////////////////////////////////////////////////
 
     public ObservableList<Rule> getRulesList() { return this.rulesList; }
+    public void clearRulesList() { this.rulesList.clear(); }
 } //end class
-
-
-
-
-
-/////////////////// This may be useful at some point. It fell out of use and was moved here for storage 06/18
-//    /**
-//     * Adds the app's internal color rules. These rules are used when the active story does not have its own color
-//     * scheme.
-//     */
-//    public void addDefaultInternalColorRules() {
-//        addColorRule(FUNCTIONAL, "ash", DARKSEAGREEN, new ArrayList<>(), CELL_BODY);
-//        addColorRule(FUNCTIONAL, "rib", web("0x663366"), new ArrayList<>(), CELL_BODY);
-//        addColorRule(FUNCTIONAL, "avg", web("0xb41919"), new ArrayList<>(), CELL_BODY);
-//
-//        addColorRule(FUNCTIONAL, "dd", web("0x4a24c1", 0.60), new ArrayList<>(), CELL_BODY);
-//        addColorRule(FUNCTIONAL, "da", web("0xc56002"), new ArrayList<>(), CELL_BODY);
-//
-//        addColorRule(FUNCTIONAL, "rivl", web("0xff9966"), new ArrayList<>(), CELL_BODY);
-//        addColorRule(FUNCTIONAL, "rivr", web("0xffe6b4"), new ArrayList<>(), CELL_BODY);
-//        addColorRule(FUNCTIONAL, "sibd", web("0xe6ccff"), new ArrayList<>(), CELL_BODY);
-//        addColorRule(FUNCTIONAL, "siav", web("0x99b3ff"), new ArrayList<>(), CELL_BODY);
-//
-//        addColorRule(FUNCTIONAL, "dd1", web("0xb30a95"), new ArrayList<>(), CELL_NUCLEUS);
-//        addColorRule(FUNCTIONAL, "dd2", web("0xb30a95"), new ArrayList<>(), CELL_NUCLEUS);
-//        addColorRule(FUNCTIONAL, "dd3", web("0xb30a95"), new ArrayList<>(), CELL_NUCLEUS);
-//        addColorRule(FUNCTIONAL, "dd4", web("0xb30a95"), new ArrayList<>(), CELL_NUCLEUS);
-//        addColorRule(FUNCTIONAL, "dd5", web("0xb30a95"), new ArrayList<>(), CELL_NUCLEUS);
-//        addColorRule(FUNCTIONAL, "dd6", web("0xb30a95"), new ArrayList<>(), CELL_NUCLEUS);
-//
-//        addColorRule(FUNCTIONAL, "da2", web("0xe6b34d"), new ArrayList<>(), CELL_NUCLEUS);
-//        addColorRule(FUNCTIONAL, "da3", web("0xe6b34d"), new ArrayList<>(), CELL_NUCLEUS);
-//        addColorRule(FUNCTIONAL, "da4", web("0xe6b34d"), new ArrayList<>(), CELL_NUCLEUS);
-//        addColorRule(FUNCTIONAL, "da5", web("0xe6b34d"), new ArrayList<>(), CELL_NUCLEUS);
-//
-//        addStructureRuleBySceneName("lim4_bundle_left", web("0xe6ccff"));
-//        addStructureRuleBySceneName("lim4_bundle_left", web("0x99b3ff"));
-//        addStructureRuleBySceneName("lim4_bundle_right", web("0xe6ccff"));
-//        addStructureRuleBySceneName("lim4_bundle_right", web("0x99b3ff"));
-//        addStructureRuleBySceneName("lim4_nerve_ring", web("0xff9966"));
-//        addStructureRuleBySceneName("lim4_nerve_ring", web("0xffe6b4"));
-//        addStructureRuleBySceneName("Amphid Commissure Right", DARKSEAGREEN);
-//        addStructureRuleBySceneName("Amphid Commissure Right", web("0x663366"));
-//        addStructureRuleBySceneName("Amphid Commissure Left", DARKSEAGREEN);
-//        addStructureRuleBySceneName("Amphid Commissure Left", web("0x663366"));
-//    }

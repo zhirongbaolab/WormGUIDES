@@ -266,7 +266,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private DoubleProperty subsceneHeight;
 
     // the model-agnostic search pipeline
-    private CElegansSearch CElegansSearchPipeline; // model agnostic
+    private CElegansSearch cElegansSearchPipeline; // model agnostic
 
     // the model specific search pipelines
     private StructuresSearch structuresSearch;
@@ -445,8 +445,10 @@ public class RootLayoutController extends BorderPane implements Initializable {
                         urlLoadStage.hide();
                         processUrl(
                                 urlLoadWindow.getInputURL(),
-                                rulesList,
-                                searchLayer,
+                                cElegansSearchPipeline,
+                                neighborsSearch,
+                                structuresSearch,
+                                annotationManager,
                                 timeProperty,
                                 rotateXAngleProperty,
                                 rotateYAngleProperty,
@@ -461,8 +463,10 @@ public class RootLayoutController extends BorderPane implements Initializable {
                     urlLoadStage.hide();
                     processUrl(
                             urlLoadWindow.getInputURL(),
-                            rulesList,
-                            searchLayer,
+                            cElegansSearchPipeline,
+                            neighborsSearch,
+                            structuresSearch,
+                            annotationManager,
                             timeProperty,
                             rotateXAngleProperty,
                             rotateYAngleProperty,
@@ -737,7 +741,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 subscene,
                 modelAnchorPane,
                 lineageData,
-                casesLists,
                 productionInfo,
                 sceneElementsList,
                 structuresLayer.getStructuresTreeRoot(),
@@ -875,7 +878,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
         displayedName.setText("Active Cell: " + name);
         moreInfoClickableText.setVisible(true);
-        if (isMulticellularStructureByName(name)) {
+        if (structuresSearch.isMulticellularStructureByName(name)) {
             moreInfoClickableText.setDisable(true);
             moreInfoClickableText.setFill(GRAY);
         } else {
@@ -894,7 +897,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
             if (functionalName != null) {
                 displayedName.setText("Active Cell: " + name + " (" + functionalName + ")");
                 displayedDescription.setText(PartsList.getDescriptionByFunctionalName(functionalName));
-            } else if (isInCellDeaths(name)) {
+            } else if (CElegansSearch.isCellDeath(name)) {
                 displayedName.setText("Active Cell: " + name);
                 displayedDescription.setText("Cell Death");
             }
@@ -988,7 +991,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private void initSearchLayer() {
         cellNucleusCheckBox.setSelected(true);
         searchLayer = new SearchLayer(
-                CElegansSearchPipeline,
+                cElegansSearchPipeline,
                 neighborsSearch,
                 structuresSearch,
                 establishCorrespondence,
@@ -1011,13 +1014,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 ancestorCheckBox,
                 descendantCheckBox,
                 colorPicker,
-                addSearchBtn,
-                geneResultsUpdatedFlag,
-                rebuildSubsceneFlag);
+                addSearchBtn);
         searchResultsListView.setItems(searchResultsList);
-//        if (defaultEmbryoFlag) {
-//            searchLayer.addDefaultInternalColorRules();
-//        }
         searchResultsUpdateService = searchLayer.getResultsUpdateService();
     }
 
@@ -1045,7 +1043,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
     private void initStructuresLayer() {
         structuresLayer = new StructuresLayer(
-                searchLayer,
+                structuresSearch,
+                annotationManager,
                 sceneElementsList,
                 selectedEntityNameProperty,
                 structuresSearchField,
@@ -1054,15 +1053,18 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 addStructureRuleBtn,
                 structureRuleColorPicker,
                 rebuildSubsceneFlag);
-        if (searchLayer != null) {
-            searchLayer.setStructureTreeRoot(structuresLayer.getStructuresTreeRoot());
+        if (structuresSearch != null) {
+            structuresSearch.setStructureTreeRoot(structuresLayer.getStructuresTreeRoot());
         }
     }
 
     private void initStoriesLayer() {
         storiesLayer = new StoriesLayer(
                 mainStage,
-                searchLayer,
+                cElegansSearchPipeline,
+                neighborsSearch,
+                structuresSearch,
+                annotationManager,
                 sceneElementsList,
                 storiesListView,
                 rulesList,
@@ -1109,10 +1111,11 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 selectedNameLabeledProperty,
                 casesLists,
                 productionInfo,
-                CElegansSearchPipeline,
+                cElegansSearchPipeline,
                 defaultEmbryoFlag,
                 lineageData,
-                searchLayer);
+                cElegansSearchPipeline,
+                structuresSearch);
         casesLists.setInfoWindow(infoWindow);
     }
 
@@ -1177,12 +1180,12 @@ public class RootLayoutController extends BorderPane implements Initializable {
         GeneSearchManager.init();
 
         // now set up the Search pipeline for the static C Elegans data
-        CElegansSearchPipeline = new CElegansSearch();
+        cElegansSearchPipeline = new CElegansSearch();
 
         // transition to model and program specific data initialization
         Parameters.init();
         initSharedVariables();
-        annotationManager = new AnnotationManager(rulesList);
+        annotationManager = new AnnotationManager(rulesList, rebuildSubsceneFlag);
 
         productionInfo = new ProductionInfo();
         casesLists = new CasesLists();
@@ -1214,8 +1217,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
         endTime = lineageData.getNumberOfTimePoints() - 1;
         movieTimeOffset = productionInfo.getMovieTimeOffset();
 
-
-
         replaceTabsWithDraggableTabs();
         initDisplayLayer();
         setSlidersProperties();
@@ -1231,11 +1232,11 @@ public class RootLayoutController extends BorderPane implements Initializable {
         neighborsSearch = new NeighborsSearch(this.lineageData);
 
         sceneElementsList = new SceneElementsList(this.lineageData, this.defaultEmbryoFlag);
-        structuresSearch = new StructuresSearch(sceneElementsList);
         establishCorrespondence = new EstablishCorrespondence(this.lineageData, this.sceneElementsList);
+        initStructuresLayer();
+        structuresSearch = new StructuresSearch(sceneElementsList, structuresLayer.getStructuresTreeRoot(), annotationManager);
 
         initSearchLayer();
-        initStructuresLayer();
         initTimelineChart();
         initStoriesLayer();
         initContextMenuStage();
@@ -1297,11 +1298,11 @@ public class RootLayoutController extends BorderPane implements Initializable {
             contextMenuController = new ContextMenuController(
                     mainStage,
                     contextMenuStage,
-                    searchLayer,
-                    casesLists,
-                    productionInfo,
                     bringUpInfoFlag,
-                    CElegansSearchPipeline);
+                    cElegansSearchPipeline,
+                    neighborsSearch,
+                    establishCorrespondence,
+                    annotationManager);
 
             final FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("/application_src/views/layouts/ContextMenuLayout.fxml"));
@@ -1316,7 +1317,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 for (Node node : contextMenuStage.getScene().getRoot().getChildrenUnmodifiable()) {
                     node.setStyle("-fx-focus-color: -fx-outer-border; -fx-faint-focus-color: transparent;");
                 }
-                contextMenuController.setMoreInfoButtonListener(event -> contextMenuStage.hide());
+                //contextMenuController.getMoreInfoButtonListener(event -> contextMenuStage.hide());
 
             } catch (IOException e) {
                 System.out.println("Error in initializing context menu");

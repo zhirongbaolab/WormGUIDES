@@ -210,7 +210,11 @@ public class CasesLists {
      * @return true if a cell case was found for the cell, false otherwise
      */
     public boolean hasCellCase(final String cellName) {
-        return cellCases != null && cellCases.hasCellCase(cellName);
+        if (cellCases == null) return false;
+
+        for(CellCase c : cellCases) {if (c.getLineageName().toLowerCase().equals(cellName.toLowerCase())) { return true; }};
+
+        return false;
     }
 
     /**

@@ -1,7 +1,7 @@
 package application_src.application_model.cell_case_logic.cases;
 
 /**
- * Class which holds a cell name and parts list entry for each terminal descendant (neuron)
+ * Class which holds a cell name and parts list entry for each terminal descendant
  */
 public class TerminalDescendant {
 

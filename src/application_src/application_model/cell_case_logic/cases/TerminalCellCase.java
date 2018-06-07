@@ -8,7 +8,7 @@
 
 package application_src.application_model.cell_case_logic.cases;
 
-import application_src.application_model.cell_case_logic.cases.CellCase;
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
 
 import java.net.URL;
 import java.net.URLConnection;
@@ -103,7 +103,7 @@ public class TerminalCellCase extends CellCase {
         this.electricalPartners = electricalPartners;
         this.neuromuscularPartners = neuromuscularPartners;
 
-        this.hasAnatomy = hasAnatomy(this.functionalName);
+        this.hasAnatomy = CElegansSearch.hasAnatomy(this.functionalName);
         if (hasAnatomy) {
             setAnatomy();
         }
@@ -308,7 +308,7 @@ public class TerminalCellCase extends CellCase {
      * Sets the anatomy information that is applicable to this cell
      */
     private void setAnatomy() {
-        anatomies = getAnatomy(functionalName);
+        anatomies = CElegansSearch.getAnatomy(functionalName);
     }
 
     /**
