@@ -85,9 +85,6 @@ public class SearchLayer {
     private final ColorPicker colorPicker;
     private final Button addRuleButton;
 
-    // queried databases
-    private WiringService wiringService;
-
 
     public SearchLayer(
             final CElegansSearch CElegansSearchPipeline,
@@ -466,11 +463,12 @@ public class SearchLayer {
                 isNeuromuscularTicked,
                 OrganismDataType.LINEAGE).getValue();
 
-        return annotationManager.addConnectomeColorRule(funcName, color, searchResults
+        return annotationManager.addConnectomeColorRule(funcName, color, searchResults,
                 isPresynapticTicked,
                 isPostsynapticTicked,
                 isElectricalTicked,
-                isNeuromuscularTicked);
+                isNeuromuscularTicked,
+                new ArrayList<>());
     }
 
 
@@ -575,40 +573,13 @@ public class SearchLayer {
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-    // TODO -> cell case methods should be moved into cell case class
-    public boolean hasCellCase(final String cellName) {
-        return casesLists != null && casesLists.hasCellCase(cellName);
-    }
-
-    public void removeCellCase(final String cellName) {
-        if (casesLists != null && cellName != null) {
-            casesLists.removeCellCase(cellName);
-        }
-    }
-
-    public void addToInfoWindow(final AnatomyTerm term) {
-        if (term.equals(AMPHID_SENSILLA)) {
-            if (!casesLists.containsAnatomyTermCase(term.getTerm())) {
-                casesLists.makeAnatomyTermCase(term);
-            }
-        }
-    }
     /////////////////////////////////////////////////////////////
 
     /**
      * Method taken from RootLayoutController --> how can InfoWindowLinkController generate page without pointer to
      * RootLayoutController?
      */
-    public void addToInfoWindow(final String name) {
-        if (wiringService == null) {
-            wiringService = new WiringService();
-        }
-        wiringService.setSearchString(name);
-        wiringService.restart();
-    }
+
 
 
 
@@ -617,109 +588,8 @@ public class SearchLayer {
     }
 
     // TODO -> this just generally needs figuring out. Why is this search in a thread? It's not computationally expensive. Why was it here
-    // and not in the connectome class? Probably just get rid of it entirely and route this back through the CElegansSearchPipeline
-    private final class WiringService extends Service<Void> {
 
-        private String searchString;
 
-        public String getSearchString() {
-            final String searched = searchString;
-            return searched;
-        }
-
-        public void setSearchString(final String searchString) {
-            this.searchString = requireNonNull(searchString);
-        }
-
-        @Override
-        protected Task<Void> createTask() {
-            return new Task<Void>() {
-                @Override
-                protected Void call() throws Exception {
-                    List<String> searchedCells = new ArrayList<>();
-                    String searched = getSearchString();
-                    // update to lineage name if functional
-                    final List<String> lineageNames = getLineageNamesByFunctionalName(searched);
-                    if (!lineageNames.isEmpty()) {
-                        searchedCells.addAll(lineageNames);
-                    } else {
-                        searchedCells.add(searched);
-                    }
-
-                    for (String searchedCell : searchedCells) {
-                        // GENERATE CELL TAB ON CLICK
-                        if (searchedCell != null && !searchedCell.isEmpty()) {
-                            if (casesLists == null || productionInfo == null) {
-                                return null; // error check
-                            }
-                            if (isLineageName(searchedCell)) {
-                                if (casesLists.containsCellCase(searchedCell)) {
-                                    // show the tab
-                                } else {
-                                    // translate the name if necessary
-                                    String funcName = CElegansSearchPipeline.checkQueryCell(searchedCell).toUpperCase();
-                                    // add a terminal case --> pass the wiring partners
-                                    casesLists.makeTerminalCase(
-                                            searchedCell,
-                                            funcName,
-                                            CElegansSearchPipeline.executeConnectomeSearch(
-                                                    funcName,
-                                                    false,
-                                                    false,
-                                                    true,
-                                                    false,
-                                                    false,
-                                                    false,
-                                                    OrganismDataType.FUNCTIONAL).getValue(),
-                                            CElegansSearchPipeline.executeConnectomeSearch(
-                                                    funcName,
-                                                    false,
-                                                    false,
-                                                    false,
-                                                    true,
-                                                    false,
-                                                    false,
-                                                    OrganismDataType.FUNCTIONAL).getValue(),
-                                            CElegansSearchPipeline.executeConnectomeSearch(
-                                                    funcName,
-                                                    false,
-                                                    false,
-                                                    false,
-                                                    false,
-                                                    true,
-                                                    false,
-                                                    OrganismDataType.FUNCTIONAL).getValue(),
-                                            CElegansSearchPipeline.executeConnectomeSearch(
-                                                    funcName,
-                                                    false,
-                                                    false,
-                                                    false,
-                                                    false,
-                                                    false,
-                                                    true,
-                                                    OrganismDataType.FUNCTIONAL).getValue(),
-                                            productionInfo.getNuclearInfo(),
-                                            productionInfo.getCellShapeData(searchedCell));
-                                }
-                            } else {
-                                // not in connectome --> non terminal case
-                                if (casesLists.containsCellCase(searchedCell)) {
-                                    // show tab
-                                } else {
-                                    // add a non terminal case
-                                    casesLists.makeNonTerminalCase(
-                                            searchedCell,
-                                            productionInfo.getNuclearInfo(),
-                                            productionInfo.getCellShapeData(searchedCell));
-                                }
-                            }
-                        }
-                    }
-                    return null;
-                }
-            };
-        }
-    }
 
     /**
      * Service that shows when gene results are being fetched by the {@link GeneSearchManager} so that the user does

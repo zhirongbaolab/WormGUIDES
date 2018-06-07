@@ -7,6 +7,7 @@ package application_src.views.info_window;
 import java.util.ArrayList;
 import java.util.List;
 
+import application_src.application_model.data.CElegansData.Anatomy.AnatomyTerm;
 import application_src.application_model.data.OrganismDataType;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import javafx.beans.property.StringProperty;
@@ -33,16 +34,12 @@ import application_src.application_model.threeD.subscenegeometry.SceneElement;
 import application_src.application_model.resources.ProductionInfo;
 import application_src.views.DraggableTab;
 
+import static application_src.application_model.data.CElegansData.Anatomy.AnatomyTerm.AMPHID_SENSILLA;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.*;
 import static java.util.Objects.requireNonNull;
 
 import static javafx.application.Platform.runLater;
 import static javafx.scene.control.TabPane.TabClosingPolicy.ALL_TABS;
-
-import static application_src.application_model.data.CElegansData.PartsList.PartsList.getDescriptions;
-import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNames;
-import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNames;
-import static application_src.application_model.data.CElegansData.PartsList.PartsList.isLineageName;
 
 /**
  * Top level container for the list of info window cell cases pages. This holds the tabpane of cases.
@@ -61,7 +58,7 @@ public class InfoWindow {
     private ProductionInfo productionInfo;
     private String nameToQuery;
 
-    private CElegansSearch CElegansSearchPipeline;
+    private CElegansSearch cElegansSearchPipeline;
 
     private SearchLayer searchLayer;
 
@@ -86,13 +83,13 @@ public class InfoWindow {
             final CElegansSearch CElegansSearchPipeline,
             final boolean defaultEmbryoFlag,
             final LineageData lineageData,
-            final SearchLayer searchLayer) {
+            final CElegansSearch cElegansSearchPipeline) {
 
         infoWindowStage = new Stage();
         infoWindowStage.setTitle("Cell Info Window");
 
         this.productionInfo = requireNonNull(productionInfo);
-        this.CElegansSearchPipeline = requireNonNull(CElegansSearchPipeline);
+        this.cElegansSearchPipeline = requireNonNull(CElegansSearchPipeline);
 
         tabPane = new TabPane();
         tabPane.setTabClosingPolicy(ALL_TABS);
@@ -203,7 +200,7 @@ public class InfoWindow {
                                         casesLists.makeTerminalCase(
                                                 lineageName,
                                                 funcName,
-                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                cElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
@@ -212,7 +209,7 @@ public class InfoWindow {
                                                         false,
                                                         false,
                                                         OrganismDataType.FUNCTIONAL).getValue(),
-                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                cElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
@@ -221,7 +218,7 @@ public class InfoWindow {
                                                         false,
                                                         false,
                                                         OrganismDataType.FUNCTIONAL).getValue(),
-                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                cElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
@@ -230,7 +227,7 @@ public class InfoWindow {
                                                         true,
                                                         false,
                                                         OrganismDataType.FUNCTIONAL).getValue(),
-                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                cElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
@@ -246,7 +243,7 @@ public class InfoWindow {
                                         casesLists.makeTerminalCase(
                                                 lineageName,
                                                 funcName,
-                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                cElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
@@ -255,7 +252,7 @@ public class InfoWindow {
                                                         false,
                                                         false,
                                                         OrganismDataType.FUNCTIONAL).getValue(),
-                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                cElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
@@ -264,7 +261,7 @@ public class InfoWindow {
                                                         false,
                                                         false,
                                                         OrganismDataType.FUNCTIONAL).getValue(),
-                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                cElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
@@ -273,7 +270,7 @@ public class InfoWindow {
                                                         true,
                                                         false,
                                                         OrganismDataType.FUNCTIONAL).getValue(),
-                                                CElegansSearchPipeline.executeConnectomeSearch(
+                                                cElegansSearchPipeline.executeConnectomeSearch(
                                                         funcName,
                                                         false,
                                                         false,
@@ -349,6 +346,23 @@ public class InfoWindow {
             infoWindowStage.show();
             infoWindowStage.toFront();
         }
+    }
+
+
+    public void addToInfoWindow(final AnatomyTerm term) {
+        if (term.equals(AMPHID_SENSILLA)) {
+            if (!casesLists.containsAnatomyTermCase(term.getTerm())) {
+                casesLists.makeAnatomyTermCase(term);
+            }
+        }
+    }
+
+    public void addToInfoWindow(final String name) {
+        if (wiringService == null) {
+            wiringService = new SearchLayer.WiringService();
+        }
+        wiringService.setSearchString(name);
+        wiringService.restart();
     }
 
     /**
@@ -518,5 +532,110 @@ public class InfoWindow {
             productionInfoStage.setResizable(true);
         }
         productionInfoStage.show();
+    }
+
+
+
+    private final class WiringService extends Service<Void> {
+
+        private String searchString;
+
+        public String getSearchString() {
+            final String searched = searchString;
+            return searched;
+        }
+
+        public void setSearchString(final String searchString) {
+            this.searchString = requireNonNull(searchString);
+        }
+
+        @Override
+        protected Task<Void> createTask() {
+            return new Task<Void>() {
+                @Override
+                protected Void call() throws Exception {
+                    List<String> searchedCells = new ArrayList<>();
+                    String searched = getSearchString();
+                    // update to lineage name if functional
+                    final List<String> lineageNames = getLineageNamesByFunctionalName(searched);
+                    if (!lineageNames.isEmpty()) {
+                        searchedCells.addAll(lineageNames);
+                    } else {
+                        searchedCells.add(searched);
+                    }
+
+                    for (String searchedCell : searchedCells) {
+                        // GENERATE CELL TAB ON CLICK
+                        if (searchedCell != null && !searchedCell.isEmpty()) {
+                            if (casesLists == null || productionInfo == null) {
+                                return null; // error check
+                            }
+                            if (isLineageName(searchedCell)) {
+                                if (casesLists.containsCellCase(searchedCell)) {
+                                    // show the tab
+                                } else {
+                                    // translate the name if necessary
+                                    String funcName = CElegansSearchPipeline.checkQueryCell(searchedCell).toUpperCase();
+                                    // add a terminal case --> pass the wiring partners
+                                    casesLists.makeTerminalCase(
+                                            searchedCell,
+                                            funcName,
+                                            CElegansSearchPipeline.executeConnectomeSearch(
+                                                    funcName,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    OrganismDataType.FUNCTIONAL).getValue(),
+                                            CElegansSearchPipeline.executeConnectomeSearch(
+                                                    funcName,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    false,
+                                                    false,
+                                                    OrganismDataType.FUNCTIONAL).getValue(),
+                                            CElegansSearchPipeline.executeConnectomeSearch(
+                                                    funcName,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    false,
+                                                    OrganismDataType.FUNCTIONAL).getValue(),
+                                            CElegansSearchPipeline.executeConnectomeSearch(
+                                                    funcName,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    false,
+                                                    true,
+                                                    OrganismDataType.FUNCTIONAL).getValue(),
+                                            productionInfo.getNuclearInfo(),
+                                            productionInfo.getCellShapeData(searchedCell));
+                                }
+                            } else {
+                                // not in connectome --> non terminal case
+                                if (casesLists.containsCellCase(searchedCell)) {
+                                    // show tab
+                                } else {
+                                    // add a non terminal case
+                                    casesLists.makeNonTerminalCase(
+                                            searchedCell,
+                                            productionInfo.getNuclearInfo(),
+                                            productionInfo.getCellShapeData(searchedCell));
+                                }
+                            }
+                        }
+                    }
+                    return null;
+                }
+            };
+        }
     }
 }

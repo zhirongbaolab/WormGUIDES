@@ -188,7 +188,7 @@ public class AnnotationManager {
      * @param options
      * @return
      */
-    public Rule addGeneColorRuleFromUrl(final String searched, final Color color,
+    public Rule addGeneColorRule(final String searched, final Color color,
                                         List<String> searchResults, List<SearchOption> options) {
         // default search options is cell
         if (options == null) {

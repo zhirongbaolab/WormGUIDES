@@ -210,8 +210,7 @@ public class CasesLists {
      * @return true if a cell case was found for the cell, false otherwise
      */
     public boolean hasCellCase(final String cellName) {
-        //TODO refactor this to just be name
-        return containsCellCase(cellName) || containsAnatomyTermCase(cellName);
+        return cellCases != null && cellCases.hasCellCase(cellName);
     }
 
     /**
