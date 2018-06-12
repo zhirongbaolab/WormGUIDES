@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import application_src.application_model.annotation.AnnotationManager;
+import application_src.application_model.data.CElegansData.Gene.GeneSearchManager;
 import application_src.application_model.data.CElegansData.Gene.WormBaseQuery;
 import application_src.application_model.data.OrganismDataType;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
@@ -45,6 +46,7 @@ import application_src.application_model.cell_case_logic.cases.TerminalCellCase;
 import application_src.application_model.annotation.color.Rule;
 import application_src.application_model.resources.ProductionInfo;
 
+import static application_src.application_model.search.SearchConfiguration.SearchType.LINEAGE;
 import static java.lang.Thread.sleep;
 import static java.util.Objects.requireNonNull;
 
@@ -193,7 +195,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
         // Neighbors
         // Gene
         // Connectome
-        this.searchService= new Service<Void>() {
+        this.searchService = new Service<Void>() {
             @Override
             protected final Task<Void> createTask() {
                 final Task<Void> task = new Task<Void>() {
@@ -207,101 +209,130 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             }
         };
 
-        // on scheduled tasks
-        this.searchService.setOnScheduled(event -> {
-            runLater(() -> expressesMenu.getItems().addAll(loadingMenuItem));
-            loadingService.restart();
-        });
 
+        searchService.setOnScheduled(event -> {
+            runLater(() -> {
+                if (searchType.equals(SearchType.GENE)) {
+                    expressesMenu.getItems().addAll(loadingMenuItem);
+                    loadingService.restart();
+                }
+            });
+
+        });
 
         // on succeeded tasks
         searchService.setOnSucceeded(event -> {
             loadingService.cancel();
             resetLoadingMenuItem();
-            if (!searchResults.isEmpty()) {
-                if (searchType.equals(SearchType.GENE)) {
-                    // set an on action command for each gene so that it can be clicked and made a rule
-                    for (String result : searchResults) {
-                        final MenuItem item = new MenuItem(result);
-                        item.setOnAction(event12 -> {
-                            ArrayList<SearchOption> options = new ArrayList<>();
-                            options.add(CELL_NUCLEUS);
-                            final Rule rule = annotationManager.addColorRule(GENE,
-                                                                            cellName,
-                                                                            DEFAULT_COLOR,
-                                                                            searchResults,
-                                                                            options);
-                            rule.showEditStage(this.parentStage);
-                            ownStage.hide();
-                        });
-                        expressesMenu.getItems().add(item);
-                    }
-                } else if (searchType.equals(SearchType.CONNECTOME)) {
-                    // get the formatted results for the context menu
-                    List<List<String>> results = getConnectomeResultsFormattedForContextMenu();
-
-                    // set those rules to the context menu pane
-                    populateWiredToMenu(
-                            results.get(PRE_SYN_INDEX),
-                            preSyn,
-                            true,
-                            false,
-                            false,
-                            false);
-                    populateWiredToMenu(
-                            results.get(POST_SYN_INDEX),
-                            postSyn,
-                            false,
-                            true,
-                            false,
-                            false);
-                    populateWiredToMenu(
-                            results.get(ELECTR_INDEX),
-                            electr,
-                            false,
-                            false,
-                            true,
-                            false);
-                    populateWiredToMenu(
-                            results.get(NEURO_INDEX),
-                            neuro,
-                            false,
-                            false,
-                            false,
-                            false);
-
-                    // set the call to search layer on the 'Color All' button
-                    colorAll.setOnAction(event1 -> {
-
-                        // translate the name if necessary
-                        String funcName = CElegansSearchPipeline.checkQueryCell(cellName).toLowerCase();
-
-                        List<String> searchResults = cElegansSearchPipeline.executeConnectomeSearch(
-                                funcName,
-                                false,
-                                false,
-                                true,
-                                true,
-                                true,
-                                true,
-                                OrganismDataType.LINEAGE).getValue();
-
+            if (searchType.equals(SearchType.GENE)) {
+                // set an on action command for each gene so that it can be clicked and made a rule
+                for (String result : searchResults) {
+                    System.out.println("gene result: " + result);
+                    final MenuItem item = new MenuItem(result);
+                    item.setOnAction(event12 -> {
                         ArrayList<SearchOption> options = new ArrayList<>();
                         options.add(CELL_NUCLEUS);
-                        final Rule rule = annotationManager.addConnectomeColorRule(
-                                funcName,
+                        final Rule rule = annotationManager.addColorRule(GENE,
+                                cellName,
                                 DEFAULT_COLOR,
                                 searchResults,
-                                true,
-                                true,
-                                true,
-                                true,
                                 options);
                         rule.showEditStage(this.parentStage);
-                        wiredToMenu.show(wiredTo, Side.RIGHT, 0, 0);
+                        ownStage.hide();
                     });
-                    }
+                    expressesMenu.getItems().add(item);
+
                 }
+            } else if (searchType.equals(SearchType.CONNECTOME)) {
+                // get the formatted results for the context menu
+                List<List<String>> results = getConnectomeResultsFormattedForContextMenu();
+
+                // set those rules to the context menu pane
+                populateWiredToMenu(
+                        results.get(PRE_SYN_INDEX),
+                        preSyn,
+                        true,
+                        false,
+                        false,
+                        false);
+                populateWiredToMenu(
+                        results.get(POST_SYN_INDEX),
+                        postSyn,
+                        false,
+                        true,
+                        false,
+                        false);
+                populateWiredToMenu(
+                        results.get(ELECTR_INDEX),
+                        electr,
+                        false,
+                        false,
+                        true,
+                        false);
+                populateWiredToMenu(
+                        results.get(NEURO_INDEX),
+                        neuro,
+                        false,
+                        false,
+                        false,
+                        false);
+
+                // set the call to search layer on the 'Color All' button
+                colorAll.setOnAction(event1 -> {
+
+                    // translate the name if necessary
+                    String funcName = CElegansSearchPipeline.checkQueryCell(cellName).toLowerCase();
+
+                    List<String> searchResults = cElegansSearchPipeline.executeConnectomeSearch(
+                            funcName,
+                            false,
+                            false,
+                            true,
+                            true,
+                            true,
+                            true,
+                            OrganismDataType.LINEAGE).getValue();
+
+                    ArrayList<SearchOption> options = new ArrayList<>();
+                    options.add(CELL_NUCLEUS);
+                    final Rule rule = annotationManager.addConnectomeColorRule(
+                            funcName,
+                            DEFAULT_COLOR,
+                            searchResults,
+                            true,
+                            true,
+                            true,
+                            true,
+                            options);
+                    rule.showEditStage(this.parentStage);
+
+                });
+
+                wiredToMenu.show(wiredTo, Side.RIGHT, 0, 0);
+            } else if (searchType.equals(SearchType.NEIGHBOR)) {
+                // show the rule stage
+                // show the rule stage
+                ArrayList<SearchOption> options = new ArrayList<>();
+                options.add(CELL_NUCLEUS);
+                final Rule rule = annotationManager.addColorRule(LINEAGE,
+                        cellName,
+                        DEFAULT_COLOR,
+                        searchResults,
+                        options);
+                rule.showEditStage(this.parentStage);
+                ownStage.hide();
+            } else if (searchType.equals(SearchType.LINEAGE)) {
+                // show the rule stage
+                ArrayList<SearchOption> options = new ArrayList<>();
+                options.add(CELL_NUCLEUS);
+                final Rule rule = annotationManager.addColorRule(LINEAGE,
+                        cellName,
+                        DEFAULT_COLOR,
+                        searchResults,
+                        options);
+                rule.showEditStage(this.parentStage);
+                ownStage.hide();
+            }
         });
 
         // on cancelled tasks
@@ -309,13 +340,6 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             resetLoadingMenuItem();
             loadingService.cancel();
         });
-
-        // set handlers
-//        info.setOnAction(setMoreInfoButtonListener());
-//        color.setOnAction(setColorCellButtonListener());
-//        colorNeighbors.setOnAction(setColorNeighborsButtonListener());
-//        expresses.setOnAction(setGeneExpressionButtonListener());
-//        wiredTo.setOnAction(setWiredToButtonListener());
     }
 
     private void performSearch() {
@@ -324,9 +348,11 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             case LINEAGE:
                 break;
             case NEIGHBOR:
+                searchResults.addAll(neighborsSearch.getNeighboringCells(cellName));
                 break;
             case GENE:
-                searchResults.addAll(cElegansSearchPipeline.executeGeneSearch(cellName, false, false, false, true, OrganismDataType.LINEAGE).getValue());
+                cElegansSearchPipeline.startGeneSearch(cellName, false, false, false, true, OrganismDataType.LINEAGE);
+                searchResults.addAll(GeneSearchManager.getPreviouslyFetchedGeneResults(cellName).getValue());
                 break;
             case CONNECTOME:
                 break;
@@ -428,7 +454,6 @@ public class ContextMenuController extends AnchorPane implements Initializable {
         final MenuItem all = new MenuItem("Color All");
         menu.getItems().add(all);
         all.setOnAction(event -> {
-
             // perform a local search
             List<String> searchResultsLcl = cElegansSearchPipeline.executeConnectomeSearch(
                     funcName,
@@ -455,42 +480,13 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             rule.showEditStage(parentStage);
             ownStage.hide();
         });
-    }
 
-    ////////////////////////////////// BUTTON HANDLERS ///////////////////////////////////////////
-    public EventHandler<ActionEvent> setMoreInfoButtonListener() {
-        // TODO -> figure out how to generate info window page from here
-        return event -> {
-            System.out.println("info window from context menu not working right now");
-        };
-    }
-
-    public EventHandler<ActionEvent> setColorCellButtonListener() {
-        return event -> {
-            searchType = SearchType.LINEAGE;
-            searchService.restart();
-        };
-    }
-
-    public EventHandler<ActionEvent> setColorNeighborsButtonListener() {
-        return event -> {
-            searchType = SearchType.NEIGHBOR;
-            searchService.restart();
-        };
-    }
-
-    public EventHandler<ActionEvent> setGeneExpressionButtonListener() {
-        return event -> {
-            searchType = SearchType.GENE;
-            searchService.restart();
-        };
-    }
-
-    public EventHandler<ActionEvent> setWiredToButtonListener() {
-        return event -> {
-            searchType = SearchType.CONNECTOME;
-            searchService.restart();
-        };
+        for (String result : results) {
+            System.out.println(result);
+            final MenuItem item = new MenuItem(result);
+            item.setDisable(true);
+            menu.getItems().add(item);
+        }
     }
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -611,6 +607,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
         loadingMenuItem = new MenuItem("Loading");
 
         expresses.setOnAction(event -> {
+            searchType = SearchType.GENE;
             if (expressesMenu == null) {
                 expressesMenu = new ContextMenu();
                 expressesMenu.setMaxHeight(MAX_MENU_HEIGHT);
@@ -627,7 +624,6 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                 expressesTitle.setOnAction(Event::consume);
 
                 expressesMenu.setAutoHide(true);
-
             }
 
             expressesMenu.getItems().clear();
@@ -638,6 +634,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
         });
 
         wiredTo.setOnAction(event -> {
+            searchType = SearchType.CONNECTOME;
             if (wiredToMenu == null) {
                 wiredToMenu = new ContextMenu();
                 wiredToMenu.setMaxHeight(MAX_MENU_HEIGHT);
@@ -657,7 +654,17 @@ public class ContextMenuController extends AnchorPane implements Initializable {
 
             wiredToMenu.getItems().clear();
             wiredToMenu.getItems().addAll(colorAll, preSyn, postSyn, electr, neuro);
+            wiredToMenu.show(wiredTo, Side.RIGHT, 0, 0);
 
+            searchService.restart();
+        });
+
+        color.setOnAction(event -> {
+            searchType = SearchType.LINEAGE;
+            searchService.restart();
+        });
+        colorNeighbors.setOnAction(event -> {
+            searchType = SearchType.NEIGHBOR;
             searchService.restart();
         });
     }

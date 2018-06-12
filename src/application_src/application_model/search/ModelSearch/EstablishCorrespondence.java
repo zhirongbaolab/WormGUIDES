@@ -6,9 +6,7 @@ import application_src.application_model.search.ModelSearch.ModelSpecificSearchO
 import application_src.application_model.search.OrganismSearchResults;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class is one of two main interfaces between the model-agnostic Search pipeline
@@ -23,27 +21,43 @@ import java.util.List;
 public class EstablishCorrespondence {
     // representations of the underlying model
     private static LineageData lineageData;
-    private static SceneElementsList sceneElementsList;
+    private static StructuresSearch structuresSearch;
 
-    public EstablishCorrespondence(LineageData lineageData, SceneElementsList sceneElementsList) {
+    public EstablishCorrespondence(LineageData lineageData, StructuresSearch structuresSearch) {
         this.lineageData = lineageData;
-        this.sceneElementsList = sceneElementsList;
+        this.structuresSearch = structuresSearch;
     }
 
     public List<String> establishCorrespondence(OrganismSearchResults searchResults,
                                                 boolean includeCellNuc, boolean includeCellBody) {
         ArrayList<String> correspondenceList = new ArrayList<>();
 
-        // iterate over the search results, and find the entities that have overlap in the underlying model. Add these
-        // to the correspondence list
-        List<String> names = lineageData.getAllCellNames();
-        for(String name : names) {
-            if (searchResults.getSearchResults().contains(name)) {
-                correspondenceList.add(name);
+        if (searchResults.getSearchResultsDataType().equals(OrganismDataType.GENE)) {
+            return searchResults.getSearchResults();
+        }
+
+        if (includeCellNuc) {
+            // iterate over the search results, and find the entities that have overlap in the underlying model. Add these
+            // to the correspondence list
+            List<String> names = lineageData.getAllCellNames();
+            for(String result : searchResults.getSearchResults()) {
+                for (String lineageName : names) {
+                    if (lineageName.equalsIgnoreCase(result)) {
+                        correspondenceList.add(lineageName);
+                    }
+                }
             }
         }
 
-        correspondenceList.addAll(StructuresSearch.getCellBodiesList(searchResults.getSearchResults()));
+        if (includeCellBody) {
+            correspondenceList.addAll(structuresSearch.getCellBodiesList(searchResults.getSearchResults()));
+        }
+
+        // remove duplicates
+        Set<String> hs = new HashSet<>();
+        hs.addAll(correspondenceList);
+        correspondenceList.clear();
+        correspondenceList.addAll(hs);
 
         return correspondenceList;
     }

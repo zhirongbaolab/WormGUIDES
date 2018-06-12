@@ -5,6 +5,7 @@
 package application_src.controllers.layers;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import application_src.application_model.annotation.AnnotationManager;
 import application_src.application_model.data.CElegansData.Gene.GeneSearchManager;
@@ -55,7 +56,6 @@ import static application_src.application_model.search.SearchConfiguration.Searc
 public class SearchLayer {
 
     private final Service<Void> resultsUpdateService;
-    private final Service<Void> showLoadingService;
 
     private final CElegansSearch cElegansSearchPipeline;
     private final NeighborsSearch neighborsSearch;
@@ -171,8 +171,6 @@ public class SearchLayer {
         // Therefore, there is a check in the service that determines if this is a gene search
         // and only then will it display the loading text
 
-        showLoadingService = new ShowLoadingService();
-
         this.resultsUpdateService = new Service<Void>() {
             @Override
             protected final Task<Void> createTask() {
@@ -192,8 +190,6 @@ public class SearchLayer {
                 return task;
             }
         };
-        this.resultsUpdateService.setOnScheduled(event -> showLoadingService.restart());
-        this.resultsUpdateService.setOnSucceeded(event -> showLoadingService.cancel());
 
         // search type toggle
         searchTypeToggleGroup = new ToggleGroup();
@@ -247,12 +243,6 @@ public class SearchLayer {
 
         // listener for change in the search toggles
         searchTypeToggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            // if toggle was previously on 'gene' then cancel whatever wormbase search was issued
-            if (oldValue != null && oldValue.getUserData() == GENE) {
-                searchResultsList.clear();
-            }
-
-
             final SearchType type = (SearchType) newValue.getUserData();
             // disable descendant options for terminal cell searches
             if (type == FUNCTIONAL || type == DESCRIPTION) {
@@ -300,7 +290,7 @@ public class SearchLayer {
             final boolean areAncestorsFetched) {
 
         if (!searchedTerm.isEmpty()) {
-            searchedTerm = searchedTerm.trim().toLowerCase();
+            searchedTerm = searchedTerm.trim();
 
             // depending on the search type, either:
             // 1. run the search on the C Elegans data through the CElegansSearchPipelin
@@ -330,6 +320,7 @@ public class SearchLayer {
                     break;
                 case GENE: // C Elegans data
                     if (CElegansSearch.isGeneFormat(searchedTerm)) {
+                        searchResultsList.add("Fetching data from WormBase..."); // set this because this is a threaded search that takes a little while to complete
                         cElegansSearchPipeline.startGeneSearch(searchedTerm,
                                 areAncestorsFetched,
                                 areDescendantsFetched,
@@ -337,20 +328,6 @@ public class SearchLayer {
                                 false,
                                 OrganismDataType.LINEAGE);
                         cElegansDataSearchResults = new CElegansSearchResults(GeneSearchManager.getPreviouslyFetchedGeneResults(searchedTerm));
-
-                    } else {
-                        // before issuing gene search, make sure the search is either a valid
-                        // lineage name or a valid functional name so the thread doesn't run unnecessarily
-                        if (CElegansSearch.isValidLineageSearchTerm(searchedTerm)
-                                || CElegansSearch.isValidFunctionalSearchTerm(searchedTerm)) {
-                            cElegansSearchPipeline.startGeneSearch(searchedTerm,
-                                    areAncestorsFetched,
-                                    areDescendantsFetched,
-                                    false,
-                                    true,
-                                    OrganismDataType.GENE);
-                            cElegansDataSearchResults = new CElegansSearchResults(GeneSearchManager.getPreviouslyFetchedGeneResults(searchedTerm));
-                        }
                     }
                     break;
                 case CONNECTOME: // C Elegans data
@@ -376,21 +353,16 @@ public class SearchLayer {
 
             if (cElegansDataSearchResults.hasResults()) {
                 // find the correspondence between the C elegans search results
-//                entitiesForAnnotation.addAll(establishCorrespondence.establishCorrespondence(cElegansDataSearchResults,
-//                                                                                                isCellNucleusFetched,
-//                                                                                                   isCellBodyFetched));
-                System.out.println("before: " + entitiesForAnnotation.size());
-                entitiesForAnnotation.addAll(cElegansDataSearchResults.getSearchResults());
-                System.out.println("after: " + entitiesForAnnotation.size());
+                entitiesForAnnotation.addAll(establishCorrespondence.establishCorrespondence(cElegansDataSearchResults,
+                                                                                                isCellNucleusFetched,
+                                                                                                   isCellBodyFetched));
             }
 
             if (!modelDataSearchResults.isEmpty()) {
                 // this comes directly from the model and should be formatted correctly,
                 // so there is no need to pass it through the correspondence pipeline.
                 // Simply add it to the cellsForListView
-                System.out.println("before: " + entitiesForAnnotation.size());
                 entitiesForAnnotation.addAll(modelDataSearchResults);
-                System.out.println("after: " + entitiesForAnnotation.size());
             }
 
             sort(entitiesForAnnotation);
@@ -400,7 +372,7 @@ public class SearchLayer {
             // this appends functional names to the lineage names (unless they are gene names),
             // and then places in the ObservableList<String> searchResultsListView -> this triggers
             // RootLayoutController to populate the results window with them
-            System.out.println("Passing " + entitiesForAnnotation.size() + " number of items to populate list view");
+            System.out.println("putting names in search results list view");
             appendFunctionalToLineageNames(entitiesForAnnotation);
         }
     }
@@ -428,7 +400,7 @@ public class SearchLayer {
      * @return
      */
     private String getSearchedText() {
-        final String searched = searchTextField.getText().toLowerCase();
+        final String searched = searchTextField.getText();
         return searched;
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
@@ -580,71 +552,7 @@ public class SearchLayer {
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /////////////////////////////////////////////////////////////
-
-    /**
-     * Method taken from RootLayoutController --> how can InfoWindowLinkController generate page without pointer to
-     * RootLayoutController?
-     */
-
-
-
-
     public Service<Void> getResultsUpdateService() {
         return resultsUpdateService;
-    }
-
-    // TODO -> this just generally needs figuring out. Why is this search in a thread? It's not computationally expensive. Why was it here
-
-
-
-    /**
-     * Service that shows when gene results are being fetched by the {@link GeneSearchManager} so that the user does
-     * not think that the application is not responding.
-     */
-    private final class ShowLoadingService extends Service<Void> {
-
-        /** Time between changes in the number of ellipses periods during loading */
-        private static final long WAIT_TIME_MILLIS = 1000;
-
-        /** Maximum number of ellipses periods to show, plus 1 */
-        private static final int MODULUS = 5;
-
-        /** Changing number of ellipses periods to display during loading */
-        private int count = 0;
-
-        @Override
-        protected final Task<Void> createTask() {
-            return new Task<Void>() {
-                @Override
-                protected Void call() throws Exception {
-                    if (searchTypeToggleGroup.getSelectedToggle().getUserData() == GENE) {
-                        while (true) {
-                            if (isCancelled()) {
-                                break;
-                            }
-                            runLater(() -> {
-                                String loadingString = "Fetching data from WormBase";
-                                int num = count % MODULUS;
-                                for (int i = 0; i < num; i++) {
-                                    loadingString += ".";
-                                }
-                                searchResultsList.clear();
-                                searchResultsList.add(loadingString);
-                            });
-                            try {
-                                sleep(WAIT_TIME_MILLIS);
-                                count++;
-                                count %= MODULUS;
-                            } catch (InterruptedException ie) {
-                                break;
-                            }
-                        }
-                        return null;
-                    }
-                    return null;
-                }
-            };
-        }
     }
 }

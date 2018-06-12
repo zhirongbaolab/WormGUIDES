@@ -1232,9 +1232,10 @@ public class RootLayoutController extends BorderPane implements Initializable {
         neighborsSearch = new NeighborsSearch(this.lineageData);
 
         sceneElementsList = new SceneElementsList(this.lineageData, this.defaultEmbryoFlag);
-        establishCorrespondence = new EstablishCorrespondence(this.lineageData, this.sceneElementsList);
         initStructuresLayer();
         structuresSearch = new StructuresSearch(sceneElementsList, structuresLayer.getStructuresTreeRoot(), annotationManager);
+
+        establishCorrespondence = new EstablishCorrespondence(this.lineageData, this.structuresSearch);
 
         initSearchLayer();
         initTimelineChart();
@@ -1308,6 +1309,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
             loader.setLocation(MainApp.class.getResource("/application_src/views/layouts/ContextMenuLayout.fxml"));
             loader.setController(contextMenuController);
             loader.setRoot(contextMenuController);
+
+
 
             try {
                 contextMenuStage.setScene(new Scene(loader.load()));

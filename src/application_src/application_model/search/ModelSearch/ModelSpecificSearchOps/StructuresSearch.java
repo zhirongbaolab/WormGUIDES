@@ -145,7 +145,7 @@ public class StructuresSearch {
      *
      * @return the cell bodies of the cells in the list
      */
-    public static List<String> getCellBodiesList(final List<String> cells) {
+    public List<String> getCellBodiesList(final List<String> cells) {
         final List<String> cellBodies = new ArrayList<>();
         if (sceneElementsList != null
                 && cells != null

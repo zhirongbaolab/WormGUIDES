@@ -16,6 +16,7 @@ import application_src.application_model.search.OrganismSearch;
 import javafx.scene.control.TreeItem;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class CElegansSearch implements OrganismSearch, Runnable {
 
@@ -32,6 +33,7 @@ public class CElegansSearch implements OrganismSearch, Runnable {
     public AbstractMap.SimpleEntry<OrganismDataType, List<String>> executeLineageSearch(String searchString, boolean includeAncestors, boolean includeDescendants) {
         OrganismDataType lineageDataType = OrganismDataType.LINEAGE;
         ArrayList<String> searchResults = new ArrayList<>();
+
 
         // access the PartsList and CellDeaths arrays
         ArrayList<String> lineageNames = (ArrayList<String>)PartsList.getLineageNames();
@@ -110,15 +112,12 @@ public class CElegansSearch implements OrganismSearch, Runnable {
                 }
 
                 // add the substring to the results list
+                System.out.println(substr);
                 results.add(substr);
             }
         }
 
         if (includeDescendants) {
-            // access the PartsList and CellDeaths arrays
-            ArrayList<String> lineageNames = (ArrayList<String>)PartsList.getLineageNames();
-            ArrayList<String> cellDeaths = (ArrayList<String>)CellDeaths.getCellDeaths();
-
             // first check if this is a special case
             if (Arrays.asList(SulstonLineage.getSpecialCasesAsStringArray()).contains(searchString)) {
                 // add all descendants in the special case tree. When a node with no leaf is reached, add all
@@ -196,6 +195,7 @@ public class CElegansSearch implements OrganismSearch, Runnable {
         // add all ancestors of this item
         while (ancestorTreeItem.getParent() != null) {
             ancestorTreeItem = ancestorTreeItem.getParent();
+            System.out.println(ancestorTreeItem.getValue());
             specialCaseAncestors.add(ancestorTreeItem.getValue());
         }
 
@@ -549,9 +549,11 @@ public class CElegansSearch implements OrganismSearch, Runnable {
      * @param intendedResultsType
      */
     public void startGeneSearch(String searchString, boolean includeAncestors, boolean includeDescendants, boolean isSearchTermGene, boolean isSearchTermAnatomy, OrganismDataType intendedResultsType) {
+        System.out.println("running gene search 1");
         GeneSearchManager.setSearchTerm(searchString.toLowerCase());
         GeneSearchManager.setSearchOptions(includeAncestors, includeDescendants, isSearchTermGene, isSearchTermAnatomy, intendedResultsType);
         if (!GeneSearchManager.getGeneResultsCache().containsKey(searchString.toLowerCase())) {
+            System.out.println("running gene search 2");
             run();
         }
     }
@@ -568,6 +570,7 @@ public class CElegansSearch implements OrganismSearch, Runnable {
                         GeneSearchManager.getIsSearchTermGene(),
                         GeneSearchManager.getIsSearchTermAnatomy(),
                         GeneSearchManager.getIntendedResultsType()));
+        System.out.println("finished running gene search");
     }
 
     /**
@@ -582,7 +585,20 @@ public class CElegansSearch implements OrganismSearch, Runnable {
         name = name.trim();
         final int hyphenIndex = name.indexOf("-");
         // check that there is a hyphen and there is a string preceeding it
-        return hyphenIndex > 1 && name.substring(hyphenIndex + 1).matches("^-?\\d+$");
+        if (hyphenIndex < 0) return false;
+        if (hyphenIndex == name.length()-1) return false;
+
+        for (int i = 0; i < name.length(); i++) {
+            if (i < hyphenIndex) { // these should all be letters
+                if (!Character.isLetter(name.charAt(i))) return false;
+            }
+            if (i > hyphenIndex) {
+                if (!Character.isDigit(name.charAt(i))) return false;
+            }
+        }
+
+        System.out.println("returning true on: " + name);
+        return true;
     }
 
     ////////// END GENE SEARCH ////////////////////////////////////////////////////////////////////////////////////
@@ -850,18 +866,54 @@ public class CElegansSearch implements OrganismSearch, Runnable {
 
         // remove names with '.' at end
         for (int i = 0; i < results.size(); i++) {
-            if (results.get(i).endsWith(".")) {
-                results.remove(i);
-            }
-
             if (results.get(i).isEmpty()) {
                 results.remove(i);
+                continue;
             }
-
+            if (results.get(i).endsWith(".")) {
+                results.remove(i);
+                continue;
+            }
             if (results.get(i).length() <= 1) {
                 results.remove(i);
+                continue;
             }
+
+            // formatting
+            if (results.get(i).toLowerCase().startsWith("ab") || results.get(i).toLowerCase().startsWith("ms")) {
+                // capitalize the first two letters
+                String formattedStr = results.get(i);
+                formattedStr = formattedStr.substring(0, 2).toUpperCase() + formattedStr.substring(2);
+                results.set(i, formattedStr);
+            }
+
+            if (results.get(i).toLowerCase().startsWith("p") ||
+                    results.get(i).toLowerCase().startsWith("z") ||
+                    results.get(i).toLowerCase().startsWith("c") ||
+                    results.get(i).toLowerCase().startsWith("d")) {
+                String formattedStr = results.get(i);
+                formattedStr = formattedStr.substring(0, 1).toUpperCase() + formattedStr.substring(1);
+                results.set(i, formattedStr);
+            }
+
+            if (results.get(i).toLowerCase().startsWith("e")) {
+                // check if it's 'EMS"
+                if (results.get(i).toLowerCase().equals("ems")) {
+                    results.set(i, results.get(i).toUpperCase());
+                } else {
+                    String formattedStr = results.get(i);
+                    formattedStr = formattedStr.substring(0, 1).toUpperCase() + formattedStr.substring(1);
+                    results.set(i, formattedStr);
+                }
+            }
+
+
         }
+
+        hs = new HashSet<>();
+        hs.addAll(results);
+        results.clear();
+        results.addAll(hs);
 
         return results;
     }
