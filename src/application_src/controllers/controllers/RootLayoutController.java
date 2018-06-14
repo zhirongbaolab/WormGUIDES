@@ -267,6 +267,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
     // the model-agnostic search pipeline
     private CElegansSearch cElegansSearchPipeline; // model agnostic
+    private GeneSearchManager geneSearchManager; // also model agnostic. this is a class that threads gene queries and itself uses the CElegansSearch class
 
     // the model specific search pipelines
     private StructuresSearch structuresSearch;
@@ -992,6 +993,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         cellNucleusCheckBox.setSelected(true);
         searchLayer = new SearchLayer(
                 cElegansSearchPipeline,
+                geneSearchManager,
                 neighborsSearch,
                 structuresSearch,
                 establishCorrespondence,
@@ -1020,7 +1022,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
     }
 
     private void initDisplayLayer() {
-        displayLayer = new DisplayLayer(rulesList, usingInternalRulesFlag, rebuildSubsceneFlag);
+        displayLayer = new DisplayLayer(annotationManager, usingInternalRulesFlag, rebuildSubsceneFlag);
         rulesListView.setItems(rulesList);
         rulesListView.setCellFactory(displayLayer.getRuleCellFactory());
     }
@@ -1177,10 +1179,10 @@ public class RootLayoutController extends BorderPane implements Initializable {
         Connectome.init();
         Anatomy.init();
         EmbryonicAnalogousCells.init();
-        GeneSearchManager.init();
 
         // now set up the Search pipeline for the static C Elegans data
         cElegansSearchPipeline = new CElegansSearch();
+        geneSearchManager = new GeneSearchManager(cElegansSearchPipeline);
 
         // transition to model and program specific data initialization
         Parameters.init();
@@ -1299,11 +1301,12 @@ public class RootLayoutController extends BorderPane implements Initializable {
             contextMenuController = new ContextMenuController(
                     mainStage,
                     contextMenuStage,
-                    bringUpInfoFlag,
                     cElegansSearchPipeline,
+                    geneSearchManager,
                     neighborsSearch,
                     establishCorrespondence,
-                    annotationManager);
+                    annotationManager,
+                    bringUpInfoFlag);
 
             final FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("/application_src/views/layouts/ContextMenuLayout.fxml"));

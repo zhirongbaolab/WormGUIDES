@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import application_src.application_model.annotation.AnnotationManager;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -31,13 +32,11 @@ import static java.util.Objects.requireNonNull;
  * list. On context change (making a story active/inactive), the rules in the current list are stored back into the
  * item that no longer has context (whether it is the internal rules or the story's rules).
  * <p>
- * The internal rules are the rules used when no story is active. On startup, the internal rules are the default
- * rules added by {@link SearchLayer#addDefaultInternalColorRules()}.
  *
  * @see Rule
  */
 public class DisplayLayer {
-
+    private final AnnotationManager annotationManager;
     private final List<Rule> internalRulesList;
     private final ObservableList<Rule> currentRulesList;
     private final Map<Rule, Button> buttonMap;
@@ -50,18 +49,19 @@ public class DisplayLayer {
      *         no story is active), false otherwise
      */
     public DisplayLayer(
-            final ObservableList<Rule> rulesList,
+            final AnnotationManager annotationManager,
             final BooleanProperty useInternalRulesFlag,
             final BooleanProperty rebuildSubsceneFlag) {
-        requireNonNull(rulesList);
         requireNonNull(useInternalRulesFlag);
         requireNonNull(rebuildSubsceneFlag);
+
+        this.annotationManager = requireNonNull(annotationManager);
 
         internalRulesList = new ArrayList<>();
         buttonMap = new HashMap<>();
 
 
-        this.currentRulesList = rulesList;
+        this.currentRulesList = annotationManager.getRulesList();
         this.currentRulesList.addListener((ListChangeListener<Rule>) change -> {
             while (change.next()) {
                 if (!change.wasUpdated()) {

@@ -17,9 +17,11 @@ import application_src.application_model.search.ModelSearch.ModelSpecificSearchO
 import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
@@ -52,10 +54,13 @@ import static application_src.application_model.search.SearchConfiguration.Searc
 import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
 import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
 import static application_src.application_model.search.SearchConfiguration.SearchOption.DESCENDANT;
+import static javafx.concurrent.Worker.State.SCHEDULED;
 
 public class SearchLayer {
 
     private final Service<Void> resultsUpdateService;
+    private final GeneSearchManager geneSearchManager;
+    private final Service<Void> showLoadingService;
 
     private final CElegansSearch cElegansSearchPipeline;
     private final NeighborsSearch neighborsSearch;
@@ -88,6 +93,7 @@ public class SearchLayer {
 
     public SearchLayer(
             final CElegansSearch CElegansSearchPipeline,
+            final GeneSearchManager geneSearchManager,
             final NeighborsSearch neighborsSearch,
             final StructuresSearch structuresSearch,
             final EstablishCorrespondence establishCorrespondence,
@@ -116,6 +122,7 @@ public class SearchLayer {
         //////// SEARCH PIPELINES, MODULES AND MANUALS ///////////////////
         // the API through which all search of C Elegans data is completed
         this.cElegansSearchPipeline = requireNonNull(CElegansSearchPipeline);
+        this.geneSearchManager = requireNonNull(geneSearchManager);
 
         // the two model specific search modules
         this.neighborsSearch = neighborsSearch;
@@ -170,6 +177,7 @@ public class SearchLayer {
         // when genes are searched because other searches are local and complete quickly.
         // Therefore, there is a check in the service that determines if this is a gene search
         // and only then will it display the loading text
+        showLoadingService = new ShowLoadingService();
 
         this.resultsUpdateService = new Service<Void>() {
             @Override
@@ -190,6 +198,39 @@ public class SearchLayer {
                 return task;
             }
         };
+
+        geneSearchManager.stateProperty().addListener(new ChangeListener<Worker.State>() {
+            @Override
+            public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldState, Worker.State newState) {
+                switch (newState) {
+                    case SCHEDULED:
+                        showLoadingService.restart();
+                        break;
+                    case READY:
+                    case RUNNING:
+                        break;
+                    case SUCCEEDED:
+                        showLoadingService.cancel();
+                        searchResultsList.clear();
+                        // call this again to get the results read into the search results list - it will pick up the cached results
+                        performSearchAndAlertAnnotationManager(GENE,
+                                getSearchedText(),
+                                cellNucleusCheckBox.isSelected(),
+                                cellBodyCheckBox.isSelected(),
+                                descendantCheckBox.isSelected(),
+                                ancestorCheckBox.isSelected());
+                        break;
+                    case CANCELLED:
+                        showLoadingService.cancel();
+                        searchResultsList.clear();
+                        break;
+                    case FAILED:
+                        break;
+
+                }
+            }
+        });
+
 
         // search type toggle
         searchTypeToggleGroup = new ToggleGroup();
@@ -320,14 +361,15 @@ public class SearchLayer {
                     break;
                 case GENE: // C Elegans data
                     if (CElegansSearch.isGeneFormat(searchedTerm)) {
-                        searchResultsList.add("Fetching data from WormBase..."); // set this because this is a threaded search that takes a little while to complete
-                        cElegansSearchPipeline.startGeneSearch(searchedTerm,
-                                areAncestorsFetched,
-                                areDescendantsFetched,
-                                true,
-                                false,
-                                OrganismDataType.LINEAGE);
-                        cElegansDataSearchResults = new CElegansSearchResults(GeneSearchManager.getPreviouslyFetchedGeneResults(searchedTerm));
+                        AbstractMap.SimpleEntry<OrganismDataType, List<String>> geneSearchResults = geneSearchManager.getPreviouslyFetchedGeneResults(searchedTerm);
+                        if (geneSearchResults == null) {
+                            geneSearchManager.setSearchTerm(searchedTerm);
+                            geneSearchManager.setSearchOptions(areAncestorsFetched, areDescendantsFetched, true, false, OrganismDataType.LINEAGE);
+                            geneSearchManager.reset();
+                            geneSearchManager.start();
+                        } else {
+                            cElegansDataSearchResults = new CElegansSearchResults(geneSearchResults);
+                        }
                     }
                     break;
                 case CONNECTOME: // C Elegans data
@@ -372,7 +414,6 @@ public class SearchLayer {
             // this appends functional names to the lineage names (unless they are gene names),
             // and then places in the ObservableList<String> searchResultsListView -> this triggers
             // RootLayoutController to populate the results window with them
-            System.out.println("putting names in search results list view");
             appendFunctionalToLineageNames(entitiesForAnnotation);
         }
     }
@@ -404,51 +445,6 @@ public class SearchLayer {
         return searched;
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    /**
-     * Adds a connectome rule that contains all the cell results retrieved based on the input query parameters
-     *
-     * @param funcName
-     *         the functional name of the cell
-     * @param color
-     *         color to apply to cell entities
-     * @param isPresynapticTicked
-     *         true if the presynaptic option was ticked, false otherwise
-     * @param isPostsynapticTicked
-     *         true if the postsynaptic option was ticked, false otherwise
-     * @param isElectricalTicked
-     *         true if the electrical option was ticked, false otherwise
-     * @param isNeuromuscularTicked
-     *         true if the neuromuscular option was ticked, false otherwise
-     *
-     * @return the rule that was added to the internal list
-     */
-    public Rule addConnectomeColorRule(
-            final String funcName,
-            final Color color,
-            final boolean isPresynapticTicked,
-            final boolean isPostsynapticTicked,
-            final boolean isElectricalTicked,
-            final boolean isNeuromuscularTicked) {
-
-        List<String> searchResults = cElegansSearchPipeline.executeConnectomeSearch(
-                funcName,
-                false,
-                false,
-                isPresynapticTicked,
-                isPostsynapticTicked,
-                isElectricalTicked,
-                isNeuromuscularTicked,
-                OrganismDataType.LINEAGE).getValue();
-
-        return annotationManager.addConnectomeColorRule(funcName, color, searchResults,
-                isPresynapticTicked,
-                isPostsynapticTicked,
-                isElectricalTicked,
-                isNeuromuscularTicked,
-                new ArrayList<>());
-    }
 
 
     //////////////////////////////////// UI COMPONENT HANDLERS AND LISTENERS /////////////////////////////////
@@ -498,29 +494,6 @@ public class SearchLayer {
                 searchResultsList.clear();
                 resultsUpdateService.restart();
             }
-
-//            if (searchTypeToggleGroup.getSelectedToggle().getUserData() == GENE) {
-//                if (!getSearchedText().isEmpty()) {
-//                    if (CElegansSearchPipeline.isGeneFormat(getSearchedText())) {
-//                        CElegansSearchPipeline.startGeneSearch(getSearchedText(),
-//                                false,
-//                                false,
-//                                true,
-//                                false,
-//                                OrganismDataType.GENE);
-//                    } else {
-//                        CElegansSearchPipeline.startGeneSearch(getSearchedText(),
-//                                ancestorCheckBox.isSelected(),
-//                                descendantCheckBox.isSelected(),
-//                                false,
-//                                false,
-//                                OrganismDataType.LINEAGE);
-//                        updateGeneResults(getSearchedText());
-//                    }
-//                }
-//            } else {
-//                resultsUpdateService.restart();
-//            }
         };
     }
 
@@ -554,5 +527,52 @@ public class SearchLayer {
 
     public Service<Void> getResultsUpdateService() {
         return resultsUpdateService;
+    }
+
+    /**
+     * Service that shows when gene results are being fetched by the GeneSearchManager so that the user does
+     * not think that the application is not responding.
+     */
+    private final class ShowLoadingService extends Service<Void> {
+
+        /** Time between changes in the number of ellipses periods during loading */
+        private static final long WAIT_TIME_MILLIS = 1000;
+
+        /** Maximum number of ellipses periods to show, plus 1 */
+        private static final int MODULUS = 5;
+
+        /** Changing number of ellipses periods to display during loading */
+        private int count = 0;
+
+        @Override
+        protected final Task<Void> createTask() {
+            return new Task<Void>() {
+                @Override
+                protected Void call() throws Exception {
+                    while (true) {
+                        if (isCancelled()) {
+                            break;
+                        }
+                        runLater(() -> {
+                            String loadingString = "Fetching data from WormBase";
+                            int num = count % MODULUS;
+                            for (int i = 0; i < num; i++) {
+                                loadingString += ".";
+                            }
+                            searchResultsList.clear();
+                            searchResultsList.add(loadingString);
+                        });
+                        try {
+                            sleep(WAIT_TIME_MILLIS);
+                            count++;
+                            count %= MODULUS;
+                        } catch (InterruptedException ie) {
+                            break;
+                        }
+                    }
+                    return null;
+                }
+            };
+        }
     }
 }

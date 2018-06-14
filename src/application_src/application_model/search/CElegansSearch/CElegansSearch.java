@@ -18,7 +18,7 @@ import javafx.scene.control.TreeItem;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-public class CElegansSearch implements OrganismSearch, Runnable {
+public class CElegansSearch implements OrganismSearch {
 
 
     ////////// LINEAGE SEARCH ////////////////////////////////////////////////////////////////////////////////////
@@ -498,6 +498,7 @@ public class CElegansSearch implements OrganismSearch, Runnable {
         if (isSearchTermGene && !isSearchTermAnatomy) {
             // search term is a gene -> find the cells (anatomy) that express this gene
             searchResults.addAll(WormBaseQuery.issueWormBaseGeneQuery(searchString));
+            System.out.println(searchResults.size() + " results found on wormbase");
 
             if (intendedResultsType.equals(OrganismDataType.FUNCTIONAL)) {
                 // convert the lineage names to functional
@@ -538,42 +539,6 @@ public class CElegansSearch implements OrganismSearch, Runnable {
     }
 
     /**
-     * This the method that is called to initiate gene search. It sets the seach term and options in the manager class,
-     * and then begins the search by running the thread that the search takes place on.
-     *
-     * @param searchString
-     * @param includeAncestors
-     * @param includeDescendants
-     * @param isSearchTermGene
-     * @param isSearchTermAnatomy
-     * @param intendedResultsType
-     */
-    public void startGeneSearch(String searchString, boolean includeAncestors, boolean includeDescendants, boolean isSearchTermGene, boolean isSearchTermAnatomy, OrganismDataType intendedResultsType) {
-        System.out.println("running gene search 1");
-        GeneSearchManager.setSearchTerm(searchString.toLowerCase());
-        GeneSearchManager.setSearchOptions(includeAncestors, includeDescendants, isSearchTermGene, isSearchTermAnatomy, intendedResultsType);
-        if (!GeneSearchManager.getGeneResultsCache().containsKey(searchString.toLowerCase())) {
-            System.out.println("running gene search 2");
-            run();
-        }
-    }
-
-    /**
-     * The thread that makes the request to WormBase and stores the results in the cache
-     */
-    @Override
-    public void run() {
-        GeneSearchManager.cacheGeneResults(GeneSearchManager.getSearchTerm(),
-                executeGeneSearch(GeneSearchManager.getSearchTerm(),
-                        GeneSearchManager.getIncludeAncestorsParam(),
-                        GeneSearchManager.getIncludeDescendantsParam(),
-                        GeneSearchManager.getIsSearchTermGene(),
-                        GeneSearchManager.getIsSearchTermAnatomy(),
-                        GeneSearchManager.getIntendedResultsType()));
-        System.out.println("finished running gene search");
-    }
-
-    /**
      * Checks whether a name is a gene name with the format SOME_STRING-SOME_NUMBER.
      *
      * @param name
@@ -596,8 +561,6 @@ public class CElegansSearch implements OrganismSearch, Runnable {
                 if (!Character.isDigit(name.charAt(i))) return false;
             }
         }
-
-        System.out.println("returning true on: " + name);
         return true;
     }
 
@@ -994,7 +957,6 @@ public class CElegansSearch implements OrganismSearch, Runnable {
         Connectome.init();
         Anatomy.init();
         EmbryonicAnalogousCells.init();
-        GeneSearchManager.init();
 
         CElegansSearch search = new CElegansSearch();
         AbstractMap.SimpleEntry<OrganismDataType, List<String>> results;

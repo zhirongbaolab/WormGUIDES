@@ -110,8 +110,10 @@ public class WormBaseQuery {
         String useTerm = lineageName;
         String funcNameAttempt = PartsList.getFunctionalNameByLineageName(lineageName);
         if (funcNameAttempt != null) {
-            useTerm = lineageName;
+            useTerm = funcNameAttempt;
         }
+
+        System.out.println("use term for wormbase anatomy term search is: " + useTerm);
 
         url.append(WORMBASE_URL).append(WORMBASE_URL_NAME_FIELD).append(useTerm).append(WORMBASE_EXT);
 

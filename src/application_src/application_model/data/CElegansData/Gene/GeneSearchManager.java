@@ -7,8 +7,7 @@ package application_src.application_model.data.CElegansData.Gene;
 import java.util.*;
 
 import application_src.application_model.data.OrganismDataType;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import static java.util.Objects.requireNonNull;
@@ -16,7 +15,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Service that returns the cells with a certain gene expression. This is a wrapper for the actual HTTP request method.
  */
-public class GeneSearchManager {
+public class GeneSearchManager extends Service<Void> {
 
     /** Map of previously fetched genes (in lower case) to their results:
      * The string will be the actual searched term, and the OrganismDataType
@@ -33,12 +32,14 @@ public class GeneSearchManager {
     private static boolean isSearchTermAnatomy;
     private static OrganismDataType intendedResultsType;
 
-    private static BooleanProperty geneResultsUpdatedFlag;
+    private CElegansSearch cElegansSearchPipeline;
 
     /**
      * Constructor
      */
-    public static void init() {
+    public GeneSearchManager(CElegansSearch cElegansSearchPipeline) {
+        this.cElegansSearchPipeline = cElegansSearchPipeline;
+
         geneResultsCache = new HashMap<>();
         searchTerm = "";
         includeAncestors = false;
@@ -46,30 +47,11 @@ public class GeneSearchManager {
         isSearchTermGene = false;
         isSearchTermAnatomy = false;
         intendedResultsType = OrganismDataType.GENE;
-
-        geneResultsUpdatedFlag = new SimpleBooleanProperty();
-        geneResultsUpdatedFlag.set(false);
     }
 
-    /**
-     * Inserts a gene and its expressing cells into the results cache. This is used when new results need to be
-     * fetched using {@link } for ruled added during URL loading, without using this service as a
-     * wrapper.
-     *
-     * @param gene the gene
-     * @param results its expressing cells
-     */
-    public static void cacheGeneResults(final String gene, final AbstractMap.SimpleEntry<OrganismDataType, List<String>> results) {
-        if (gene != null && results != null) {
-            geneResultsCache.put(gene, results);
-            geneResultsUpdatedFlag.set(true);
-        }
-        geneResultsUpdatedFlag.set(false);
-    }
+    public void setSearchTerm(String term) { searchTerm = term; }
 
-    public static void setSearchTerm(String term) { searchTerm = term; }
-
-    public static void setSearchOptions(boolean includeAncestorsParam, boolean includeDescendantsParam, boolean isSearchTermGeneParam, boolean isSearchTermAnatomyParam, OrganismDataType intendedResultsTypeParam) {
+    public void setSearchOptions(boolean includeAncestorsParam, boolean includeDescendantsParam, boolean isSearchTermGeneParam, boolean isSearchTermAnatomyParam, OrganismDataType intendedResultsTypeParam) {
         includeAncestors = includeAncestorsParam;
         includeDescendants = includeDescendantsParam;
         isSearchTermGene = isSearchTermGeneParam;
@@ -86,7 +68,7 @@ public class GeneSearchManager {
      *
      * @return cells with that gene expression
      */
-    public static AbstractMap.SimpleEntry<OrganismDataType, List<String>> getPreviouslyFetchedGeneResults(String term) {
+    public AbstractMap.SimpleEntry<OrganismDataType, List<String>> getPreviouslyFetchedGeneResults(String term) {
         term = term.trim().toLowerCase();
         if (geneResultsCache.containsKey(term)) {
             return geneResultsCache.get(term);
@@ -94,12 +76,27 @@ public class GeneSearchManager {
         return null;
     }
 
-    public static Map<String, AbstractMap.SimpleEntry<OrganismDataType, List<String>>> getGeneResultsCache() { return geneResultsCache; }
-    public static String getSearchTerm() { return searchTerm; }
-    public static boolean getIncludeAncestorsParam() { return includeAncestors; }
-    public static boolean getIncludeDescendantsParam() { return includeDescendants; }
-    public static boolean getIsSearchTermGene() { return isSearchTermGene; }
-    public static boolean getIsSearchTermAnatomy() { return isSearchTermAnatomy; }
-    public static OrganismDataType getIntendedResultsType() { return intendedResultsType; }
+    @Override
+    protected final Task<Void> createTask() {
+        return new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                if (!geneResultsCache.containsKey(searchTerm)) {
 
+                    final AbstractMap.SimpleEntry<OrganismDataType, List<String>> results = cElegansSearchPipeline.executeGeneSearch(searchTerm,
+                            includeAncestors,
+                            includeDescendants,
+                            isSearchTermGene,
+                            isSearchTermAnatomy,
+                            intendedResultsType);
+
+                    // save results in cache
+                    System.out.println("caching results of size:" + results.getValue().size() + " with search term: " + searchTerm);
+                    geneResultsCache.put(searchTerm.toLowerCase(), results);
+                    System.out.println("returning results from gene search thread");
+                }
+                return null;
+            }
+        };
+    }
 }
