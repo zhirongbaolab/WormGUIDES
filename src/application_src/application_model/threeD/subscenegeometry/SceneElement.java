@@ -44,6 +44,7 @@ public class SceneElement {
     private int endTime;
     private String comments;
     private boolean completeResourceFlag;
+    private boolean isSelectable;
 
     /** X-coordinate of scene element's position when element belongs to a note */
     private int x;
@@ -81,7 +82,8 @@ public class SceneElement {
             final String resourceLocation,
             final int startTime,
             final int endTime,
-            final String comments) {
+            final String comments,
+            final boolean isSelectable) {
 
         this.sceneName = requireNonNull(sceneName);
         this.cellNames = requireNonNull(cellNames);
@@ -90,6 +92,7 @@ public class SceneElement {
         this.imagingSource = requireNonNull(imagingSource);
         this.resourceLocation = requireNonNull(resourceLocation);
         completeResourceFlag = isResourceComplete();
+        this.isSelectable = requireNonNull(isSelectable);
 
         this.startTime = startTime;
         this.endTime = endTime;
@@ -163,6 +166,8 @@ public class SceneElement {
     private boolean isResourceComplete() {
         return resourceLocation.endsWith(".obj");
     }
+
+    public boolean isSelectable() { return this.isSelectable; }
 
     /**
      * Builds the scene element mesh view for the specified time

@@ -48,8 +48,10 @@ public class SceneElementsList {
     private static final String MCS_CONNECTOR_STR = "MCS CONNECTOR";
     private static final String MCS_PROCESS_STR = "MCS PROCESS";
     private static final String TRACT_STR = "TRACT";
+    private static final String YES = "Y";
+    private static final String NO = "N";
 
-    private static final int NUM_OF_CSV_FIELDS = 9;
+    private static final int NUM_OF_CSV_FIELDS = 10;
     private static final int DESCRIPTION_INDEX = 0;
     private static final int TYPE_INDEX = 1;
     private static final int CELLS_INDEX = 2;
@@ -58,7 +60,8 @@ public class SceneElementsList {
     private static final int RESOURCE_LOCATION_INDEX = 5;
     private static final int START_TIME_INDEX = 6;
     private static final int END_TIME_INDEX = 7;
-    private static final int COMMENTS_INDEX = 8;
+    private static final int SELECTABLE_INDEX = 8;
+    private static final int COMMENTS_INDEX = 9;
 
     private final List<SceneElement> elementsList;
     private final TreeItem<StructureTreeNode> root;
@@ -191,6 +194,15 @@ public class SceneElementsList {
                             endTime = effectiveEndTime < endTime ? effectiveEndTime : endTime;
                         }
 
+                        String sel = tokens[SELECTABLE_INDEX];
+                        boolean selectable = true;
+                        // figure out if selectable
+                        if (sel.equalsIgnoreCase(YES)) {
+                            selectable = true;
+                        } else if (sel.equalsIgnoreCase(NO)) {
+                            selectable = false;
+                        }
+
                         final SceneElement element = new SceneElement(
                                 name,
                                 set,
@@ -200,7 +212,8 @@ public class SceneElementsList {
                                 resourceLocation,
                                 startTime,
                                 endTime,
-                                tokens[COMMENTS_INDEX]);
+                                tokens[COMMENTS_INDEX],
+                                selectable);
                         addSceneElement(element);
                         if (!element.getAllCells().isEmpty()) {
                             nameCellsMap.put(element.getSceneName().toLowerCase(), element.getAllCells());

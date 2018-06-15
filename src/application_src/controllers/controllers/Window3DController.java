@@ -223,6 +223,7 @@ public class Window3DController {
     private final Comparator<Shape3D> opacityComparator;
     // opacity value for "other" cells (with no rule attached)
     private final DoubleProperty othersOpacityProperty;
+    private final double nonSelectableOpacity = 0.25;
     private final List<String> otherCells;
     private final Vector<JavaPicture> javaPictures;
     private final SearchLayer searchLayer;
@@ -1052,8 +1053,15 @@ public class Window3DController {
             for (int i = 0; i < currentSceneElementMeshes.size(); i++) {
                 curr = currentSceneElementMeshes.get(i);
                 if (curr.equals(node)) {
-                    found = true;
                     clickedSceneElement = currentSceneElements.get(i);
+                    if (!clickedSceneElement.isSelectable()) {
+                        selectedIndex.set(-1);
+                        selectedNameProperty.set("");
+                        return;
+                    }
+
+                    found = true;
+
                     String name = normalizeName(clickedSceneElement.getSceneName());
                     selectedNameProperty.set(name);
 
@@ -1933,6 +1941,10 @@ public class Window3DController {
                 for (Rule rule : rulesList) {
                     if (rule.appliesToCellNucleus(cellName)) {
                         colors.add(web(rule.getColor().toString()));
+                        // check if opacity of rule is below cutoff, then it's not selectable
+                        if (rule.getColor().getOpacity() <= getSelectabilityVisibilityCutoff()) {
+                            sphere.setDisable(true);
+                        }
                     }
                 }
                 material = colorHash.getMaterial(colors);
@@ -2027,18 +2039,28 @@ public class Window3DController {
                         for (Rule rule : rulesList) {
                             if (rule.appliesToStructureWithSceneName(sceneElement.getSceneName())) {
                                 colors.add(rule.getColor());
+                                if (rule.getColor().getOpacity() <= getSelectabilityVisibilityCutoff()) {
+                                    meshView.setDisable(true);
+                                }
                             }
                         }
                     } else {
                         for (Rule rule : rulesList) {
                             if (rule.appliesToStructureWithSceneName(sceneElement.getSceneName())) {
                                 colors.add(rule.getColor());
+
+                                if (rule.getColor().getOpacity() <= getSelectabilityVisibilityCutoff()) {
+                                    meshView.setDisable(true);
+                                }
                             } else {
-                                colors.addAll(structureCells
-                                        .stream()
-                                        .filter(rule::appliesToCellBody)
-                                        .map(name -> rule.getColor())
-                                        .collect(toList()));
+                                for (int g = 0; g < structureCells.size(); g++) {
+                                    if (rule.appliesToCellBody(structureCells.get(g))) {
+                                        colors.add(rule.getColor());
+                                        if (rule.getColor().getOpacity() <= getSelectabilityVisibilityCutoff()) {
+                                            meshView.setDisable(true);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -2064,8 +2086,7 @@ public class Window3DController {
                     }
                 }
 
-                // add mouse event handlers to mesh
-                if (!meshView.isDisable()) {
+                if (sceneElement.isSelectable() && !meshView.isDisable()) {
                     final String sceneName = sceneElement.getSceneName();
                     meshView.setOnMouseEntered(event -> {
                         spritesPane.setCursor(HAND);
@@ -2080,8 +2101,9 @@ public class Window3DController {
                         // make label disappear
                         removeTransientLabel();
                     });
+                } else {
+                    meshView.setDisable(true);
                 }
-
                 entities.add(meshView);
             }
         }
