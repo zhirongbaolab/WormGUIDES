@@ -324,7 +324,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private int endTime;
     private int movieTimeOffset;
     private boolean defaultEmbryoFlag;
-    private Service<Void> searchResultsUpdateService;
     private ContextMenuController contextMenuController;
     private ColorHash colorHash;
     private SubScene subscene;
@@ -788,7 +787,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 colorHash,
                 contextMenuStage,
                 contextMenuController,
-                searchResultsUpdateService,
                 searchResultsList);
 
         timeProperty.addListener((observable, oldValue, newValue) -> {
@@ -1018,7 +1016,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 colorPicker,
                 addSearchBtn);
         searchResultsListView.setItems(searchResultsList);
-        searchResultsUpdateService = searchLayer.getResultsUpdateService();
     }
 
     private void initDisplayLayer() {

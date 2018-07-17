@@ -112,7 +112,6 @@ public class CElegansSearch implements OrganismSearch {
                 }
 
                 // add the substring to the results list
-                System.out.println(substr);
                 results.add(substr);
             }
         }
@@ -139,7 +138,14 @@ public class CElegansSearch implements OrganismSearch {
             results.addAll(addAllDescendants(searchString));
         }
 
-        // add the search string itself if it's not already there
+        // add the search string itself if it's a special case
+        String[] spCases = SulstonLineage.getSpecialCasesAsStringArray();
+        for (String s : spCases) {
+            if (s.toLowerCase().equals(searchString.toLowerCase())) {
+                results.add(s);
+            }
+        }
+
         if (!results.contains(searchString)) {
             results.add(searchString);
         }
@@ -195,7 +201,6 @@ public class CElegansSearch implements OrganismSearch {
         // add all ancestors of this item
         while (ancestorTreeItem.getParent() != null) {
             ancestorTreeItem = ancestorTreeItem.getParent();
-            System.out.println(ancestorTreeItem.getValue());
             specialCaseAncestors.add(ancestorTreeItem.getValue());
         }
 
@@ -837,9 +842,14 @@ public class CElegansSearch implements OrganismSearch {
                 results.remove(i);
                 continue;
             }
-            if (results.get(i).length() <= 1) {
-                results.remove(i);
-                continue;
+
+            // get rid of single letter results
+            if (!results.get(i).toLowerCase().startsWith("e") &&
+                    !results.get(i).toLowerCase().startsWith("c") &&
+                    !results.get(i).toLowerCase().startsWith("d") &&
+                    results.get(i).length() == 1) {
+                    results.remove(i);
+                    continue;
             }
 
             // formatting
@@ -854,9 +864,14 @@ public class CElegansSearch implements OrganismSearch {
                     results.get(i).toLowerCase().startsWith("z") ||
                     results.get(i).toLowerCase().startsWith("c") ||
                     results.get(i).toLowerCase().startsWith("d")) {
-                String formattedStr = results.get(i);
-                formattedStr = formattedStr.substring(0, 1).toUpperCase() + formattedStr.substring(1);
-                results.set(i, formattedStr);
+                // only update if this isn't the special case itself
+                if (results.get(i).length() > 1) {
+                    String formattedStr = results.get(i);
+                    formattedStr = formattedStr.substring(0, 1).toUpperCase() + formattedStr.substring(1);
+                    results.set(i, formattedStr);
+                } else if (results.get(i).length() == 1) {
+                    results.set(i, results.get(i).toUpperCase());
+                }
             }
 
             if (results.get(i).toLowerCase().startsWith("e")) {
@@ -864,13 +879,15 @@ public class CElegansSearch implements OrganismSearch {
                 if (results.get(i).toLowerCase().equals("ems")) {
                     results.set(i, results.get(i).toUpperCase());
                 } else {
-                    String formattedStr = results.get(i);
-                    formattedStr = formattedStr.substring(0, 1).toUpperCase() + formattedStr.substring(1);
-                    results.set(i, formattedStr);
+                    if (results.get(i).length() > 1) {
+                        String formattedStr = results.get(i);
+                        formattedStr = formattedStr.substring(0, 1).toUpperCase() + formattedStr.substring(1);
+                        results.set(i, formattedStr);
+                    } else if (results.get(i).equals("e")) {
+                        results.set(i, "E");
+                    }
                 }
             }
-
-
         }
 
         hs = new HashSet<>();

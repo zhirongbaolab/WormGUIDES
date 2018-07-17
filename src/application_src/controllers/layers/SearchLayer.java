@@ -330,6 +330,8 @@ public class SearchLayer {
             final boolean areDescendantsFetched,
             final boolean areAncestorsFetched) {
 
+        searchResultsList.clear();
+
         if (!searchedTerm.isEmpty()) {
             searchedTerm = searchedTerm.trim();
 
@@ -390,31 +392,27 @@ public class SearchLayer {
                     break;
             }
 
-            System.out.println("C elegans search produced " + cElegansDataSearchResults.getSearchResults().size() + " results");
-            final List<String> entitiesForAnnotation = new ArrayList<>();
+            if (cElegansDataSearchResults.hasResults() || !modelDataSearchResults.isEmpty()) {
+                final List<String> entitiesForAnnotation = new ArrayList<>();
 
-            if (cElegansDataSearchResults.hasResults()) {
-                // find the correspondence between the C elegans search results
-                entitiesForAnnotation.addAll(establishCorrespondence.establishCorrespondence(cElegansDataSearchResults,
-                                                                                                isCellNucleusFetched,
-                                                                                                   isCellBodyFetched));
+                // add the c elegans search results to the list to be propagated to the results list and trigger the annotation pipeline
+                entitiesForAnnotation.addAll(cElegansDataSearchResults.getSearchResults());
+
+
+                if (!modelDataSearchResults.isEmpty()) {
+                    // this comes directly from the model and should be formatted correctly,
+                    // so there is no need to pass it through the correspondence pipeline.
+                    // Simply add it to the cellsForListView
+                    entitiesForAnnotation.addAll(modelDataSearchResults);
+                }
+
+                sort(entitiesForAnnotation);
+
+                // this appends functional names to the lineage names (unless they are gene names),
+                // and then places in the ObservableList<String> searchResultsListView -> this triggers
+                // RootLayoutController to populate the results window with them
+                appendFunctionalToLineageNames(entitiesForAnnotation);
             }
-
-            if (!modelDataSearchResults.isEmpty()) {
-                // this comes directly from the model and should be formatted correctly,
-                // so there is no need to pass it through the correspondence pipeline.
-                // Simply add it to the cellsForListView
-                entitiesForAnnotation.addAll(modelDataSearchResults);
-            }
-
-            sort(entitiesForAnnotation);
-
-            //annotationManager.updateAnnotation(entitiesForAnnotation);
-
-            // this appends functional names to the lineage names (unless they are gene names),
-            // and then places in the ObservableList<String> searchResultsListView -> this triggers
-            // RootLayoutController to populate the results window with them
-            appendFunctionalToLineageNames(entitiesForAnnotation);
         }
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -427,12 +425,21 @@ public class SearchLayer {
      */
     private void appendFunctionalToLineageNames(final List<String> list) {
         searchResultsList.clear();
+
+        // keep the formatted results in a temporary list and then add them all at once so that the
+        // trigger in Window3d controller to correspondingly annotate the model only runs once and
+        // does so with all of the results loaded
+
+        ArrayList<String> localFormattedResults = new ArrayList<>();
         for (String result : list) {
             if (getFunctionalNameByLineageName(result) != null) {
                 result += " (" + getFunctionalNameByLineageName(result) + ")";
             }
-            searchResultsList.add(result);
+            localFormattedResults.add(result);
         }
+
+        // --> this updated is trigger at updateLocalSearchResults() in Window3DController
+        searchResultsList.addAll(localFormattedResults);
     }
 
     /**

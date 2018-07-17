@@ -28,6 +28,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -407,7 +408,6 @@ public class Window3DController {
             final ColorHash colorHash,
             final Stage contextMenuStage,
             final ContextMenuController contextMenuController,
-            final Service<Void> searchResultsUpdateService,
             final ObservableList<String> searchResultsList) {
 
         this.parentStage = requireNonNull(parentStage);
@@ -743,8 +743,11 @@ public class Window3DController {
         this.contextMenuStage = requireNonNull(contextMenuStage);
         this.contextMenuController = requireNonNull(contextMenuController);
 
-        requireNonNull(searchResultsUpdateService).setOnSucceeded(event -> updateLocalSearchResults());
         this.searchResultsList = requireNonNull(searchResultsList);
+        this.searchResultsList.addListener((ListChangeListener)(c -> {
+            updateLocalSearchResults();
+        }));
+
 
         this.captureVideo = new SimpleBooleanProperty();
     }

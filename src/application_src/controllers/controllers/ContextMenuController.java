@@ -213,8 +213,6 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                             loadingService.cancel();
                             resetLoadingMenuItem();
 
-                            System.out.println("fetching cached search results with: " + cellName);
-                            System.out.println(geneSearchManager.getPreviouslyFetchedGeneResults(cellName) == null);
                             final List<String> results = geneSearchManager.getPreviouslyFetchedGeneResults(cellName).getValue();
                             if (results != null) {
                                 for (String res : results) {

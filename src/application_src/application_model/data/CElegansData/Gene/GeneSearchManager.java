@@ -91,9 +91,7 @@ public class GeneSearchManager extends Service<Void> {
                             intendedResultsType);
 
                     // save results in cache
-                    System.out.println("caching results of size:" + results.getValue().size() + " with search term: " + searchTerm);
                     geneResultsCache.put(searchTerm.toLowerCase(), results);
-                    System.out.println("returning results from gene search thread");
                 }
                 return null;
             }
