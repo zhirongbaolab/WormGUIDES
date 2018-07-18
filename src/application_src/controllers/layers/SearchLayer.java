@@ -287,15 +287,23 @@ public class SearchLayer {
 
         // listener for change in the search toggles
         searchTypeToggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            final SearchType type = (SearchType) newValue.getUserData();
+            final SearchType newType = (SearchType) newValue.getUserData();
             // disable descendant options for terminal cell searches
-            if (type == FUNCTIONAL || type == DESCRIPTION) {
+            if (newType == FUNCTIONAL || newType == DESCRIPTION) {
                 descendantCheckBox.setSelected(false);
                 descendantCheckBox.disableProperty().set(true);
                 descendantLabel.disableProperty().set(true);
             } else {
                 descendantCheckBox.disableProperty().set(false);
                 descendantLabel.disableProperty().set(false);
+            }
+
+            if (newType != CONNECTOME) {
+                // untick any/all connectome checkboxes that may have been left ticked
+                presynapticCheckBox.setSelected(false);
+                postsynapticCheckBox.setSelected(false);
+                electricalCheckBox.setSelected(false);
+                neuromuscularCheckBox.setSelected(false);
             }
 
             // re-search whatever is in the search field with this new search type

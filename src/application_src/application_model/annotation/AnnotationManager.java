@@ -1,6 +1,7 @@
 package application_src.application_model.annotation;
 
 import application_src.application_model.annotation.color.Rule;
+import application_src.application_model.data.CElegansData.PartsList.PartsList;
 import application_src.application_model.search.SearchConfiguration.SearchOption;
 import application_src.application_model.search.SearchConfiguration.SearchType;
 import javafx.beans.property.BooleanProperty;
@@ -69,7 +70,7 @@ public class AnnotationManager {
 
 
         // default search options is cell
-        if (options == null ) {
+        if (options == null) {
             options = new ArrayList<>();
         }
 
@@ -164,7 +165,15 @@ public class AnnotationManager {
      * @return the multicellular structure rule added
      */
     public Rule addStructureRuleBySceneName(final String searched, final Color color) {
-        return addColorRule(STRUCTURE_BY_SCENE_NAME, searched, color, new ArrayList<>(), new ArrayList<>());
+        List<SearchOption> options = new ArrayList<>();
+        options.add(CELL_NUCLEUS);
+        options.add(CELL_BODY);
+        List<String> searchResults = new ArrayList<>();
+        if (PartsList.isLineageName(searched)) {
+            searchResults.add(searched);
+        }
+
+        return addColorRule(STRUCTURE_BY_SCENE_NAME, searched, color, searchResults, options);
     }
 
     public Rule addStructureRuleByHeading(final String heading, final Color color, List<String> structuresToAdd) {
@@ -242,6 +251,8 @@ public class AnnotationManager {
                 if (labelBuilder.toString().isEmpty()) {
                     labelBuilder.append(searched);
                 }
+            } else if (searchType == STRUCTURE_BY_SCENE_NAME && PartsList.isLineageName(searched)){
+                labelBuilder.append("'").append(searched).append("' (").append(PartsList.getFunctionalNameByLineageName(searched)).append(") ").append(searchType.toString());
             } else {
                 labelBuilder.append("'").append(searched).append("' ").append(searchType.toString());
             }

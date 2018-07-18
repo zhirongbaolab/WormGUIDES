@@ -856,7 +856,7 @@ public class CElegansSearch implements OrganismSearch {
             if (results.get(i).toLowerCase().startsWith("ab") || results.get(i).toLowerCase().startsWith("ms")) {
                 // capitalize the first two letters
                 String formattedStr = results.get(i);
-                formattedStr = formattedStr.substring(0, 2).toUpperCase() + formattedStr.substring(2);
+                formattedStr = formattedStr.substring(0, 2).toUpperCase() + formattedStr.substring(2).toLowerCase();
                 results.set(i, formattedStr);
             }
 
@@ -867,7 +867,7 @@ public class CElegansSearch implements OrganismSearch {
                 // only update if this isn't the special case itself
                 if (results.get(i).length() > 1) {
                     String formattedStr = results.get(i);
-                    formattedStr = formattedStr.substring(0, 1).toUpperCase() + formattedStr.substring(1);
+                    formattedStr = formattedStr.substring(0, 1).toUpperCase() + formattedStr.substring(1).toLowerCase();
                     results.set(i, formattedStr);
                 } else if (results.get(i).length() == 1) {
                     results.set(i, results.get(i).toUpperCase());
@@ -881,7 +881,7 @@ public class CElegansSearch implements OrganismSearch {
                 } else {
                     if (results.get(i).length() > 1) {
                         String formattedStr = results.get(i);
-                        formattedStr = formattedStr.substring(0, 1).toUpperCase() + formattedStr.substring(1);
+                        formattedStr = formattedStr.substring(0, 1).toUpperCase() + formattedStr.substring(1).toLowerCase();
                         results.set(i, formattedStr);
                     } else if (results.get(i).equals("e")) {
                         results.set(i, "E");

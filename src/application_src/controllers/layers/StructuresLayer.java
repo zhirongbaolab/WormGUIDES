@@ -55,7 +55,7 @@ public class StructuresLayer {
     private String searchText;
 
     public StructuresLayer(
-            final StructuresSearch structuresSearch,
+            StructuresSearch structuresSearch,
             final AnnotationManager annotationManager,
             final SceneElementsList sceneElementsList,
             final StringProperty selectedEntityNameProperty,
@@ -66,7 +66,9 @@ public class StructuresLayer {
             final ColorPicker colorPicker,
             final BooleanProperty rebuildSceneFlag) {
 
+
         this.structuresSearch = structuresSearch;
+
         selectedColor = WHITE;
 
         searchStructuresResultsList = observableArrayList();

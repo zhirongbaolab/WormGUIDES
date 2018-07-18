@@ -228,7 +228,7 @@ public class StoriesLayer {
             story.setComparator(noteComparator);
         }
 
-        setActiveStory(stories.get(stories.size()-1));
+        setActiveStory(stories.get(0));
 
         // now that the active story is set, set up the timeline chart
         timelineStage.setScene(TimelineChart.buildTimeline(this));

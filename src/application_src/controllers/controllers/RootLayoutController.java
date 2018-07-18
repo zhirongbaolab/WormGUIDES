@@ -1042,19 +1042,18 @@ public class RootLayoutController extends BorderPane implements Initializable {
     }
 
     private void initStructuresLayer() {
-        structuresLayer = new StructuresLayer(
-                structuresSearch,
-                annotationManager,
-                sceneElementsList,
-                selectedEntityNameProperty,
-                structuresSearchField,
-                structuresSearchListView,
-                structuresTreeView,
-                addStructureRuleBtn,
-                structureRuleColorPicker,
-                rebuildSubsceneFlag);
         if (structuresSearch != null) {
-            structuresSearch.setStructureTreeRoot(structuresLayer.getStructuresTreeRoot());
+            structuresLayer = new StructuresLayer(
+                    structuresSearch,
+                    annotationManager,
+                    sceneElementsList,
+                    selectedEntityNameProperty,
+                    structuresSearchField,
+                    structuresSearchListView,
+                    structuresTreeView,
+                    addStructureRuleBtn,
+                    structureRuleColorPicker,
+                    rebuildSubsceneFlag);
         }
     }
 
@@ -1231,9 +1230,10 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
         neighborsSearch = new NeighborsSearch(this.lineageData);
 
+        // scene geometry
         sceneElementsList = new SceneElementsList(this.lineageData, this.defaultEmbryoFlag);
+        structuresSearch = new StructuresSearch(sceneElementsList, sceneElementsList.getTreeRoot(), annotationManager);
         initStructuresLayer();
-        structuresSearch = new StructuresSearch(sceneElementsList, structuresLayer.getStructuresTreeRoot(), annotationManager);
 
         establishCorrespondence = new EstablishCorrespondence(this.lineageData, this.structuresSearch);
 
