@@ -69,6 +69,7 @@ public class SearchLayer {
     private final AnnotationManager annotationManager;
 
     private final ObservableList<String> searchResultsList;
+    private final List<String> localUnformattedResults; // internal list of the search results that's passed to rules
 
     // gui components
     private final TextField searchTextField;
@@ -90,6 +91,7 @@ public class SearchLayer {
     private final ColorPicker colorPicker;
     private final Button addRuleButton;
 
+    private BooleanProperty rebuildSubsceneFlag;
 
     public SearchLayer(
             final CElegansSearch CElegansSearchPipeline,
@@ -116,7 +118,8 @@ public class SearchLayer {
             final CheckBox ancestorCheckBox,
             final CheckBox descendantCheckBox,
             final ColorPicker colorPicker,
-            final Button addRuleButton) {
+            final Button addRuleButton,
+            final BooleanProperty rebuidSubsceneFlag) {
 
 
         //////// SEARCH PIPELINES, MODULES AND MANUALS ///////////////////
@@ -138,6 +141,7 @@ public class SearchLayer {
 
         // the internal representation of the search results that are displayed in the Find Cells tab
         this.searchResultsList = requireNonNull(searchResultsList);
+        this.localUnformattedResults = new ArrayList<>();
 
         // text field
         this.searchTextField = requireNonNull(searchTextField);
@@ -188,8 +192,6 @@ public class SearchLayer {
                         runLater(() -> performSearchAndAlertAnnotationManager(
                                 (SearchType) searchTypeToggleGroup.getSelectedToggle().getUserData(),
                                 getSearchedText(),
-                                cellNucleusCheckBox.isSelected(),
-                                cellBodyCheckBox.isSelected(),
                                 descendantCheckBox.isSelected(),
                                 ancestorCheckBox.isSelected()));
                         return null;
@@ -215,14 +217,13 @@ public class SearchLayer {
                         // call this again to get the results read into the search results list - it will pick up the cached results
                         performSearchAndAlertAnnotationManager(GENE,
                                 getSearchedText(),
-                                cellNucleusCheckBox.isSelected(),
-                                cellBodyCheckBox.isSelected(),
                                 descendantCheckBox.isSelected(),
                                 ancestorCheckBox.isSelected());
                         break;
                     case CANCELLED:
                         showLoadingService.cancel();
                         searchResultsList.clear();
+                        localUnformattedResults.clear();
                         break;
                     case FAILED:
                         break;
@@ -242,6 +243,8 @@ public class SearchLayer {
                 requireNonNull(connectomeRadioButton),
                 requireNonNull(multicellRadioButton),
                 requireNonNull(descendantLabel));
+
+        this.rebuildSubsceneFlag = rebuidSubsceneFlag;
     }
 
     /**
@@ -317,20 +320,17 @@ public class SearchLayer {
      *
      * @param searchType
      * @param searchedTerm
-     * @param isCellNucleusFetched
-     * @param isCellBodyFetched
      * @param areDescendantsFetched
      * @param areAncestorsFetched
      */
     private void performSearchAndAlertAnnotationManager(
             final SearchType searchType,
             String searchedTerm,
-            final boolean isCellNucleusFetched,
-            final boolean isCellBodyFetched,
             final boolean areDescendantsFetched,
             final boolean areAncestorsFetched) {
 
         searchResultsList.clear();
+        localUnformattedResults.clear();
 
         if (!searchedTerm.isEmpty()) {
             searchedTerm = searchedTerm.trim();
@@ -381,8 +381,8 @@ public class SearchLayer {
                                     areDescendantsFetched,
                                     presynapticCheckBox.isSelected(),
                                     postsynapticCheckBox.isSelected(),
-                                    neuromuscularCheckBox.isSelected(),
                                     electricalCheckBox.isSelected(),
+                                    neuromuscularCheckBox.isSelected(),
                                     OrganismDataType.LINEAGE));
                     break;
                 case MULTICELLULAR_STRUCTURE_CELLS: // model specific data
@@ -393,6 +393,7 @@ public class SearchLayer {
             }
 
             if (cElegansDataSearchResults.hasResults() || !modelDataSearchResults.isEmpty()) {
+                localUnformattedResults.addAll(cElegansDataSearchResults.getSearchResults());
                 final List<String> entitiesForAnnotation = new ArrayList<>();
 
                 // add the c elegans search results to the list to be propagated to the results list and trigger the annotation pipeline
@@ -403,6 +404,7 @@ public class SearchLayer {
                     // this comes directly from the model and should be formatted correctly,
                     // so there is no need to pass it through the correspondence pipeline.
                     // Simply add it to the cellsForListView
+                    localUnformattedResults.addAll(modelDataSearchResults);
                     entitiesForAnnotation.addAll(modelDataSearchResults);
                 }
 
@@ -480,14 +482,55 @@ public class SearchLayer {
                 options.add(DESCENDANT);
             }
 
-            annotationManager.addColorRule(
-                    (SearchType) searchTypeToggleGroup.getSelectedToggle().getUserData(),
-                    getSearchedText(),
-                    colorPicker.getValue(),
-                    searchResultsList,
-                    options);
 
+            SearchType searchType = (SearchType) searchTypeToggleGroup.getSelectedToggle().getUserData();
+            switch (searchType) {
+                case LINEAGE: // C Elegans data
+                    annotationManager.addColorRule(
+                            LINEAGE,
+                            getSearchedText(),
+                            colorPicker.getValue(),
+                            localUnformattedResults,
+                            options);
+                    break;
+                case FUNCTIONAL: // C Elegans data
+                    annotationManager.addColorRule(
+                            LINEAGE,
+                            getSearchedText(),
+                            colorPicker.getValue(),
+                            localUnformattedResults,
+                            options);
+                    break;
+                case DESCRIPTION: // C Elegans data
+                    annotationManager.addColorRule(
+                            LINEAGE,
+                            getSearchedText(),
+                            colorPicker.getValue(),
+                            localUnformattedResults,
+                            options);
+                    break;
+                case GENE: // C Elegans data
+                    annotationManager.addGeneColorRule(
+                            getSearchedText(),
+                            colorPicker.getValue(),
+                            localUnformattedResults,
+                            options);
+                    break;
+                case CONNECTOME: // C Elegans data
+                    final Rule rule = annotationManager.addConnectomeColorRule(
+                            CElegansSearch.checkQueryCell(getSearchedText()),
+                            colorPicker.getValue(),
+                            localUnformattedResults,
+                            presynapticCheckBox.isSelected(),
+                            postsynapticCheckBox.isSelected(),
+                            electricalCheckBox.isSelected(),
+                            neuromuscularCheckBox.isSelected(),
+                            options);
+                    break;
+            }
+            //rebuildSubsceneFlag.setValue(true);
             searchTextField.clear();
+            localUnformattedResults.clear();
         };
     }
 

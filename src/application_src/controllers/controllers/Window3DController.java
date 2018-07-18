@@ -1924,8 +1924,12 @@ public class Window3DController {
                 // if not in search (flashlight mode), consult active list of rules
                 final List<Color> colors = new ArrayList<>();
                 for (Rule rule : rulesList) {
+                    //System.out.println("checking rule: " + rule.getSearchedText());
                     if (rule.appliesToCellNucleus(cellName)) {
+                        //System.out.println("rule applies to: " + cellName);
                         colors.add(web(rule.getColor().toString()));
+                    } else {
+                        //System.out.println("rule doesn't apply to: " + cellName);
                     }
                 }
                 material = colorHash.getMaterial(colors);

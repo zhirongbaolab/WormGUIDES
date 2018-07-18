@@ -79,7 +79,7 @@ public class AnnotationManager {
 
 
 
-        final Rule rule = new Rule(
+        Rule rule = new Rule(
                 rebuildSubsceneFlag,
                 createRuleLabel(searched, searchType),
                 color,
@@ -118,7 +118,6 @@ public class AnnotationManager {
         rule.resetLabel(sb.toString());
         rulesList.add(rule);
         return rule;
-
     }
 
 
@@ -197,6 +196,7 @@ public class AnnotationManager {
         final String label = createRuleLabel(searched, GENE);
         final Rule rule = new Rule(rebuildSubsceneFlag, label, color, GENE, options);
         rule.setCells(searchResults);
+        rulesList.add(rule);
         return rule;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -298,7 +298,6 @@ public class AnnotationManager {
         return sb;
     }
     //////////////////////////////////////////////////////////////////////////////////////////////
-
     public ObservableList<Rule> getRulesList() { return this.rulesList; }
     public void clearRulesList() { this.rulesList.clear(); }
 } //end class

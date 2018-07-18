@@ -297,7 +297,7 @@ public class Rule {
      */
     public void setCells(final List<String> list) {
         if (list != null) {
-            cells = list;
+            cells.addAll(list);
             cellsSet = true;
         }
     }

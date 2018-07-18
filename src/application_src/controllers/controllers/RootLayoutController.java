@@ -783,7 +783,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 playingMovieFlag,
                 geneResultsUpdatedFlag,
                 rebuildSubsceneFlag,
-                rulesList,
+                annotationManager.getRulesList(),
                 colorHash,
                 contextMenuStage,
                 contextMenuController,
@@ -1014,7 +1014,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 ancestorCheckBox,
                 descendantCheckBox,
                 colorPicker,
-                addSearchBtn);
+                addSearchBtn,
+                rebuildSubsceneFlag);
         searchResultsListView.setItems(searchResultsList);
     }
 

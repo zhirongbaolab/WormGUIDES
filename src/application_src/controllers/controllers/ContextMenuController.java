@@ -460,7 +460,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             }
 
             // colors all connections
-            final MenuItem all = new MenuItem("Color All");
+            final MenuItem all = new MenuItem("Color All Connections");
             wiredToMenu.getItems().add(all);
             all.setOnAction(event -> {
                 ArrayList<String> allResults = new ArrayList<>();
@@ -507,7 +507,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
                 // add all of the results to the dropdown menu for reference, but they're not clickable
                 for (String preSynRes : results.get(PRE_SYN_INDEX)) {
                     MenuItem item = new MenuItem(preSynRes);
-                    item.setDisable(false);
+                    item.setDisable(true);
                     preSyn.getItems().add(item);
                 }
             } else {
@@ -535,7 +535,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
 
                 for (String postSynRes : results.get(POST_SYN_INDEX)) {
                     MenuItem item = new MenuItem(postSynRes);
-                    item.setDisable(false);
+                    item.setDisable(true);
                     postSyn.getItems().add(item);
                 }
             } else {
@@ -563,7 +563,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
 
                 for (String elecRes : results.get(ELECTR_INDEX)) {
                     MenuItem item = new MenuItem(elecRes);
-                    item.setDisable(false);
+                    item.setDisable(true);
                     electr.getItems().add(item);
                 }
             } else {
@@ -591,7 +591,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
 
                 for (String neuroRes : results.get(NEURO_INDEX)) {
                     MenuItem item = new MenuItem(neuroRes);
-                    item.setDisable(false);
+                    item.setDisable(true);
                     neuro.getItems().add(item);
                 }
             } else {
@@ -666,7 +666,6 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             expressesMenu.getItems().addAll(expressesTitle);
             expressesMenu.show(expresses, Side.RIGHT, 0, 0);
 
-            System.out.println("setting search term: " + cellName);
             geneSearchManager.setSearchTerm(cellName);
             geneSearchManager.setSearchOptions(false, false, false, true, OrganismDataType.GENE);
             geneSearchManager.reset();
