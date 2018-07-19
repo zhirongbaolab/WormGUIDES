@@ -1,6 +1,5 @@
 package application_src.views.popups;
 
-import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,10 +18,10 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
-import application_src.application_model.stories.Note;
-import application_src.application_model.stories.Story;
+import application_src.application_model.annotation.stories.Note;
+import application_src.application_model.annotation.stories.Story;
 import application_src.controllers.layers.StoriesLayer;
-import application_src.application_model.ProductionInfo;
+import application_src.application_model.resources.ProductionInfo;
 import application_src.MainApp;
 
 

@@ -19,14 +19,14 @@ import java.util.StringTokenizer;
 
 import javafx.scene.control.TreeItem;
 
-import application_src.application_model.logic.lineage.LineageData;
+import application_src.application_model.data.LineageData;
 import application_src.MainApp;
 
 import static java.lang.Integer.MIN_VALUE;
 import static java.lang.Integer.parseInt;
 import static java.util.Collections.sort;
 
-import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNameByLineageName;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
 import static application_src.application_model.loaders.GeometryLoader.getEffectiveStartTime;
 
 import static application_src.application_model.threeD.subscenegeometry.SceneElementType.SINGLE_CELL;

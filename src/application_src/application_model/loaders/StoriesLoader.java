@@ -14,8 +14,8 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
-import application_src.application_model.stories.Note;
-import application_src.application_model.stories.Story;
+import application_src.application_model.annotation.stories.Note;
+import application_src.application_model.annotation.stories.Story;
 import javafx.collections.ObservableList;
 
 import static java.lang.Double.parseDouble;

@@ -21,8 +21,8 @@ import static javafx.scene.layout.HBox.setHgrow;
 import static javafx.scene.layout.Priority.ALWAYS;
 import static javafx.scene.text.TextAlignment.CENTER;
 
-import static application_src.application_model.logic.AppFont.getBoldFont;
-import static application_src.application_model.logic.AppFont.getFont;
+import static application_src.application_model.resources.utilities.AppFont.getBoldFont;
+import static application_src.application_model.resources.utilities.AppFont.getFont;
 
 /**
  * This class is a popup dialog that contains some prompt text and two buttons, yes and no. The Strings for these

@@ -15,7 +15,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
-import application_src.application_model.stories.Note;
+import application_src.application_model.annotation.stories.Note;
 
 import static java.util.Objects.requireNonNull;
 
@@ -31,8 +31,8 @@ import static javafx.scene.text.FontSmoothingType.LCD;
 import static application_src.controllers.layers.StoriesLayer.colorTexts;
 import static application_src.application_model.loaders.IconImageLoader.getEyeIcon;
 import static application_src.application_model.loaders.IconImageLoader.getEyeInvertIcon;
-import static application_src.application_model.logic.AppFont.getBolderFont;
-import static application_src.application_model.logic.AppFont.getFont;
+import static application_src.application_model.resources.utilities.AppFont.getBolderFont;
+import static application_src.application_model.resources.utilities.AppFont.getFont;
 import static application_src.views.graphical_representations.RuleGraphic.UI_SIDE_LENGTH;
 
 /**

@@ -15,7 +15,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-import application_src.application_model.logic.color_rule.Rule;
+import application_src.application_model.annotation.color.Rule;
 
 import static java.util.Objects.requireNonNull;
 
@@ -30,7 +30,7 @@ import static application_src.application_model.loaders.IconImageLoader.getClose
 import static application_src.application_model.loaders.IconImageLoader.getEditIcon;
 import static application_src.application_model.loaders.IconImageLoader.getEyeIcon;
 import static application_src.application_model.loaders.IconImageLoader.getEyeInvertIcon;
-import static application_src.application_model.logic.AppFont.getFont;
+import static application_src.application_model.resources.utilities.AppFont.getFont;
 
 /**
  * Graphical representation of a rule (used to display a rule in a list view)

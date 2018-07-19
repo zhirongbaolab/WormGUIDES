@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import application_src.application_model.annotation.AnnotationManager;
+import application_src.application_model.search.SearchConfiguration.SearchOption;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.binding.DoubleBinding;
@@ -53,11 +55,11 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import application_src.application_model.logic.lineage.LineageData;
+import application_src.application_model.data.LineageData;
 import application_src.controllers.controllers.ContextMenuController;
 import application_src.controllers.layers.SearchLayer;
-import application_src.application_model.logic.color_rule.Rule;
-import application_src.application_model.logic.ColorHash;
+import application_src.application_model.annotation.color.Rule;
+import application_src.application_model.annotation.color.ColorHash;
 
 import static java.lang.Math.max;
 import static java.lang.Math.round;
@@ -71,6 +73,7 @@ import static javafx.scene.Cursor.HAND;
 import static javafx.scene.control.ContentDisplay.GRAPHIC_ONLY;
 import static javafx.scene.control.Tooltip.install;
 import static javafx.scene.input.KeyCode.F5;
+import static javafx.scene.input.KeyCode.P;
 import static javafx.scene.input.KeyEvent.KEY_PRESSED;
 import static javafx.scene.input.MouseButton.PRIMARY;
 import static javafx.scene.input.MouseButton.SECONDARY;
@@ -81,12 +84,12 @@ import static javafx.scene.text.Font.font;
 import static javafx.scene.text.FontWeight.SEMI_BOLD;
 
 import static javax.imageio.ImageIO.write;
-import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.logic.search.SearchType.LINEAGE;
-import static application_src.application_model.logic.search.SearchType.NEIGHBOR;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
+import static application_src.application_model.search.SearchConfiguration.SearchType.LINEAGE;
+import static application_src.application_model.search.SearchConfiguration.SearchType.NEIGHBOR;
 import static application_src.application_model.loaders.IconImageLoader.getMinusIcon;
 import static application_src.application_model.loaders.IconImageLoader.getPlusIcon;
-import static application_src.application_model.logic.color_rule.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
 
 public class SulstonTreePane extends ScrollPane {
     //TODO decouple rendering as separate class from WG app specific interaction -as
@@ -137,6 +140,7 @@ public class SulstonTreePane extends ScrollPane {
     private int iYmin = 19;
 
     private boolean defaultEmbryoFlag;
+    private AnnotationManager annotationManager;
 
     public SulstonTreePane(
             final Stage ownStage,
@@ -144,14 +148,14 @@ public class SulstonTreePane extends ScrollPane {
             final LineageData lineageData,
             final int movieTimeOffset,
             final TreeItem<String> lineageTreeRoot,
-            final ObservableList<Rule> rules,
             final ColorHash colorHash,
             final IntegerProperty timeProperty,
             final Stage contextMenuStage,
             final ContextMenuController contextMenuController,
             final StringProperty selectedNameLabeledProperty,
             final BooleanProperty rebuildSubsceneFlag,
-            final boolean defaultEmbryoFlag) {
+            final boolean defaultEmbryoFlag,
+            final AnnotationManager annotationManager) {
 
         super();
 
@@ -166,6 +170,7 @@ public class SulstonTreePane extends ScrollPane {
                 // right click
                 if (event.getButton() == SECONDARY
                         || (event.getButton() == PRIMARY && (event.isControlDown() || event.isMetaDown()))) {
+                    resetSelectedNameLabeled(sourceName);
                     showContextMenu(sourceName, event.getScreenX(), event.getScreenY());
                 }
                 // left click
@@ -197,6 +202,8 @@ public class SulstonTreePane extends ScrollPane {
         this.timeProperty = requireNonNull(timeProperty);
         this.timeProperty.addListener((observable, oldValue, newValue) -> repositionTimeLine());
 
+        this.annotationManager = annotationManager;
+
         setUpDefaultView();
 
         this.colorHash = requireNonNull(colorHash);
@@ -204,12 +211,10 @@ public class SulstonTreePane extends ScrollPane {
 
         this.rebuildSubsceneFlag = requireNonNull(rebuildSubsceneFlag);
         this.rebuildSubsceneFlag.addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                updateColoring();
-            }
+            updateColoring();
         });
 
-        this.rules = requireNonNull(rules);
+        this.rules = requireNonNull(annotationManager.getRulesList());
         this.rules.addListener((ListChangeListener<Rule>) listener -> rebuildSubsceneFlag.set(true));
 
         this.nameXUseMap = new HashMap<>();
@@ -313,7 +318,7 @@ public class SulstonTreePane extends ScrollPane {
 
     /**
      * Adds the tree drawing as well as timeline marks to the tree window. This is called after the scene for this
-     * tree pane is set by the {@link wormguides.controllers.RootLayoutController}.
+     * tree pane is set by the {RootLayoutController}.
      */
     public void addDrawing() {
         addLines(lineageTreeRoot, mainPane);
@@ -339,7 +344,7 @@ public class SulstonTreePane extends ScrollPane {
     }
 
     /**
-     * Called by {@link wormguides.controllers.RootLayoutController} to resizes this scrollpane and
+     * Called by {RootLayoutController} to resizes this scrollpane and
      * canvas to fit the window. Gets rid of extraneous space outside of the
      * tree.
      */
@@ -422,18 +427,27 @@ public class SulstonTreePane extends ScrollPane {
             }
 
             contextMenuController.setColorButtonListener(event -> {
-                final Rule rule = searchLayer.addColorRule(
+                List<SearchOption> options = new ArrayList<>();
+                options.add(CELL_NUCLEUS);
+                final Rule rule = annotationManager.addColorRule(
                         LINEAGE,
                         name,
                         WHITE,
-                        CELL_NUCLEUS);
+                        new ArrayList<>(),
+                        options);
                 rule.showEditStage(ownStage);
                 contextMenuStage.hide();
             });
 
             contextMenuController.setColorNeighborsButtonListener(event -> {
                 // call distance SearchLayer method
-                final Rule rule = searchLayer.addColorRule(NEIGHBOR, name, WHITE, CELL_NUCLEUS);
+                List<SearchOption> options = new ArrayList<>();
+                options.add(CELL_NUCLEUS);
+                final Rule rule = annotationManager.addColorRule(NEIGHBOR,
+                        name,
+                        WHITE,
+                        new ArrayList<>(),
+                        options);
                 rule.showEditStage(ownStage);
                 contextMenuStage.hide();
             });

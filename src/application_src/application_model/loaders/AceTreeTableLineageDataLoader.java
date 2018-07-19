@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import application_src.application_model.logic.lineage.LineageData;
+import application_src.application_model.data.LineageData;
 import application_src.MainApp;
-import application_src.application_model.ProductionInfo;
-import application_src.application_model.logic.lineage.TableLineageData;
+import application_src.application_model.resources.ProductionInfo;
+import application_src.application_model.data.TableLineageData;
 
 import static java.lang.Double.parseDouble;
 import static java.lang.Integer.parseInt;

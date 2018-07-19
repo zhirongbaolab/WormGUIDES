@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import application_src.application_model.annotation.stories.Note;
 import javafx.scene.shape.MeshView;
 
 import static java.util.Objects.requireNonNull;
@@ -16,7 +17,7 @@ import static application_src.application_model.loaders.GeometryLoader.loadOBJ;
 
 /**
  * A structure in the scene, whether it is uni or multicellular. This can also be an entity with a mesh rendering (that
- * contains no cells) attached to a {@link application_src.application_model.stories.Note}.
+ * contains no cells) attached to a {@link Note}.
  */
 public class SceneElement {
 
