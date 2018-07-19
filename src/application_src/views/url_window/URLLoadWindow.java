@@ -24,7 +24,7 @@ import javafx.scene.layout.VBox;
 
 import application_src.application_model.loaders.IconImageLoader;
 
-import static application_src.application_model.logic.AppFont.getFont;
+import static application_src.application_model.resources.utilities.AppFont.getFont;
 
 public class URLLoadWindow extends AnchorPane {
 

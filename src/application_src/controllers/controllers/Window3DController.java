@@ -28,6 +28,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -73,26 +74,27 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
-import application_src.application_model.logic.lineage.LineageData;
-import application_src.application_model.internal_data.connectome.Connectome;
+import application_src.application_model.data.LineageData;
+import application_src.application_model.data.CElegansData.Connectome.Connectome;
 import application_src.controllers.layers.SearchLayer;
 import application_src.controllers.layers.StoriesLayer;
 import application_src.application_model.threeD.camerageometry.Xform;
-import application_src.application_model.logic.cell_case.CasesLists;
-import application_src.application_model.logic.color_rule.Rule;
+import application_src.application_model.cell_case_logic.CasesLists;
+import application_src.application_model.annotation.color.Rule;
 import application_src.application_model.threeD.subscenegeometry.SceneElement;
 import application_src.application_model.threeD.subscenegeometry.SceneElementMeshView;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
 import application_src.application_model.threeD.subscenegeometry.StructureTreeNode;
-import application_src.application_model.ProductionInfo;
-import application_src.application_model.stories.Note;
-import application_src.application_model.stories.Note.Display;
-import application_src.application_model.logic.ColorComparator;
-import application_src.application_model.logic.ColorHash;
+import application_src.application_model.resources.ProductionInfo;
+import application_src.application_model.annotation.stories.Note;
+import application_src.application_model.annotation.stories.Note.Display;
+import application_src.application_model.annotation.color.ColorComparator;
+import application_src.application_model.annotation.color.ColorHash;
 import application_src.application_model.threeD.subscenesaving.JavaPicture;
 import application_src.application_model.threeD.subscenesaving.JpegImagesToMovie;
-import application_src.views.popups.TimelineChart;
 
+import static application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.ModelSpecificSearchUtil.getFirstOccurenceOf;
+import static application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.ModelSpecificSearchUtil.getLastOccurenceOf;
 import static java.lang.Math.pow;
 import static java.lang.Math.round;
 import static java.lang.Math.sqrt;
@@ -128,23 +130,21 @@ import static javafx.scene.transform.Rotate.Z_AXIS;
 
 import static com.sun.javafx.scene.CameraHelper.project;
 import static javax.imageio.ImageIO.write;
-import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.logic.search.SearchType.LINEAGE;
-import static application_src.application_model.logic.search.SearchType.NEIGHBOR;
-import static application_src.application_model.logic.search.SearchUtil.getFirstOccurenceOf;
-import static application_src.application_model.logic.search.SearchUtil.getLastOccurenceOf;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
+import static application_src.application_model.search.SearchConfiguration.SearchType.LINEAGE;
+import static application_src.application_model.search.SearchConfiguration.SearchType.NEIGHBOR;
 import static application_src.application_model.loaders.NoteImageLoader.createImageView;
-import static application_src.application_model.logic.color_rule.SearchOption.CELL_BODY;
-import static application_src.application_model.logic.color_rule.SearchOption.CELL_NUCLEUS;
-import static application_src.application_model.stories.Note.Display.CALLOUT_LOWER_LEFT;
-import static application_src.application_model.stories.Note.Display.CALLOUT_LOWER_RIGHT;
-import static application_src.application_model.stories.Note.Display.CALLOUT_UPPER_LEFT;
-import static application_src.application_model.stories.Note.Display.CALLOUT_UPPER_RIGHT;
-import static application_src.application_model.stories.Note.Display.OVERLAY;
-import static application_src.application_model.stories.Note.Display.SPRITE;
-import static application_src.application_model.logic.AppFont.getBillboardFont;
-import static application_src.application_model.logic.AppFont.getOrientationIndicatorFont;
-import static application_src.application_model.logic.AppFont.getSpriteAndOverlayFont;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.annotation.stories.Note.Display.CALLOUT_LOWER_LEFT;
+import static application_src.application_model.annotation.stories.Note.Display.CALLOUT_LOWER_RIGHT;
+import static application_src.application_model.annotation.stories.Note.Display.CALLOUT_UPPER_LEFT;
+import static application_src.application_model.annotation.stories.Note.Display.CALLOUT_UPPER_RIGHT;
+import static application_src.application_model.annotation.stories.Note.Display.OVERLAY;
+import static application_src.application_model.annotation.stories.Note.Display.SPRITE;
+import static application_src.application_model.resources.utilities.AppFont.getBillboardFont;
+import static application_src.application_model.resources.utilities.AppFont.getOrientationIndicatorFont;
+import static application_src.application_model.resources.utilities.AppFont.getSpriteAndOverlayFont;
 import static application_src.application_model.threeD.subsceneparameters.Parameters.getBillboardScale;
 import static application_src.application_model.threeD.subsceneparameters.Parameters.getCameraFarClip;
 import static application_src.application_model.threeD.subsceneparameters.Parameters.getCameraInitialDistance;
@@ -184,10 +184,6 @@ import static application_src.application_model.threeD.subsceneparameters.Parame
  * particular entity, then queries the {@link ColorHash} for the {@link Material} to use for the entity.
  */
 public class Window3DController {
-
-    private static final double CANNONICAL_ORIENTATION_X = 145.0;
-    private static final double CANNONICAL_ORIENTATION_Y = -166.0;
-    private static final double CANNONICAL_ORIENTATION_Z = 24.0;
     private static final String CS = ", ";
     private static final String ACTIVE_LABEL_COLOR_HEX = "#ffff66",
             SPRITE_COLOR_HEX = "#ffffff",
@@ -255,7 +251,6 @@ public class Window3DController {
     private final StringProperty selectedNameLabeledProperty;
     private final Stage contextMenuStage;
     private final ContextMenuController contextMenuController;
-    private final CasesLists casesLists;
     private final BooleanProperty cellClickedProperty;
     private final ObservableList<String> searchResultsList;
     private final ObservableList<Rule> rulesList;
@@ -291,7 +286,6 @@ public class Window3DController {
     // orientation indicator
     private Cylinder orientationIndicator;
     private final ProductionInfo productionInfo;
-    private final Connectome connectome;
     private final BooleanProperty bringUpInfoFlag;
     private final SubsceneSizeListener subsceneSizeListener;
 
@@ -369,9 +363,7 @@ public class Window3DController {
             final SubScene subscene,
             final AnchorPane parentPane,
             final LineageData lineageData,
-            final CasesLists casesLists,
             final ProductionInfo productionInfo,
-            final Connectome connectome,
             final SceneElementsList sceneElementsList,
             final TreeItem<StructureTreeNode> structureTreeRoot,
             final StoriesLayer storiesLayer,
@@ -395,7 +387,7 @@ public class Window3DController {
             final CheckBox uniformSizeCheckBox,
             final CheckBox cellNucleusCheckBox,
             final CheckBox cellBodyCheckBox,
-            final RadioButton multiRadioBtn,
+            //final RadioButton multiRadioBtn,
             final int startTime,
             final int endTime,
             final IntegerProperty timeProperty,
@@ -417,7 +409,6 @@ public class Window3DController {
             final ColorHash colorHash,
             final Stage contextMenuStage,
             final ContextMenuController contextMenuController,
-            final Service<Void> searchResultsUpdateService,
             final ObservableList<String> searchResultsList) {
 
         this.parentStage = requireNonNull(parentStage);
@@ -432,7 +423,6 @@ public class Window3DController {
         this.rootEntitiesGroup = requireNonNull(rootEntitiesGroup);
         this.lineageData = lineageData;
         this.productionInfo = requireNonNull(productionInfo);
-        this.connectome = requireNonNull(connectome);
         this.sceneElementsList = requireNonNull(sceneElementsList);
         this.storiesLayer = requireNonNull(storiesLayer);
         this.searchLayer = requireNonNull(searchLayer);
@@ -655,8 +645,6 @@ public class Window3DController {
 
         setNotesPane(parentPane);
 
-        this.casesLists = requireNonNull(casesLists);
-
         movieFiles = new Vector<>();
         javaPictures = new Vector<>();
         count = -1;
@@ -751,13 +739,16 @@ public class Window3DController {
         requireNonNull(clearAllLabelsButton).setOnAction(getClearAllLabelsButtonListener());
         requireNonNull(cellNucleusCheckBox).selectedProperty().addListener(getCellNucleusTickListener());
         requireNonNull(cellBodyCheckBox).selectedProperty().addListener(getCellBodyTickListener());
-        requireNonNull(multiRadioBtn).selectedProperty().addListener(getMulticellModeListener());
+        //requireNonNull(multiRadioBtn).selectedProperty().addListener(getMulticellModeListener());
 
         this.contextMenuStage = requireNonNull(contextMenuStage);
         this.contextMenuController = requireNonNull(contextMenuController);
 
-        requireNonNull(searchResultsUpdateService).setOnSucceeded(event -> updateLocalSearchResults());
         this.searchResultsList = requireNonNull(searchResultsList);
+        this.searchResultsList.addListener((ListChangeListener)(c -> {
+            updateLocalSearchResults();
+        }));
+
 
         this.captureVideo = new SimpleBooleanProperty();
     }
@@ -1204,6 +1195,7 @@ public class Window3DController {
             contextMenuController.disableWiredToFunction(isMulticellularStructureOrTract);
             contextMenuController.disableGeneExpressionFunction(isMulticellularStructureOrTract);
             contextMenuController.disableColorNeighborsFunction(isMulticellularStructureOrTract);
+            contextMenuController.setIsStructure(true);
         }
 
         if (hasFunctionalName) {
@@ -1211,29 +1203,6 @@ public class Window3DController {
         } else {
             contextMenuController.disableWiredToFunction(true);
         }
-
-        contextMenuController.setColorButtonListener(event -> {
-            contextMenuStage.hide();
-            if (isStructure) {
-                if (hasFunctionalName) {
-                    searchLayer.addStructureRuleBySceneName(getFunctionalNameByLineageName(name), WHITE)
-                            .showEditStage(parentStage);
-                } else {
-                    searchLayer.addStructureRuleBySceneName(name, WHITE)
-                            .showEditStage(parentStage);
-                }
-            } else {
-                searchLayer.addColorRule(LINEAGE, name, WHITE, CELL_NUCLEUS, CELL_BODY)
-                        .showEditStage(parentStage);
-            }
-        });
-
-        contextMenuController.setColorNeighborsButtonListener(event -> {
-            contextMenuStage.hide();
-            // color neighboring cell bodies, multicellular structures, as well as nuclei
-            searchLayer.addColorRule(NEIGHBOR, name, WHITE, CELL_NUCLEUS, CELL_BODY)
-                    .showEditStage(parentStage);
-        });
 
         contextMenuStage.setX(sceneX);
         contextMenuStage.setY(sceneY);
@@ -1804,6 +1773,7 @@ public class Window3DController {
         // End search stuff
     }
 
+    // TODO -> this should tap the annotation manager which has just been populated with these results
     private void updateLocalSearchResults() {
         if (searchResultsList == null) {
             return;
@@ -1939,7 +1909,9 @@ public class Window3DController {
                 // if not in search (flashlight mode), consult active list of rules
                 final List<Color> colors = new ArrayList<>();
                 for (Rule rule : rulesList) {
+                    //System.out.println("checking rule: " + rule.getSearchedText());
                     if (rule.appliesToCellNucleus(cellName)) {
+                        //System.out.println("rule applies to: " + cellName);
                         colors.add(web(rule.getColor().toString()));
                         // check if opacity of rule is below cutoff, then it's not selectable
                         if (rule.getColor().getOpacity() <= getSelectabilityVisibilityCutoff()) {

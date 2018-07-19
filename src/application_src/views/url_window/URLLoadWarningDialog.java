@@ -16,7 +16,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import application_src.application_model.logic.AppFont;
+import application_src.application_model.resources.utilities.AppFont;
 
 public class URLLoadWarningDialog extends Dialog<ButtonType> {
 

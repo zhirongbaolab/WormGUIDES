@@ -11,6 +11,10 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import application_src.application_model.annotation.AnnotationManager;
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.NeighborsSearch;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -31,18 +35,16 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-import application_src.application_model.logic.lineage.LineageData;
+import application_src.application_model.data.LineageData;
 import application_src.MainApp;
 import application_src.controllers.controllers.StoryEditorController;
-import application_src.application_model.logic.color_rule.Rule;
+import application_src.application_model.annotation.color.Rule;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
-import application_src.application_model.stories.Note;
-import application_src.application_model.stories.Story;
+import application_src.application_model.annotation.stories.Note;
+import application_src.application_model.annotation.stories.Story;
 import application_src.views.graphical_representations.NoteGraphic;
 import application_src.views.graphical_representations.StoryGraphic;
 import application_src.views.popups.TimelineChart;
-
-import javax.swing.event.ChangeListener;
 
 import static java.lang.Integer.MIN_VALUE;
 import static java.util.Objects.requireNonNull;
@@ -51,11 +53,11 @@ import static javafx.collections.FXCollections.observableArrayList;
 import static javafx.geometry.Insets.EMPTY;
 
 import static application_src.application_model.loaders.StoriesLoader.loadConfigFile;
-import static application_src.application_model.stories.StoryFileUtil.loadFromCSVFile;
-import static application_src.application_model.stories.StoryFileUtil.saveToCSVFile;
-import static application_src.application_model.logic.color_url.UrlGenerator.generateInternal;
-import static application_src.application_model.logic.color_url.UrlGenerator.generateInternalWithoutViewArgs;
-import static application_src.application_model.logic.color_url.UrlParser.parseUrlRules;
+import static application_src.application_model.annotation.stories.StoryFileUtil.loadFromCSVFile;
+import static application_src.application_model.annotation.stories.StoryFileUtil.saveToCSVFile;
+import static application_src.application_model.annotation.color.URL.UrlGenerator.generateInternal;
+import static application_src.application_model.annotation.color.URL.UrlGenerator.generateInternalWithoutViewArgs;
+import static application_src.application_model.annotation.color.URL.UrlParser.parseUrlRules;
 
 /**
  * Controller of the list view in the 'Stories' tab
@@ -71,7 +73,11 @@ public class StoriesLayer {
 
     private final LineageData lineageData;
     private final SceneElementsList sceneElementsList;
-    private final SearchLayer searchLayer;
+
+    private CElegansSearch cElegansSearchPipeline;
+    private NeighborsSearch neighborsSearch;
+    private StructuresSearch structuresSearch;
+    private AnnotationManager annotationManager;
 
     private final IntegerProperty timeProperty;
     private final DoubleProperty rotateXAngleProperty;
@@ -87,7 +93,6 @@ public class StoriesLayer {
     private final StringProperty activeCellNameProperty;
     private final StringProperty activeStoryProperty;
 
-    private final ObservableList<Rule> activeRulesList;
     private final ObservableList<Story> stories;
 
     private final Button deleteStoryButton;
@@ -109,7 +114,10 @@ public class StoriesLayer {
 
     public StoriesLayer(
             final Stage parentStage,
-            final SearchLayer searchLayer,
+            final CElegansSearch cElegansSearchPipeline,
+            final NeighborsSearch neighborsSearch,
+            final StructuresSearch structuresSearch,
+            final AnnotationManager annotationManager,
             final SceneElementsList elementsList,
             final ListView<Story> storiesListView,
             final ObservableList<Rule> rulesList,
@@ -137,11 +145,14 @@ public class StoriesLayer {
             Stage timelineStage) {
 
         this.parentStage = requireNonNull(parentStage);
-        this.searchLayer = requireNonNull(searchLayer);
+
+        this.cElegansSearchPipeline = requireNonNull(cElegansSearchPipeline);
+        this.neighborsSearch = requireNonNull(neighborsSearch);
+        this.structuresSearch = requireNonNull(structuresSearch);
+        this.annotationManager = requireNonNull(annotationManager);
+
         this.lineageData = requireNonNull(lineageData);
         this.sceneElementsList = requireNonNull(elementsList);
-
-        this.activeRulesList = requireNonNull(rulesList);
 
         this.cellClickedFlag = requireNonNull(cellClickedFlag);
         this.rebuildSubsceneFlag = requireNonNull(rebuildSubsceneFlag);
@@ -313,7 +324,6 @@ public class StoriesLayer {
                 TEMPLATE_STORY_NAME,
                 TEMPLATE_STORY_DESCRIPTION,
                 ""));
-
     }
 
     /**
@@ -350,13 +360,13 @@ public class StoriesLayer {
             if (activeStory != null) {
                 if (activeNote != null && activeNote.hasColorScheme()) {
                     // if the story color scheme is not being used, save rules into the note's URL
-                    activeNote.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
+                    activeNote.setColorUrl(generateInternalWithoutViewArgs(annotationManager.getRulesList()));
                     // copy the note's rules and temporarily use the story's color scheme
                     // then put back the copied rules into the active rules list
-                    final List<Rule> rulesCopy = new ArrayList<>(activeRulesList);
-                    parseUrlRules(activeStory.getColorUrl(), activeRulesList, searchLayer);
+                    //final List<Rule> rulesCopy = new ArrayList<>(annotationManager.getRulesList());
+                    parseUrlRules(activeStory.getColorUrl(), cElegansSearchPipeline, structuresSearch, neighborsSearch, annotationManager);
                     activeStory.setColorUrl(generateInternal(
-                            activeRulesList,
+                            annotationManager.getRulesList(),
                             timeProperty.get(),
                             rotateXAngleProperty.get(),
                             rotateYAngleProperty.get(),
@@ -365,11 +375,11 @@ public class StoriesLayer {
                             translateYProperty.get(),
                             zoomProperty.get(),
                             othersOpacityProperty.get()));
-                    activeRulesList.clear();
-                    activeRulesList.addAll(rulesCopy);
+                    annotationManager.clearRulesList();
+                    //activeRulesList.addAll(rulesCopy);
                 } else {
                     activeStory.setColorUrl(generateInternal(
-                            activeRulesList,
+                            annotationManager.getRulesList(),
                             timeProperty.get(),
                             rotateXAngleProperty.get(),
                             rotateYAngleProperty.get(),
@@ -430,11 +440,11 @@ public class StoriesLayer {
         boolean wasUsingNoteUrl = activeNote != null && activeNote.hasColorScheme();
         boolean willUseNoteUrl = note != null && note.hasColorScheme();
         if (wasUsingNoteUrl) {
-            activeNote.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
+            activeNote.setColorUrl(generateInternalWithoutViewArgs(annotationManager.getRulesList()));
         } else {
             if (willUseNoteUrl) {
                 // save the scheme to the story if the old note has no color scheme and the new one does
-                activeStory.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
+                activeStory.setColorUrl(generateInternalWithoutViewArgs(annotationManager.getRulesList()));
             } else {
                 // no need to do anything if we stay in the story context
             }
@@ -453,13 +463,17 @@ public class StoriesLayer {
             if (activeNote.hasColorScheme()) {
                 parseUrlRules(
                         activeNote.getColorUrl(),
-                        activeRulesList,
-                        searchLayer);
+                        cElegansSearchPipeline,
+                        structuresSearch,
+                        neighborsSearch,
+                        annotationManager);
             } else if (wasUsingNoteUrl && !willUseNoteUrl) {
                 parseUrlRules(
                         activeStory.getColorUrl(),
-                        activeRulesList,
-                        searchLayer);
+                        cElegansSearchPipeline,
+                        structuresSearch,
+                        neighborsSearch,
+                        annotationManager);
             }
 
             final int noteStartTime = getEffectiveStartTime(activeNote);
@@ -601,20 +615,20 @@ public class StoriesLayer {
             // save the color url to the internal representation of this story, in case it has changed
             if (activeNote != null) {
                 if (activeNote.hasColorScheme()) {
-                    activeNote.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
+                    activeNote.setColorUrl(generateInternalWithoutViewArgs(annotationManager.getRulesList()));
 
                     // slight hack to get the story's rules together
                     if (activeStory.hasNotes()) {
                         setActiveNoteWithSubsceneRebuild(activeStory.getNotes().get(0));
 
                         // now the activeRulesList should be the general story colors, so save those to the active story
-                        activeStory.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
+                        activeStory.setColorUrl(generateInternalWithoutViewArgs(annotationManager.getRulesList()));
                     }
                 } else {
-                    activeStory.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
+                    activeStory.setColorUrl(generateInternalWithoutViewArgs(annotationManager.getRulesList()));
                 }
             } else {
-                activeStory.setColorUrl(generateInternalWithoutViewArgs(activeRulesList));
+                activeStory.setColorUrl(generateInternalWithoutViewArgs(annotationManager.getRulesList()));
             }
 
             activeStory.setActive(false);
@@ -637,7 +651,7 @@ public class StoriesLayer {
             // if story does not come with a url, set its url to contain the internal color rules
             if (!activeStory.hasColorScheme()) {
                 activeStory.setColorUrl(generateInternal(
-                        activeRulesList,
+                        annotationManager.getRulesList(),
                         timeProperty.get(),
                         rotateXAngleProperty.get(),
                         rotateYAngleProperty.get(),
@@ -650,8 +664,10 @@ public class StoriesLayer {
             useInternalRulesFlag.set(false);
             parseUrlRules(
                     activeStory.getColorUrl(),
-                    activeRulesList,
-                    searchLayer);
+                    cElegansSearchPipeline,
+                    structuresSearch,
+                    neighborsSearch,
+                    annotationManager);
             if (activeStory.hasNotes()) {
                 timeProperty.set(getEffectiveStartTime(activeStory.getNotes().get(0)));
             }

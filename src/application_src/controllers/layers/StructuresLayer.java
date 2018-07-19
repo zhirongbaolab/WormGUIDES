@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import application_src.application_model.annotation.AnnotationManager;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -25,8 +27,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
-import application_src.application_model.internal_data.partslist.PartsList;
-import application_src.application_model.logic.color_rule.Rule;
+import application_src.application_model.data.CElegansData.PartsList.PartsList;
+import application_src.application_model.annotation.color.Rule;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
 import application_src.application_model.threeD.subscenegeometry.StructureTreeNode;
 
@@ -37,35 +39,24 @@ import static javafx.collections.FXCollections.observableArrayList;
 import static javafx.scene.control.ContentDisplay.GRAPHIC_ONLY;
 import static javafx.scene.paint.Color.WHITE;
 
-import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.internal_data.partslist.PartsList.getLineageNamesByFunctionalName;
-import static application_src.application_model.internal_data.partslist.PartsList.isLineageName;
-import static application_src.application_model.logic.AppFont.getBolderFont;
-import static application_src.application_model.logic.AppFont.getFont;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNamesByFunctionalName;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.isLineageName;
+import static application_src.application_model.resources.utilities.AppFont.getBolderFont;
+import static application_src.application_model.resources.utilities.AppFont.getFont;
 
 public class StructuresLayer {
-
-    private final SearchLayer searchLayer;
-    private final SceneElementsList sceneElementsList;
-
+    private StructuresSearch structuresSearch;
     private final ObservableList<String> searchStructuresResultsList;
-
     private final TreeView<StructureTreeNode> structuresTreeView;
-
-    private final Map<String, List<String>> nameToCellsMap;
-    private final Map<String, String> nameToCommentsMap;
-    private final Map<String, String> nameToMarkerMap;
-    private final Map<String, StructureCellGraphic> structureNameToTreeCellMap;
-
     private final StringProperty selectedStructureNameProperty;
-
     private final TextField searchField;
-
     private Color selectedColor;
     private String searchText;
 
     public StructuresLayer(
-            final SearchLayer searchLayer,
+            StructuresSearch structuresSearch,
+            final AnnotationManager annotationManager,
             final SceneElementsList sceneElementsList,
             final StringProperty selectedEntityNameProperty,
             final TextField searchField,
@@ -75,11 +66,12 @@ public class StructuresLayer {
             final ColorPicker colorPicker,
             final BooleanProperty rebuildSceneFlag) {
 
+
+        this.structuresSearch = structuresSearch;
+
         selectedColor = WHITE;
 
         searchStructuresResultsList = observableArrayList();
-
-        structureNameToTreeCellMap = new HashMap<>();
 
         requireNonNull(selectedEntityNameProperty);
         selectedStructureNameProperty = new SimpleStringProperty("");
@@ -88,13 +80,6 @@ public class StructuresLayer {
                 selectedEntityNameProperty.set(newValue);
             }
         });
-
-        this.searchLayer = requireNonNull(searchLayer);
-
-        this.sceneElementsList = requireNonNull(sceneElementsList);
-        this.nameToCellsMap = this.sceneElementsList.getNameToCellsMap();
-        this.nameToCommentsMap = this.sceneElementsList.getNameToCommentsMap();
-        this.nameToMarkerMap = this.sceneElementsList.getNameToMarkerMap();
 
         this.searchField = requireNonNull(searchField);
         this.searchField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -136,18 +121,20 @@ public class StructuresLayer {
                 final StructureTreeNode selectedNode = selectedItem.getValue();
                 if (selectedNode != null) {
                     if (selectedNode.isLeafNode()) {
-                        addStructureRule(selectedNode.getSceneName(), selectedColor);
+                        annotationManager.addStructureRuleBySceneName(selectedNode.getSceneName(), selectedColor);
                     } else {
-                        final Rule headingRule = searchLayer.addStructureRuleByHeading(
-                                selectedNode.getNodeText(),
-                                selectedColor);
+                        // execute the search
+                        List<String> structuresToAdd = structuresSearch.executeStructureSearchUnderHeading(selectedNode.getNodeText());
+
+                        // add the rule to the annotation manager
+                        annotationManager.addStructureRuleByHeading(selectedNode.getNodeText(), selectedColor, structuresToAdd);
                     }
                     clearStructureTreeNodeSelection();
                 }
             } else {
                 // otherwise add rule(s) for all structures in the search results
                 for (String string : searchStructuresResultsList) {
-                    addStructureRule(string, selectedColor);
+                    annotationManager.addStructureRuleBySceneName(string, selectedColor);
                 }
                 searchField.clear();
             }
@@ -168,113 +155,9 @@ public class StructuresLayer {
         structuresTreeView.getSelectionModel().clearSelection();
     }
 
-    /**
-     * Utilizes the search layer to add a structure color rule by the specified name.
-     *
-     * @param name
-     *         the name of the structure
-     * @param color
-     *         the color
-     */
-    public void addStructureRule(String name, final Color color) {
-        if (name == null || color == null) {
-            return;
-        }
-        name = name.trim();
-
-        // the scene name may be a functional name - use the lineage name so the rule can be recognized by the cell
-        // bodies (whose scene names are the lineage names)
-        if (isLineageName(name)) {
-            name = getFunctionalNameByLineageName(name);
-        }
-        searchLayer.addStructureRuleBySceneName(name, color);
-    }
-
-    /**
-     * Searches for scene elements (single-celled and multicellular) whose scene name or comment is specified by the
-     * searched term. The search results list is updated with those structure scene names.
-     *
-     * @param searched
-     *         the searched term
-     */
-    public void searchAndUpdateResults(String searched) {
-        if (searched == null || searched.isEmpty()) {
-            return;
-        }
-
-        final String[] terms = searched.toLowerCase().split(" ");
+    public void searchAndUpdateResults(String searchString) {
         searchStructuresResultsList.clear();
-
-        String nameLower;
-        for (String name : sceneElementsList.getAllSceneNames()) {
-            if (!searchStructuresResultsList.contains(name)) {
-                nameLower = name.toLowerCase();
-
-                boolean appliesToName = false;
-                boolean appliesToCell = false;
-                boolean appliesToMarker = false;
-                boolean appliesToComment = false;
-
-                // search in structure scene names
-                for (String term : terms) {
-                    if (nameLower.contains(term)) {
-                        appliesToName = true;
-                        break;
-                    }
-                }
-
-                // search in cells
-                final List<String> cells = nameToCellsMap.get(nameLower);
-                if (cells != null) {
-                    for (String cell : cells) {
-                        // use the first term
-                        if (terms.length > 0) {
-                            // check if search term is a functional name
-                            final List<String> lineageNames = new ArrayList<>(
-                                    getLineageNamesByFunctionalName(terms[0]));
-                            for (String lineageName : lineageNames) {
-                                if (lineageName != null) {
-                                    if (cell.toLowerCase().startsWith(lineageName.toLowerCase())) {
-                                        appliesToCell = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (cell.toLowerCase().startsWith(terms[0].toLowerCase())) {
-                                appliesToCell = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (nameToMarkerMap.get(nameLower).startsWith(terms[0].toLowerCase())) {
-                    appliesToMarker = true;
-                }
-
-                // search in comments if name does not already apply
-                if (nameToCommentsMap.containsKey(nameLower)) {
-                    final String commentLowerCase = nameToCommentsMap.get(nameLower).toLowerCase();
-                    for (String term : terms) {
-                        if (commentLowerCase.contains(term)) {
-                            appliesToComment = true;
-                        } else {
-                            appliesToComment = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (appliesToName || appliesToCell || appliesToMarker || appliesToComment) {
-                    // use functional name in structure search results instead of lineage names
-                    String functionalName = PartsList.getFunctionalNameByLineageName(name);
-                    if (functionalName == null) {
-                        functionalName = name;
-                    }
-                    searchStructuresResultsList.add(functionalName);
-                }
-            }
-        }
+        searchStructuresResultsList.addAll(structuresSearch.searchStructures(searchString));
     }
 
     public StringProperty getSelectedStructureNameProperty() {

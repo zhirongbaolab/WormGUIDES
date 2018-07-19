@@ -9,10 +9,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import application_src.application_model.logic.search.WormBaseQuery;
+import application_src.application_model.annotation.AnnotationManager;
+import application_src.application_model.annotation.color.Rule;
+import application_src.application_model.data.CElegansData.Gene.GeneSearchManager;
+import application_src.application_model.data.OrganismDataType;
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
+import application_src.application_model.search.ModelSearch.EstablishCorrespondence;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.NeighborsSearch;
+import application_src.application_model.search.SearchConfiguration.SearchOption;
+import application_src.views.info_window.InfoWindow;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.concurrent.Worker;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -30,22 +41,17 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import application_src.application_model.internal_data.connectome.Connectome;
 import application_src.controllers.layers.SearchLayer;
-import application_src.application_model.logic.cell_case.CasesLists;
-import application_src.application_model.logic.cell_case.TerminalCellCase;
-import application_src.application_model.logic.color_rule.Rule;
-import application_src.application_model.ProductionInfo;
 
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.search.SearchConfiguration.SearchType.*;
 import static java.lang.Thread.sleep;
 import static java.util.Objects.requireNonNull;
 
 import static javafx.application.Platform.runLater;
 import static javafx.scene.paint.Color.WHITE;
-
-import static application_src.application_model.internal_data.partslist.PartsList.getFunctionalNameByLineageName;
-import static application_src.application_model.logic.search.SearchType.GENE;
-import static application_src.application_model.logic.color_rule.SearchOption.CELL_NUCLEUS;
 
 /**
  * Controller for the context menu that shows up on right click on a 3D entity. The menu can be accessed via the 3D
@@ -54,7 +60,9 @@ import static application_src.application_model.logic.color_rule.SearchOption.CE
 
 public class ContextMenuController extends AnchorPane implements Initializable {
 
-    /** Wait time in miliseconds between showing a different number of periods after loading (for gene option) */
+    /**
+     * Wait time in miliseconds between showing a different number of periods after loading (for gene option)
+     */
     private static final long WAIT_TIME_MILLI = 750;
 
     private static final double MAX_MENU_HEIGHT = 200;
@@ -64,12 +72,18 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             ELECTR_INDEX = 2,
             NEURO_INDEX = 3;
 
-    /** Default color of the rules that are created by the context menu */
+    /**
+     * Default color of the rules that are created by the context menu
+     */
     private static final Color DEFAULT_COLOR = WHITE;
 
     private final Stage ownStage;
 
-    private final SearchLayer searchLayer;
+    private CElegansSearch cElegansSearchPipeline;
+    private GeneSearchManager geneSearchManager;
+    private NeighborsSearch neighborsSearch;
+    private EstablishCorrespondence establishCorrespondence;
+    private AnnotationManager annotationManager;
 
     @FXML
     private VBox mainVBox;
@@ -95,54 +109,47 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     private ContextMenu expressesMenu;
     private MenuItem expressesTitle;
     private MenuItem loadingMenuItem;
-    private Service<List<String>> expressesQueryService;
     private Service<Void> loadingService;
     private ContextMenu wiredToMenu;
     private MenuItem colorAll;
     private Menu preSyn, postSyn, electr, neuro;
-    private Service<List<List<String>>> wiredToQueryService;
-    private ProductionInfo productionInfo;
     private Stage parentStage;
     private BooleanProperty bringUpInfoProperty;
-    private Connectome connectome;
+    private boolean isStructure;
 
     /**
-     * Controller constructor
-     *
      * @param parentStage
-     *         the parent stage (or popup window) that the context menu lives
-     *         in, used for rule editing window popups
+     * @param ownStage
+     * @param cElegansSearchPipeline
+     * @param geneSearchManager
+     * @param neighborsSearch
+     * @param establishCorrespondence
+     * @param annotationManager
      * @param bringUpInfoProperty
-     *         when set to true, RootLayoutController brings up the cell info
-     *         window
-     * @param cases
-     *         list of cell cases (terminal and non-terminal) that are
-     *         currently in the program
-     * @param productionInfo
-     *         production information about WormGUIDES
-     * @param connectome
-     *         connectome object that has information about cell connectome
      */
     public ContextMenuController(
             final Stage parentStage,
             final Stage ownStage,
-            final SearchLayer searchLayer,
-            final CasesLists cases,
-            final ProductionInfo productionInfo,
-            final Connectome connectome,
+            final CElegansSearch cElegansSearchPipeline,
+            final GeneSearchManager geneSearchManager,
+            final NeighborsSearch neighborsSearch,
+            final EstablishCorrespondence establishCorrespondence,
+            final AnnotationManager annotationManager,
             final BooleanProperty bringUpInfoProperty) {
 
         super();
 
+        this.isStructure = false;
         this.parentStage = requireNonNull(parentStage);
         this.ownStage = requireNonNull(ownStage);
 
-        this.searchLayer = requireNonNull(searchLayer);
-        this.productionInfo = requireNonNull(productionInfo);
+        this.cElegansSearchPipeline = requireNonNull(cElegansSearchPipeline);
+        this.geneSearchManager = requireNonNull(geneSearchManager);
+        this.neighborsSearch = requireNonNull(neighborsSearch);
+        this.establishCorrespondence = requireNonNull(establishCorrespondence);
+        this.annotationManager = requireNonNull(annotationManager);
 
         this.bringUpInfoProperty = requireNonNull(bringUpInfoProperty);
-
-        this.connectome = connectome;
 
         loadingService = new Service<Void>() {
             @Override
@@ -189,182 +196,82 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             }
         };
 
-        expressesQueryService = new Service<List<String>>() {
+        geneSearchManager.stateProperty().addListener(new ChangeListener<Worker.State>() {
             @Override
-            protected Task<List<String>> createTask() {
-                final Task<List<String>> task = new Task<List<String>>() {
-                    @Override
-                    protected List<String> call() throws Exception {
-                        if (cellName != null && !cellName.isEmpty()) {
-                            if (cases == null) {
-                                System.out.println("null cell name");
-                                return null; // error check
-                            }
-
-                            return WormBaseQuery.issueWormBaseAnatomyTermQuery(cellName);
-
+            public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldState, Worker.State newState) {
+                switch (newState) {
+                    case SCHEDULED:
+                        if (ownStage.isShowing()) { // this will tell us whether this gene search is being called by the search layer or here
+                            expressesMenu.getItems().addAll(loadingMenuItem);
+                            loadingService.restart();
                         }
-                        return null;
-                    }
-                };
-                return task;
-            }
-        };
+                        break;
+                    case READY:
+                    case RUNNING:
+                        break;
+                    case SUCCEEDED:
+                        if (ownStage.isShowing()) {
+                            loadingService.cancel();
+                            resetLoadingMenuItem();
 
-        expressesQueryService.setOnSucceeded(event -> {
-            loadingService.cancel();
-            resetLoadingMenuItem();
-            final List<String> results = expressesQueryService.getValue();
-            if (results != null) {
-                for (String result : results) {
-                    final MenuItem item = new MenuItem(result);
-                    item.setOnAction(event12 -> {
-                        final Rule rule = searchLayer.addColorRule(GENE, result, DEFAULT_COLOR, CELL_NUCLEUS);
-                        rule.showEditStage(this.parentStage);
-                    });
-                    expressesMenu.getItems().add(item);
+                            final List<String> results = geneSearchManager.getPreviouslyFetchedGeneResults(cellName).getValue();
+                            if (results != null) {
+                                for (String res : results) {
+                                    final MenuItem item = new MenuItem(res);
+                                    item.setOnAction(event12 -> {
+                                        ArrayList<SearchOption> options = new ArrayList<>();
+                                        options.add(CELL_NUCLEUS);
+
+                                        geneSearchManager.setSearchTerm(res);
+                                        geneSearchManager.setSearchOptions(false, false, true, false, OrganismDataType.LINEAGE);
+                                        geneSearchManager.restart();
+
+                                        // this is an unsafe practice. for now, we know this will generate results
+                                        // because we're searching a term that was generated by a wormbase search itself
+                                        // regardless, this is an unsafe practice and a better solution should be implemented
+                                        // --> this is instead of doing a nested listener for the geneSearchManager's state,
+                                        // because that's a nightmare that doesn't have a clear management strategy
+                                        while (geneSearchManager.getPreviouslyFetchedGeneResults(res) == null) { }
+
+                                        List<String> r = geneSearchManager.getPreviouslyFetchedGeneResults(res).getValue();
+                                        if (r != null) {
+                                            final Rule rule = annotationManager.addGeneColorRule(res,
+                                                    DEFAULT_COLOR,
+                                                    r,
+                                                    options);
+                                            rule.showEditStage(parentStage);
+                                            ownStage.hide();
+                                        }
+
+                                    });
+                                    expressesMenu.getItems().add(item);
+                                }
+                            }
+                        } else {
+                            loadingService.cancel();
+                            resetLoadingMenuItem();
+                        }
+                        break;
+                    case CANCELLED:
+                        if (ownStage.isShowing()) {
+                            resetLoadingMenuItem();
+                            loadingService.cancel();
+                        }
+                        break;
+                    case FAILED:
+                        if (ownStage.isShowing()) {
+                            resetLoadingMenuItem();
+                            loadingService.cancel();
+                        }
+                        break;
+
                 }
             }
         });
-
-        expressesQueryService.setOnScheduled(event -> {
-            runLater(() -> expressesMenu.getItems().addAll(loadingMenuItem));
-            loadingService.restart();
-        });
-
-        expressesQueryService.setOnCancelled(event -> {
-            resetLoadingMenuItem();
-            loadingService.cancel();
-        });
-
-        wiredToQueryService = new Service<List<List<String>>>() {
-            @Override
-            protected Task<List<List<String>>> createTask() {
-                final Task<List<List<String>>> task = new Task<List<List<String>>>() {
-                    @Override
-                    protected List<List<String>> call() throws Exception {
-                        if (cellName != null && !cellName.isEmpty()) {
-                            List<List<String>> results = new ArrayList<>();
-
-                            // translate the name if necessary
-                            String funcName = connectome.checkQueryCell(cellName).toLowerCase();
-
-                            if (cases.containsCellCase(funcName)) {
-                                TerminalCellCase terminalCase = (TerminalCellCase) cases.getCellCase(funcName);
-                                results.add(PRE_SYN_INDEX, terminalCase.getPresynapticPartners());
-                                results.add(POST_SYN_INDEX, terminalCase.getPostsynapticPartners());
-                                results.add(ELECTR_INDEX, terminalCase.getElectricalPartners());
-                                results.add(NEURO_INDEX, terminalCase.getNeuromuscularPartners());
-                            } else {
-                                // these calls return functional names
-                                results.add(
-                                        PRE_SYN_INDEX,
-                                        connectome.queryConnectivity(
-                                                funcName,
-                                                true,
-                                                false,
-                                                false,
-                                                false,
-                                                false));
-                                results.add(
-                                        POST_SYN_INDEX,
-                                        connectome.queryConnectivity(
-                                                funcName,
-                                                false,
-                                                true,
-                                                false,
-                                                false,
-                                                false));
-                                results.add(
-                                        ELECTR_INDEX,
-                                        connectome.queryConnectivity(
-                                                funcName,
-                                                false,
-                                                false,
-                                                true,
-                                                false,
-                                                false));
-                                results.add(
-                                        NEURO_INDEX,
-                                        connectome.queryConnectivity(
-                                                funcName,
-                                                false,
-                                                false,
-                                                false,
-                                                true,
-                                                false));
-                            }
-                            return results;
-                        }
-                        return null;
-                    }
-                };
-                return task;
-            }
-        };
-
-        wiredToQueryService.setOnSucceeded(event -> {
-            final List<List<String>> results = wiredToQueryService.getValue();
-            if (results != null) {
-                colorAll.setOnAction(event1 -> {
-                    // translate the name if necessary
-                    String funcName = connectome.checkQueryCell(cellName).toLowerCase();
-
-                    final Rule rule = searchLayer.addConnectomeColorRuleFromContextMenu(
-                            funcName,
-                            DEFAULT_COLOR,
-                            true,
-                            true,
-                            true,
-                            true);
-                    rule.showEditStage(this.parentStage);
-                });
-
-                populateWiredToMenu(
-                        results.get(PRE_SYN_INDEX),
-                        preSyn,
-                        true,
-                        false,
-                        false,
-                        false);
-                populateWiredToMenu(
-                        results.get(POST_SYN_INDEX),
-                        postSyn,
-                        false,
-                        true,
-                        false,
-                        false);
-                populateWiredToMenu(
-                        results.get(ELECTR_INDEX),
-                        electr,
-                        false,
-                        false,
-                        true,
-                        false);
-                populateWiredToMenu(
-                        results.get(NEURO_INDEX),
-                        neuro,
-                        false,
-                        false,
-                        false,
-                        false);
-            } else {
-                wiredToMenu.getItems().clear();
-                wiredToMenu.getItems().add(new MenuItem("None"));
-            }
-
-            wiredToMenu.show(wiredTo, Side.RIGHT, 0, 0);
-        });
     }
 
-    /**
-     * Sets the listener for the 'more info' button click in the menu
-     *
-     * @param handler
-     *         the handler (provided by RootLayoutController) that handles the 'more info' button click action
-     */
-    public void setMoreInfoButtonListener(final EventHandler<MouseEvent> handler) {
-        info.setOnMouseClicked(handler);
+    public void setIsStructure(boolean b) {
+        this.isStructure = b;
     }
 
     /**
@@ -372,9 +279,8 @@ public class ContextMenuController extends AnchorPane implements Initializable {
      * SulstonTreePane since they handle the click differently. A different mouse click listener is set depending on
      * where the menu pops up (whether in the 3D subscene or the sulston tree)
      *
-     * @param handler
-     *         the handler (provided by Window3DController or SulstonTreePane) that handles the 'color this cell'
-     *         button click action
+     * @param handler the handler (provided by Window3DController or SulstonTreePane) that handles the 'color this cell'
+     *                button click action
      */
     public void setColorButtonListener(EventHandler<MouseEvent> handler) {
         color.setOnMouseClicked(handler);
@@ -393,10 +299,9 @@ public class ContextMenuController extends AnchorPane implements Initializable {
      * SulstonTreePane since they handle the click differently. A different mouse click listener is set depending on
      * where the menu pops up (whether in the 3D subscene or the sulston tree)
      *
-     * @param handler
-     *         the handler (provided by Window3DController or
-     *         SulstonTreePane) that handles the 'color neighbors' button
-     *         click action
+     * @param handler the handler (provided by Window3DController or
+     *                SulstonTreePane) that handles the 'color neighbors' button
+     *                click action
      */
     public void setColorNeighborsButtonListener(EventHandler<MouseEvent> handler) {
         colorNeighbors.setOnMouseClicked(handler);
@@ -415,8 +320,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     /**
      * Sets the linage name (cell/cellbody scope) of the context menu
      *
-     * @param name
-     *         lineage name of cell/cell body that the context menu is for
+     * @param name lineage name of cell/cell body that the context menu is for
      */
     public void setName(String name) {
         name = name.trim();
@@ -438,8 +342,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     /**
      * Disables/enables the 'More Info' functionality depending on whether the entity is a terminal cell/cell body
      *
-     * @param disable
-     *         true if the entity is a multicellular structure or a tract, false otherwise
+     * @param disable true if the entity is a multicellular structure or a tract, false otherwise
      */
     public void disableMoreInfoFunction(final boolean disable) {
         info.setDisable(disable);
@@ -448,8 +351,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     /**
      * Disables/enables the 'Wired To' functionality depending on whether the entity is a terminal cell/cell body
      *
-     * @param disable
-     *         true if the entity is a multicellular structure or a tract, false otherwise
+     * @param disable true if the entity is a multicellular structure or a tract, false otherwise
      */
     public void disableWiredToFunction(final boolean disable) {
         wiredTo.setDisable(disable);
@@ -458,8 +360,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     /**
      * Disables/enables the 'Gene Expression' functionality depending on whether the entity is a terminal cell/cell body
      *
-     * @param disable
-     *         true if the entity is a multicellular structure or a tract, false otherwise
+     * @param disable true if the entity is a multicellular structure or a tract, false otherwise
      */
     public void disableGeneExpressionFunction(final boolean disable) {
         expresses.setDisable(disable);
@@ -468,11 +369,234 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     /**
      * Disables/enables the 'Color Neighbors' functionality depending on whether the entity is a terminal cell/cell body
      *
-     * @param disable
-     *         true if entity is a multicellular structure or tract, false otherwise
+     * @param disable true if entity is a multicellular structure or tract, false otherwise
      */
     public void disableColorNeighborsFunction(final boolean disable) {
         colorNeighbors.setDisable(disable);
+    }
+
+    /**
+     * Removes the MenuItem that shows that gene expression web querying is in
+     * progress.
+     */
+    private void resetLoadingMenuItem() {
+        if (loadingMenuItem != null) {
+            runLater(() -> {
+                if (wiredToMenu != null && wiredToMenu.getItems().contains(loadingMenuItem)) {
+                    wiredToMenu.getItems().remove(loadingMenuItem);
+                } else if (expressesMenu != null && expressesMenu.getItems().contains(loadingMenuItem)) {
+                    expressesMenu.getItems().remove(loadingMenuItem);
+                }
+
+                loadingMenuItem.setText("Loading");
+            });
+        }
+    }
+
+    /**
+     *
+     */
+    private void performConnectomeSearchAndPopulateMenu() {
+
+        wiredToMenu.getItems().clear();
+        preSyn.getItems().clear();
+        postSyn.getItems().clear();
+        electr.getItems().clear();
+        neuro.getItems().clear();
+
+        if (cellName != null && !cellName.isEmpty()) {
+            List<List<String>> results = new ArrayList<>();
+
+            // these calls return functional names
+            results.add(
+                    PRE_SYN_INDEX,
+                    cElegansSearchPipeline.executeConnectomeSearch(
+                            cellName,
+                            false,
+                            false,
+                            true,
+                            false,
+                            false,
+                            false,
+                            OrganismDataType.LINEAGE).getValue());
+            results.add(
+                    POST_SYN_INDEX,
+                    cElegansSearchPipeline.executeConnectomeSearch(
+                            cellName,
+                            false,
+                            false,
+                            false,
+                            true,
+                            false,
+                            false,
+                            OrganismDataType.LINEAGE).getValue());
+            results.add(
+                    ELECTR_INDEX,
+                    cElegansSearchPipeline.executeConnectomeSearch(
+                            cellName,
+                            false,
+                            false,
+                            false,
+                            false,
+                            true,
+                            false,
+                            OrganismDataType.LINEAGE).getValue());
+            results.add(
+                    NEURO_INDEX,
+                    cElegansSearchPipeline.executeConnectomeSearch(
+                            cellName,
+                            false,
+                            false,
+                            false,
+                            false,
+                            false,
+                            true,
+                            OrganismDataType.LINEAGE).getValue());
+
+            if (results.isEmpty()) {
+                wiredToMenu.getItems().add(new MenuItem("None"));
+                return;
+            }
+
+            // colors all connections
+            final MenuItem all = new MenuItem("Color All Connections");
+            wiredToMenu.getItems().add(all);
+            all.setOnAction(event -> {
+                ArrayList<String> allResults = new ArrayList<>();
+                allResults.addAll(results.get(PRE_SYN_INDEX));
+                allResults.addAll(results.get(POST_SYN_INDEX));
+                allResults.addAll(results.get(ELECTR_INDEX));
+                allResults.addAll(results.get(NEURO_INDEX));
+                List<SearchOption> options = new ArrayList<>();
+                options.add(CELL_NUCLEUS);
+                options.add(CELL_BODY);
+                final Rule rule = annotationManager.addConnectomeColorRule(
+                        CElegansSearch.checkQueryCell(cellName),
+                        DEFAULT_COLOR,
+                        allResults,
+                        true,
+                        true,
+                        true,
+                        true,
+                        options);
+                rule.showEditStage(parentStage);
+            });
+
+            // populate each of the respective menus
+            if (!results.get(PRE_SYN_INDEX).isEmpty()) {
+                // add the Color All button for presynaptic results
+                final MenuItem allPresyn = new MenuItem("Color All");
+                preSyn.getItems().add(allPresyn);
+                allPresyn.setOnAction(event -> {
+                    List<SearchOption> options = new ArrayList<>();
+                    options.add(CELL_NUCLEUS);
+                    options.add(CELL_BODY);
+                    final Rule rule = annotationManager.addConnectomeColorRule(
+                            CElegansSearch.checkQueryCell(cellName),
+                            DEFAULT_COLOR,
+                            results.get(PRE_SYN_INDEX),
+                            true,
+                            false,
+                            false,
+                            false,
+                            options);
+                    rule.showEditStage(parentStage);
+                });
+
+                // add all of the results to the dropdown menu for reference, but they're not clickable
+                for (String preSynRes : results.get(PRE_SYN_INDEX)) {
+                    MenuItem item = new MenuItem(preSynRes);
+                    item.setDisable(true);
+                    preSyn.getItems().add(item);
+                }
+            } else {
+                preSyn.getItems().add(new MenuItem("None"));
+            }
+
+            if (!results.get(POST_SYN_INDEX).isEmpty()) {
+                final MenuItem allPostyn = new MenuItem("Color All");
+                postSyn.getItems().add(allPostyn);
+                allPostyn.setOnAction(event -> {
+                    List<SearchOption> options = new ArrayList<>();
+                    options.add(CELL_NUCLEUS);
+                    options.add(CELL_BODY);
+                    final Rule rule = annotationManager.addConnectomeColorRule(
+                            CElegansSearch.checkQueryCell(cellName),
+                            DEFAULT_COLOR,
+                            results.get(POST_SYN_INDEX),
+                            false,
+                            true,
+                            false,
+                            false,
+                            options);
+                    rule.showEditStage(parentStage);
+                });
+
+                for (String postSynRes : results.get(POST_SYN_INDEX)) {
+                    MenuItem item = new MenuItem(postSynRes);
+                    item.setDisable(true);
+                    postSyn.getItems().add(item);
+                }
+            } else {
+                postSyn.getItems().add(new MenuItem("None"));
+            }
+
+            if (!results.get(ELECTR_INDEX).isEmpty()) {
+                final MenuItem allElec = new MenuItem("Color All");
+                electr.getItems().add(allElec);
+                allElec.setOnAction(event -> {
+                    List<SearchOption> options = new ArrayList<>();
+                    options.add(CELL_NUCLEUS);
+                    options.add(CELL_BODY);
+                    final Rule rule = annotationManager.addConnectomeColorRule(
+                            CElegansSearch.checkQueryCell(cellName),
+                            DEFAULT_COLOR,
+                            results.get(ELECTR_INDEX),
+                            false,
+                            false,
+                            true,
+                            false,
+                            options);
+                    rule.showEditStage(parentStage);
+                });
+
+                for (String elecRes : results.get(ELECTR_INDEX)) {
+                    MenuItem item = new MenuItem(elecRes);
+                    item.setDisable(true);
+                    electr.getItems().add(item);
+                }
+            } else {
+                electr.getItems().add(new MenuItem("None"));
+            }
+
+            if (!results.get(NEURO_INDEX).isEmpty()) {
+                final MenuItem allNeuro = new MenuItem("Color All");
+                neuro.getItems().add(allNeuro);
+                allNeuro.setOnAction(event -> {
+                    List<SearchOption> options = new ArrayList<>();
+                    options.add(CELL_NUCLEUS);
+                    options.add(CELL_BODY);
+                    final Rule rule = annotationManager.addConnectomeColorRule(
+                            CElegansSearch.checkQueryCell(cellName),
+                            DEFAULT_COLOR,
+                            results.get(NEURO_INDEX),
+                            false,
+                            false,
+                            false,
+                            true,
+                            options);
+                    rule.showEditStage(parentStage);
+                });
+
+                for (String neuroRes : results.get(NEURO_INDEX)) {
+                    MenuItem item = new MenuItem(neuroRes);
+                    item.setDisable(true);
+                    neuro.getItems().add(item);
+                }
+            } else {
+                neuro.getItems().add(new MenuItem("None"));
+            }
+        }
     }
 
     /**
@@ -482,6 +606,38 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         loadingMenuItem = new MenuItem("Loading");
+
+        info.setOnAction(event -> {
+            // show the info window
+            showInfoAction();
+        });
+
+        color.setOnAction(event -> {
+            // make the rule with no search options
+            if (isStructure) {
+                final Rule rule = annotationManager.addStructureRuleBySceneName(cellName, DEFAULT_COLOR);
+                rule.showEditStage(parentStage);
+            } else {
+                ArrayList<SearchOption> options = new ArrayList<>();
+                options.add(CELL_NUCLEUS);
+                final Rule rule = annotationManager.addColorRule(LINEAGE, cellName, DEFAULT_COLOR, new ArrayList<>(),  options);
+                rule.showEditStage(parentStage);
+            }
+            ownStage.hide();
+        });
+
+        colorNeighbors.setOnAction(event -> {
+            if (cellName != null && !cellName.isEmpty()) {
+                List<String> results = neighborsSearch.getNeighboringCells(cellName);
+                if (!results.isEmpty()) {
+                    ArrayList<SearchOption> options = new ArrayList<>();
+                    options.add(CELL_NUCLEUS);
+                    final Rule rule = annotationManager.addColorRule(NEIGHBOR, cellName, DEFAULT_COLOR, results, options);
+                    rule.showEditStage(parentStage);
+                    ownStage.hide();
+                }
+            }
+        });
 
         expresses.setOnAction(event -> {
             if (expressesMenu == null) {
@@ -507,7 +663,10 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             expressesMenu.getItems().addAll(expressesTitle);
             expressesMenu.show(expresses, Side.RIGHT, 0, 0);
 
-            expressesQueryService.restart();
+            geneSearchManager.setSearchTerm(cellName);
+            geneSearchManager.setSearchOptions(false, false, false, true, OrganismDataType.GENE);
+            geneSearchManager.reset();
+            geneSearchManager.start();
         });
 
         wiredTo.setOnAction(event -> {
@@ -517,7 +676,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
 
                 wiredTo.setContextMenu(wiredToMenu);
 
-                wiredToMenu.setOnHidden(event1 -> wiredToQueryService.cancel());
+                wiredToMenu.setOnHidden(event1 -> wiredToMenu.getItems().clear());
 
                 wiredToMenu.setAutoHide(true);
 
@@ -529,92 +688,15 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             }
 
             wiredToMenu.getItems().clear();
-            wiredToMenu.getItems().addAll(colorAll, preSyn, postSyn, electr, neuro);
-
-            wiredToQueryService.restart();
-        });
-    }
-
-    /**
-     * Removes the MenuItem that shows that gene expression web querying is in
-     * progress.
-     */
-    private void resetLoadingMenuItem() {
-        if (loadingMenuItem != null) {
-            runLater(() -> {
-                if (wiredToMenu != null && wiredToMenu.getItems().contains(loadingMenuItem)) {
-                    wiredToMenu.getItems().remove(loadingMenuItem);
-                } else if (expressesMenu != null && expressesMenu.getItems().contains(loadingMenuItem)) {
-                    expressesMenu.getItems().remove(loadingMenuItem);
-                }
-
-                loadingMenuItem.setText("Loading");
-            });
-        }
-    }
-
-    /**
-     * Populates the input menu with MenuItems for each of the 'wired-to' results.
-     *
-     * @param results
-     *         Results from either a pre-synaptic, post-synaptic, electrical, or neuromuscular query to the connectome
-     * @param menu
-     *         The pre-synaptic, post-synaptic, eletrical, or neuromuscular menu that should be populated with these
-     *         results
-     * @param isPresynaptic
-     *         true if a pre-synaptic query to the connectome was issued, false otherwise
-     * @param isPostsynaptic
-     *         true if a pose-synaptic query to the connectome was issued, false otherwise
-     * @param isElectrical
-     *         true if an electrical query to the connectome was issued, false otherwise
-     * @param isNeuromuscular
-     *         true if a neuromuscular query to the connectome was issued, false otherwise
-     */
-    private void populateWiredToMenu(
-            final List<String> results,
-            final Menu menu,
-            final boolean isPresynaptic,
-            final boolean isPostsynaptic,
-            final boolean isElectrical,
-            final boolean isNeuromuscular) {
-
-        menu.getItems().clear();
-
-        String funcName = connectome.checkQueryCell(cellName).toLowerCase();
-
-        if (results.isEmpty()) {
-            menu.getItems().add(new MenuItem("None"));
-            return;
-        }
-
-        final MenuItem all = new MenuItem("Color All");
-        menu.getItems().add(all);
-        all.setOnAction(event -> {
-            final Rule rule = searchLayer.addConnectomeColorRuleFromContextMenu(
-                    funcName,
-                    DEFAULT_COLOR,
-                    isPresynaptic,
-                    isPostsynaptic,
-                    isElectrical,
-                    isNeuromuscular);
-            rule.showEditStage(parentStage);
+            performConnectomeSearchAndPopulateMenu();
+            wiredToMenu.getItems().addAll(preSyn, postSyn, electr, neuro);
+            wiredToMenu.show(wiredTo, Side.RIGHT, 0, 0);
         });
 
-        for (String result : results) {
-            final MenuItem item = new MenuItem(result);
-            menu.getItems().add(item);
-            item.setOnAction(event -> {
-                final Rule rule = searchLayer.addConnectomeColorRuleFromContextMenu(
-                        connectome.checkQueryCell(result).toLowerCase(),
-                        DEFAULT_COLOR,
-                        isPresynaptic,
-                        isPostsynaptic,
-                        isElectrical,
-                        isNeuromuscular);
-                rule.showEditStage(parentStage);
-            });
-        }
+
     }
+
+
 
     /**
      * Toggles the BooleanProperty bringUpInfoProperty so that the cell info window is displayed. The controller for

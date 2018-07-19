@@ -20,11 +20,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-import application_src.application_model.logic.color_rule.SearchOption;
-import static application_src.application_model.logic.color_rule.SearchOption.ANCESTOR;
-import static application_src.application_model.logic.color_rule.SearchOption.CELL_BODY;
-import static application_src.application_model.logic.color_rule.SearchOption.CELL_NUCLEUS;
-import static application_src.application_model.logic.color_rule.SearchOption.DESCENDANT;
+import application_src.application_model.search.SearchConfiguration.SearchOption;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.ANCESTOR;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.search.SearchConfiguration.SearchOption.DESCENDANT;
 
 public class RuleEditorController extends AnchorPane implements Initializable {
 
@@ -69,6 +69,11 @@ public class RuleEditorController extends AnchorPane implements Initializable {
     public void disableDescendantOption() {
         descendantsLabel.setDisable(true);
         descendantsCheckBox.setDisable(true);
+    }
+
+    public void disableAncestorOption() {
+        ancestorsLabel.setDisable(true);
+        ancestorsCheckBox.setDisable(true);
     }
 
     public void disableOptionsForStructureRule() {
