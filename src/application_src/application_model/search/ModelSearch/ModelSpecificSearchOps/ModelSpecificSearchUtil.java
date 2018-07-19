@@ -8,9 +8,9 @@ public class ModelSpecificSearchUtil {
     private static LineageData lineageData;
     private static SceneElementsList sceneElementsList;
 
-    public ModelSpecificSearchUtil(LineageData lineageData, SceneElementsList sceneElementsList) {
-        this.lineageData = lineageData;
-        this.sceneElementsList = sceneElementsList;
+    public static void init(LineageData ld, SceneElementsList sel) {
+        lineageData = ld;
+        sceneElementsList = sel;
     }
 
 

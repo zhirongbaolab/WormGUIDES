@@ -20,6 +20,7 @@ import application_src.application_model.data.CElegansData.Gene.GeneSearchManage
 import application_src.application_model.data.CElegansData.SulstonLineage.SulstonLineage;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import application_src.application_model.search.ModelSearch.EstablishCorrespondence;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.ModelSpecificSearchUtil;
 import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.NeighborsSearch;
 import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
 import application_src.views.popups.TimelineChart;
@@ -1236,6 +1237,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
         initStructuresLayer();
 
         establishCorrespondence = new EstablishCorrespondence(this.lineageData, this.structuresSearch);
+
+        ModelSpecificSearchUtil.init(lineageData, sceneElementsList);
 
         initSearchLayer();
         initTimelineChart();
