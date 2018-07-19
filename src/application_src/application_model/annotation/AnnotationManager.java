@@ -2,6 +2,7 @@ package application_src.application_model.annotation;
 
 import application_src.application_model.annotation.color.Rule;
 import application_src.application_model.data.CElegansData.PartsList.PartsList;
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import application_src.application_model.search.SearchConfiguration.SearchOption;
 import application_src.application_model.search.SearchConfiguration.SearchType;
 import javafx.beans.property.BooleanProperty;
@@ -30,12 +31,13 @@ public class AnnotationManager {
 
     private BooleanProperty rebuildSubsceneFlag;
 
-    // links to downstream annotation class
+    private CElegansSearch cElegansSearch;
 
 
-    public AnnotationManager(ObservableList<Rule> rulesList, BooleanProperty rebuildSubsceneFlag) {
+    public AnnotationManager(ObservableList<Rule> rulesList, BooleanProperty rebuildSubsceneFlag, CElegansSearch cElegansSearch) {
         this.rulesList = rulesList;
         this.rebuildSubsceneFlag = rebuildSubsceneFlag;
+        this.cElegansSearch = cElegansSearch;
 
     }
 
@@ -85,7 +87,8 @@ public class AnnotationManager {
                 createRuleLabel(searched, searchType),
                 color,
                 searchType,
-                options);
+                options,
+                cElegansSearch);
         rule.setCells(searchResults);
         rulesList.add(rule);
         return rule;
@@ -113,7 +116,7 @@ public class AnnotationManager {
         final StringBuilder sb = createLabelForConnectomeRule(
                 searched,
                 presynapticTicked, postsynapticTicked, electricalTicked, neuromuscularTicked);
-        final Rule rule = new Rule(rebuildSubsceneFlag, sb.toString(), color, CONNECTOME, options);
+        final Rule rule = new Rule(rebuildSubsceneFlag, sb.toString(), color, CONNECTOME, options, cElegansSearch);
         rule.setCells(searchResults);
         rule.setSearchedText(sb.toString());
         rule.resetLabel(sb.toString());
@@ -144,7 +147,8 @@ public class AnnotationManager {
                 createRuleLabel(names),
                 color,
                 SearchType.MSL,
-                options
+                options,
+                cElegansSearch
         );
         rule.setCells(searchResults);
         rulesList.add(rule);
@@ -203,7 +207,7 @@ public class AnnotationManager {
         }
 
         final String label = createRuleLabel(searched, GENE);
-        final Rule rule = new Rule(rebuildSubsceneFlag, label, color, GENE, options);
+        final Rule rule = new Rule(rebuildSubsceneFlag, label, color, GENE, options, cElegansSearch);
         rule.setCells(searchResults);
         rulesList.add(rule);
         return rule;

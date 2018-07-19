@@ -71,6 +71,11 @@ public class RuleEditorController extends AnchorPane implements Initializable {
         descendantsCheckBox.setDisable(true);
     }
 
+    public void disableAncestorOption() {
+        ancestorsLabel.setDisable(true);
+        ancestorsCheckBox.setDisable(true);
+    }
+
     public void disableOptionsForStructureRule() {
         cellBodyLabel.setDisable(true);
         cellBodyCheckBox.setDisable(true);

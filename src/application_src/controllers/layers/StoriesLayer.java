@@ -324,7 +324,6 @@ public class StoriesLayer {
                 TEMPLATE_STORY_NAME,
                 TEMPLATE_STORY_DESCRIPTION,
                 ""));
-
     }
 
     /**

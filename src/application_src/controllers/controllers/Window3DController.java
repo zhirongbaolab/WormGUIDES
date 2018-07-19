@@ -386,7 +386,7 @@ public class Window3DController {
             final CheckBox uniformSizeCheckBox,
             final CheckBox cellNucleusCheckBox,
             final CheckBox cellBodyCheckBox,
-            final RadioButton multiRadioBtn,
+            //final RadioButton multiRadioBtn,
             final int startTime,
             final int endTime,
             final IntegerProperty timeProperty,
@@ -738,7 +738,7 @@ public class Window3DController {
         requireNonNull(clearAllLabelsButton).setOnAction(getClearAllLabelsButtonListener());
         requireNonNull(cellNucleusCheckBox).selectedProperty().addListener(getCellNucleusTickListener());
         requireNonNull(cellBodyCheckBox).selectedProperty().addListener(getCellBodyTickListener());
-        requireNonNull(multiRadioBtn).selectedProperty().addListener(getMulticellModeListener());
+        //requireNonNull(multiRadioBtn).selectedProperty().addListener(getMulticellModeListener());
 
         this.contextMenuStage = requireNonNull(contextMenuStage);
         this.contextMenuController = requireNonNull(contextMenuController);

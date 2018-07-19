@@ -15,6 +15,8 @@ import static java.util.Arrays.asList;
 
 /**
  * Tree containing the lineage of the underlying embryo.
+ *
+ * This is used to represent the model itself and assumes a C Elegans lineage structure.
  */
 public class LineageTree {
 

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import application_src.application_model.data.OrganismDataType;
+import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import application_src.application_model.search.SearchConfiguration.SearchOption;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -70,7 +72,8 @@ public class Rule {
 
     private String text;
 
-    private List<SearchOption> options;
+    private List<SearchOption> currentOptions;
+    private List<SearchOption> previousOptions;
     private BooleanProperty ruleChanged;
     private boolean visible;
     private Color color;
@@ -87,9 +90,6 @@ public class Rule {
     /**
      * Rule class constructor called by the {@link SearchLayer} class
      *
-     * @param rebuildSubsceneFlag
-     *         true when the subscene should be rebuilt, false otherwise. This is passed to the
-     *         rule editor controller in order to trigger a subscene rebuild when 'Submit' is clicked
      * @param searched
      *         text that user searched
      * @param color
@@ -105,29 +105,8 @@ public class Rule {
             String searched,
             Color color,
             SearchType type,
-            SearchOption... options) {
-        this(rebuildSubsceneFlag, searched, color, type, new ArrayList<>(asList(options)));
-    }
-
-    /**
-     * Rule class constructor called by the {@link SearchLayer} class
-     *
-     * @param searched
-     *         text that user searched
-     * @param color
-     *         color that the search cell(s), cell body(ies), and/or multicellular structure(s) should have in the 3D
-     *         subscene
-     * @param type
-     *         type of search that was made
-     * @param options
-     *         options that the rule should be extended to
-     */
-    public Rule(
-            final BooleanProperty rebuildSubsceneFlag,
-            String searched,
-            Color color,
-            SearchType type,
-            List<SearchOption> options) {
+            List<SearchOption> options,
+            CElegansSearch cElegansSearch) {
 
         this.rebuildSubsceneFlag = requireNonNull(rebuildSubsceneFlag);
 
@@ -141,6 +120,48 @@ public class Rule {
                 if (editController != null) {
                     graphic.setColorButton(editController.getColor());
                 }
+
+                // if the ancestors or descendants options change, we need to rerun the search
+                boolean prevAnc = previousOptions.contains(ANCESTOR);
+                boolean prevDes = previousOptions.contains(DESCENDANT);
+                boolean currAnc = currentOptions.contains(ANCESTOR);
+                boolean currDes = currentOptions.contains(DESCENDANT);
+                if (prevAnc != currAnc || prevDes != currDes) {
+                    switch (searchType) {
+                        case LINEAGE:
+                            setCells(cElegansSearch.executeLineageSearch(searched, currAnc, currDes).getValue());
+                            break;
+                        case FUNCTIONAL:
+                            setCells(cElegansSearch.executeFunctionalSearch(searched.substring(searched.indexOf("'")+1, searched.lastIndexOf("'")), currAnc, currDes, OrganismDataType.LINEAGE).getValue());
+                            break;
+                        case DESCRIPTION:
+                            setCells(cElegansSearch.executeDescriptionSearch(searched.substring(searched.indexOf("'")+1, searched.lastIndexOf("'")), currAnc, currDes, OrganismDataType.LINEAGE).getValue());
+                            break;
+                        case GENE:
+                            System.out.println("Updating gene rule from RuleEditorController is currently not supported.\nPlease delete the rule and run an updated search from the Find Cells tab. (07/2018)");
+                            break;
+                        case CONNECTOME:
+                            boolean pre = false;
+                            boolean post = false;
+                            boolean elec = false;
+                            boolean neuro = false;
+                            if (text.contains("pre")) {
+                                pre = true;
+                            }
+                            if (text.contains("post")) {
+                                post = true;
+                            }
+                            if (text.contains("elec")) {
+                                elec = true;
+                            }
+                            if (text.contains("neuro")) {
+                                neuro = true;
+                            }
+                            setCells(cElegansSearch.executeConnectomeSearch(searched.substring(searched.indexOf("'")+1, searched.lastIndexOf("'")), currAnc, currDes, pre, post, elec, neuro, OrganismDataType.LINEAGE).getValue());
+                            break;
+                    }
+                }
+
                 rebuildSubsceneFlag.set(true);
                 ruleChanged.set(false);
             }
@@ -237,10 +258,16 @@ public class Rule {
             editController.setDescendantsTicked(isDescendantSelected());
 
             final String textLowerCase = text.toLowerCase();
-            if (textLowerCase.contains("functional") || textLowerCase.contains("description")) {
+            if (textLowerCase.contains("functional") || textLowerCase.contains("description") || textLowerCase.contains("connectome")) {
                 editController.disableDescendantOption();
             } else if (isStructureRuleBySceneName() || isStructureRuleByHeading()) {
                 editController.disableOptionsForStructureRule();
+            } else if (textLowerCase.contains("gene")) {
+                // this is a harder operation to support because this a threaded search in the CElegansSearch class.
+                // for now we won't support it. In the future, to support this, you need to write a subroutine that
+                // take the list of gene search results and executes lineage searching on it
+                editController.disableAncestorOption();
+                editController.disableDescendantOption();
             }
 
         } catch (IOException ioe) {
@@ -267,18 +294,6 @@ public class Rule {
         return searchType == STRUCTURES_BY_HEADING;
     }
 
-    public boolean isGeneRule() {
-        return searchType == GENE;
-    }
-
-    /**
-     * @return true if the list of baseline cells are set by the {@link SearchLayer}
-     * class, false otherwise
-     */
-    public boolean areCellsSet() {
-        return cellsSet;
-    }
-
     /**
      * @return the list of baseline cells that this rule affects, not including
      * decsendant or ancestor cells.
@@ -297,13 +312,10 @@ public class Rule {
      */
     public void setCells(final List<String> list) {
         if (list != null) {
+            cells.clear();
             cells.addAll(list);
             cellsSet = true;
         }
-    }
-
-    public void setOptions(SearchOption... options) {
-        setOptions(new ArrayList<>(asList(options)));
     }
 
     public String getSearchedText() {
@@ -321,10 +333,6 @@ public class Rule {
             text = name;
             graphic.resetLabel(toStringFull());
         }
-    }
-
-    public String getSearchedTextLowerCase() {
-        return text.toLowerCase();
     }
 
     public Color getColor() {
@@ -354,28 +362,35 @@ public class Rule {
     }
 
     public boolean isCellSelected() {
-        return options.contains(CELL_NUCLEUS);
+        return currentOptions.contains(CELL_NUCLEUS);
     }
 
     public boolean isCellBodySelected() {
-        return options.contains(CELL_BODY);
+        return currentOptions.contains(CELL_BODY);
     }
 
     public boolean isAncestorSelected() {
-        return options.contains(ANCESTOR);
+        return currentOptions.contains(ANCESTOR);
     }
 
     public boolean isDescendantSelected() {
-        return options.contains(DESCENDANT);
+        return currentOptions.contains(DESCENDANT);
     }
 
     public SearchOption[] getOptions() {
-        return options.toArray(new SearchOption[options.size()]);
+        return currentOptions.toArray(new SearchOption[currentOptions.size()]);
     }
 
     public void setOptions(final List<SearchOption> options) {
-        this.options = new ArrayList<>();
-        this.options.addAll(options.stream().filter(Objects::nonNull).collect(toList()));
+        previousOptions = new ArrayList<>();
+        if (currentOptions != null) {
+            // set the previous
+            previousOptions.addAll(currentOptions.stream().filter(Objects::nonNull).collect(toList()));
+        }
+
+        // set the new options to the current
+        this.currentOptions = new ArrayList<>();
+        this.currentOptions.addAll(options.stream().filter(Objects::nonNull).collect(toList()));
     }
 
     /**
@@ -400,11 +415,11 @@ public class Rule {
     public String toStringFull() {
         final StringBuilder sb = new StringBuilder(text);
         sb.append(" ");
-        if (!options.isEmpty()) {
+        if (!currentOptions.isEmpty()) {
             sb.append("(");
-            for (int i = 0; i < options.size(); i++) {
-                sb.append(options.get(i).toString());
-                if (i < options.size() - 1) {
+            for (int i = 0; i < currentOptions.size(); i++) {
+                sb.append(currentOptions.get(i).toString());
+                if (i < currentOptions.size() - 1) {
                     sb.append(", ");
                 }
             }
@@ -427,14 +442,14 @@ public class Rule {
         if (name == null) return false;
 
         name = name.trim();
-        if (options.contains(CELL_NUCLEUS) && cells.contains(name)) {
+        if (currentOptions.contains(CELL_NUCLEUS) && cells.contains(name)) {
             return true;
         }
         for (String cell : cells) {
-            if (options.contains(ANCESTOR) && isAncestor(name, cell)) {
+            if (currentOptions.contains(ANCESTOR) && isAncestor(name, cell)) {
                 return true;
             }
-            if (options.contains(DESCENDANT) && isDescendant(name, cell)) {
+            if (currentOptions.contains(DESCENDANT) && isDescendant(name, cell)) {
                 return true;
             }
         }
@@ -478,7 +493,7 @@ public class Rule {
      * otherwise
      */
     public boolean appliesToCellBody(final String name) {
-        if (!visible || !options.contains(CELL_BODY)) {
+        if (!visible || !currentOptions.contains(CELL_BODY)) {
             return false;
         }
 
@@ -486,10 +501,10 @@ public class Rule {
             if (cell.equalsIgnoreCase(name)) {
                 return true;
             }
-            if (options.contains(DESCENDANT) && isDescendant(name, cell)) {
+            if (currentOptions.contains(DESCENDANT) && isDescendant(name, cell)) {
                 return true;
             }
-            if (options.contains(ANCESTOR) && isAncestor(name, cell)) {
+            if (currentOptions.contains(ANCESTOR) && isAncestor(name, cell)) {
                 return true;
             }
         }
@@ -528,6 +543,7 @@ public class Rule {
                 final String fullRuleString = toStringFull();
                 graphic.resetLabel(fullRuleString);
                 graphic.resetTooltip(fullRuleString);
+
                 ruleChanged.set(true);
             }
         }

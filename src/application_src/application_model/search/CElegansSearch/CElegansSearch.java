@@ -305,7 +305,6 @@ public class CElegansSearch implements OrganismSearch {
             }
         }
 
-
         if (includeAncestors) {
             ArrayList<String> ancestorSearchResults = new ArrayList<>();
             searchResults.stream().forEach(s -> {

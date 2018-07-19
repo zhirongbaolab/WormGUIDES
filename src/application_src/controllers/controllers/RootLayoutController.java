@@ -171,8 +171,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
             funRadioBtn,
             desRadioBtn,
             genRadioBtn,
-            conRadioBtn,
-            multiRadioBtn;
+            conRadioBtn;
+    //        multiRadioBtn;
     @FXML
     private CheckBox cellNucleusCheckBox,
             cellBodyCheckBox,
@@ -376,14 +376,14 @@ public class RootLayoutController extends BorderPane implements Initializable {
                         lineageData,
                         movieTimeOffset,
                         lineageTreeRoot,
-                        rulesList,
                         colorHash,
                         timeProperty,
                         contextMenuStage,
                         contextMenuController,
                         selectedNameLabeledProperty,
                         rebuildSubsceneFlag,
-                        defaultEmbryoFlag);
+                        defaultEmbryoFlag,
+                        annotationManager);
                 sulstonTreeStage.setScene(new Scene(treePane));
                 sulstonTreeStage.setTitle("LineageTree");
                 sulstonTreeStage.initModality(NONE);
@@ -536,9 +536,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 if (searchType.substring(searchType.length()-2).equals(", ")) {
                     searchType = searchType.substring(0, searchType.length()-2);
                 }
-            } else if (multiRadioBtn.isSelected()) {
-                searchType = "Multicellular Structure";
-            }
+            } //else if (multiRadioBtn.isSelected()) {
+                //searchType = "Multicellular Structure";
+            //}
 
             String searchOptions = "";
 
@@ -765,7 +765,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 uniformSizeCheckBox,
                 cellNucleusCheckBox,
                 cellBodyCheckBox,
-                multiRadioBtn,
+                //multiRadioBtn,
                 startTime,
                 endTime,
                 timeProperty,
@@ -1003,7 +1003,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 desRadioBtn,
                 genRadioBtn,
                 conRadioBtn,
-                multiRadioBtn,
+                //multiRadioBtn,
                 descendantLabel,
                 presynapticCheckBox,
                 postsynapticCheckBox,
@@ -1184,7 +1184,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         // transition to model and program specific data initialization
         Parameters.init();
         initSharedVariables();
-        annotationManager = new AnnotationManager(rulesList, rebuildSubsceneFlag);
+        annotationManager = new AnnotationManager(rulesList, rebuildSubsceneFlag, cElegansSearchPipeline);
 
         productionInfo = new ProductionInfo();
         casesLists = new CasesLists();

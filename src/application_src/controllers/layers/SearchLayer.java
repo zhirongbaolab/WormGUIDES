@@ -107,7 +107,7 @@ public class SearchLayer {
             final RadioButton descriptionRadioButton,
             final RadioButton geneRadioButton,
             final RadioButton connectomeRadioButton,
-            final RadioButton multicellRadioButton,
+            //final RadioButton multicellRadioButton,
             final Label descendantLabel,
             final CheckBox presynapticCheckBox,
             final CheckBox postsynapticCheckBox,
@@ -241,7 +241,7 @@ public class SearchLayer {
                 requireNonNull(descriptionRadioButton),
                 requireNonNull(geneRadioButton),
                 requireNonNull(connectomeRadioButton),
-                requireNonNull(multicellRadioButton),
+                //requireNonNull(multicellRadioButton),
                 requireNonNull(descendantLabel));
 
         this.rebuildSubsceneFlag = rebuidSubsceneFlag;
@@ -254,7 +254,7 @@ public class SearchLayer {
      * @param descriptionRadioButton
      * @param geneRadioButton
      * @param connectomeRadioButton
-     * @param multicellRadioButton
+     //* @param multicellRadioButton
      * @param descendantLabel
      */
     private void initSearchTypeToggleGroup(
@@ -263,7 +263,7 @@ public class SearchLayer {
             final RadioButton descriptionRadioButton,
             final RadioButton geneRadioButton,
             final RadioButton connectomeRadioButton,
-            final RadioButton multicellRadioButton,
+            //final RadioButton multicellRadioButton,
             final Label descendantLabel) {
 
         lineageRadioButton.setToggleGroup(searchTypeToggleGroup);
@@ -281,8 +281,8 @@ public class SearchLayer {
         connectomeRadioButton.setToggleGroup(searchTypeToggleGroup);
         connectomeRadioButton.setUserData(CONNECTOME);
 
-        multicellRadioButton.setToggleGroup(searchTypeToggleGroup);
-        multicellRadioButton.setUserData(MULTICELLULAR_STRUCTURE_CELLS);
+        //multicellRadioButton.setToggleGroup(searchTypeToggleGroup);
+        //multicellRadioButton.setUserData(MULTICELLULAR_STRUCTURE_CELLS);
 
 
         // listener for change in the search toggles
@@ -393,8 +393,8 @@ public class SearchLayer {
                                     neuromuscularCheckBox.isSelected(),
                                     OrganismDataType.LINEAGE));
                     break;
-                case MULTICELLULAR_STRUCTURE_CELLS: // model specific data
-                    break;
+                //case MULTICELLULAR_STRUCTURE_CELLS: // model specific data
+                    //break;
                 case NEIGHBOR: // model specific data
                     modelDataSearchResults = neighborsSearch.getNeighboringCells(searchedTerm);
                     break;
@@ -503,7 +503,7 @@ public class SearchLayer {
                     break;
                 case FUNCTIONAL: // C Elegans data
                     annotationManager.addColorRule(
-                            LINEAGE,
+                            FUNCTIONAL,
                             getSearchedText(),
                             colorPicker.getValue(),
                             localUnformattedResults,
@@ -511,7 +511,7 @@ public class SearchLayer {
                     break;
                 case DESCRIPTION: // C Elegans data
                     annotationManager.addColorRule(
-                            LINEAGE,
+                            DESCRIPTION,
                             getSearchedText(),
                             colorPicker.getValue(),
                             localUnformattedResults,
