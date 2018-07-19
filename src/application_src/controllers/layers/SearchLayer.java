@@ -91,7 +91,6 @@ public class SearchLayer {
     private final ColorPicker colorPicker;
     private final Button addRuleButton;
 
-    private BooleanProperty rebuildSubsceneFlag;
 
     public SearchLayer(
             final CElegansSearch CElegansSearchPipeline,
@@ -118,8 +117,7 @@ public class SearchLayer {
             final CheckBox ancestorCheckBox,
             final CheckBox descendantCheckBox,
             final ColorPicker colorPicker,
-            final Button addRuleButton,
-            final BooleanProperty rebuidSubsceneFlag) {
+            final Button addRuleButton) {
 
 
         //////// SEARCH PIPELINES, MODULES AND MANUALS ///////////////////
@@ -243,8 +241,6 @@ public class SearchLayer {
                 requireNonNull(connectomeRadioButton),
                 //requireNonNull(multicellRadioButton),
                 requireNonNull(descendantLabel));
-
-        this.rebuildSubsceneFlag = rebuidSubsceneFlag;
     }
 
     /**

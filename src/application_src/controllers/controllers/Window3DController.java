@@ -1196,29 +1196,6 @@ public class Window3DController {
             contextMenuController.disableWiredToFunction(true);
         }
 
-//        contextMenuController.setColorButtonListener(event -> {
-//            contextMenuStage.hide();
-//            if (isStructure) {
-//                if (hasFunctionalName) {
-//                    searchLayer.addStructureRuleBySceneName(getFunctionalNameByLineageName(name), WHITE)
-//                            .showEditStage(parentStage);
-//                } else {
-//                    searchLayer.addStructureRuleBySceneName(name, WHITE)
-//                            .showEditStage(parentStage);
-//                }
-//            } else {
-//                searchLayer.addColorRule(LINEAGE, name, WHITE, CELL_NUCLEUS, CELL_BODY)
-//                        .showEditStage(parentStage);
-//            }
-//        });
-//
-//        contextMenuController.setColorNeighborsButtonListener(event -> {
-//            contextMenuStage.hide();
-//            // color neighboring cell bodies, multicellular structures, as well as nuclei
-//            searchLayer.addColorRule(NEIGHBOR, name, WHITE, CELL_NUCLEUS, CELL_BODY)
-//                    .showEditStage(parentStage);
-//        });
-
         contextMenuStage.setX(sceneX);
         contextMenuStage.setY(sceneY);
 

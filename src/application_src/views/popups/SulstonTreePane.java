@@ -73,6 +73,7 @@ import static javafx.scene.Cursor.HAND;
 import static javafx.scene.control.ContentDisplay.GRAPHIC_ONLY;
 import static javafx.scene.control.Tooltip.install;
 import static javafx.scene.input.KeyCode.F5;
+import static javafx.scene.input.KeyCode.P;
 import static javafx.scene.input.KeyEvent.KEY_PRESSED;
 import static javafx.scene.input.MouseButton.PRIMARY;
 import static javafx.scene.input.MouseButton.SECONDARY;
@@ -169,6 +170,7 @@ public class SulstonTreePane extends ScrollPane {
                 // right click
                 if (event.getButton() == SECONDARY
                         || (event.getButton() == PRIMARY && (event.isControlDown() || event.isMetaDown()))) {
+                    resetSelectedNameLabeled(sourceName);
                     showContextMenu(sourceName, event.getScreenX(), event.getScreenY());
                 }
                 // left click
@@ -209,9 +211,7 @@ public class SulstonTreePane extends ScrollPane {
 
         this.rebuildSubsceneFlag = requireNonNull(rebuildSubsceneFlag);
         this.rebuildSubsceneFlag.addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                updateColoring();
-            }
+            updateColoring();
         });
 
         this.rules = requireNonNull(annotationManager.getRulesList());

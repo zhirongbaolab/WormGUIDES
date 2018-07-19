@@ -202,15 +202,15 @@ public class UrlParser {
                         List<String> geneSearchResults = cElegansSearchPipeline.executeGeneSearch(name, false, false, true, false, OrganismDataType.GENE).getValue();
                         annotationManager.addGeneColorRule(name, web(colorHex, alpha), geneSearchResults, options);
                     }
-                    if (types.contains("-m")) {
-                        // TODO -> not implemented
-                        annotationManager.addColorRule(
-                                MULTICELLULAR_STRUCTURE_CELLS,
-                                name,
-                                web(colorHex, alpha),
-                                new ArrayList<>(),
-                                options);
-                    }
+//                    if (types.contains("-m")) {
+//                        // TODO -> not implemented
+//                        annotationManager.addColorRule(
+//                                MULTICELLULAR_STRUCTURE_CELLS,
+//                                name,
+//                                web(colorHex, alpha),
+//                                new ArrayList<>(),
+//                                options);
+//                    }
                     if (types.contains("-M")) {
                         annotationManager.addStructureRuleBySceneName(
                                 name.replace("=", " "),

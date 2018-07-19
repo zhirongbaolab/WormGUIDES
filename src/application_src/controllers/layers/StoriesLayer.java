@@ -363,7 +363,7 @@ public class StoriesLayer {
                     activeNote.setColorUrl(generateInternalWithoutViewArgs(annotationManager.getRulesList()));
                     // copy the note's rules and temporarily use the story's color scheme
                     // then put back the copied rules into the active rules list
-                    final List<Rule> rulesCopy = new ArrayList<>(annotationManager.getRulesList());
+                    //final List<Rule> rulesCopy = new ArrayList<>(annotationManager.getRulesList());
                     parseUrlRules(activeStory.getColorUrl(), cElegansSearchPipeline, structuresSearch, neighborsSearch, annotationManager);
                     activeStory.setColorUrl(generateInternal(
                             annotationManager.getRulesList(),

@@ -856,6 +856,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 if (infoWindow == null) {
                     initInfoWindow();
                 }
+
                 infoWindow.addName(selectedEntityNameProperty.get());
                 openInfoWindow();
             }
@@ -1014,8 +1015,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 ancestorCheckBox,
                 descendantCheckBox,
                 colorPicker,
-                addSearchBtn,
-                rebuildSubsceneFlag);
+                addSearchBtn);
         searchResultsListView.setItems(searchResultsList);
     }
 
@@ -1240,6 +1240,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         initSearchLayer();
         initTimelineChart();
         initStoriesLayer();
+        initInfoWindow();
         initContextMenuStage();
 
         addListeners();
