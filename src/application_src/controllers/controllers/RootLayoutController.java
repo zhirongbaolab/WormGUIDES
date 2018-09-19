@@ -727,7 +727,6 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private void exitApplication() {
         System.out.println("Exiting...");
         if (!defaultEmbryoFlag) {
-            sulstonTreeStage.hide();
             mainStage.hide();
             return;
         }
@@ -1195,6 +1194,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
             lineageData = (LineageData) bundle.getObject("lineageData");
             System.out.println("loading external model");
             setOriginToZero(lineageData, defaultEmbryoFlag);
+            System.out.println("WormGUIDES has isSulstonMode: " + lineageData.isSulstonMode());
         } else {
             // takes about 2800ms (dictates noticeable part of startup time)
             final Instant start = Instant.now();
