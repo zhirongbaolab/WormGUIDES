@@ -1,4 +1,3 @@
-AB	P0.a	Embryonic founder cell
 ADAL	ABplapaaaapp	Ring interneurons
 ADAR	ABprapaaaapp	Ring interneurons
 ADEL	ABplapaaaapa	Anterior deirid, sensory neuron, dopaminergic
@@ -66,8 +65,8 @@ AVDL	ABalaaapalr	Ventral cord interneuron, synapses onto VA, DA, AS motorneurons
 AVDR	ABalaaapprl	Ventral cord interneuron, synapses onto VA, DA, AS motorneurons; formerly called delta
 AVEL	ABalpppaaaa	Ventral cord interneuron, like AVD but outputs restrict-ed to anterior cord
 AVER	ABpraaaaaaa	Ventral cord interneuron, like AVD but outputs restrict-ed to anterior cord
-AVFL	P1.aaaa	ABplapaappaaaa or ABprapaappaaaa. Interneuron, processes in ventral cord and ring, few synapses
-AVFR	W.aaa	ABprapaapaaaa. Interneuron, processes in ventral cord and ring, few synapses
+AVFL/R	P1.aaaa	ABplapaappaaaa or ABprapaappaaaa. Interneuron, processes in ventral cord and ring, few synapses
+AVFL/R	W.aaa	ABprapaapaaaa. Interneuron, processes in ventral cord and ring, few synapses
 AVG	ABprpapppap	Ventral cord interneuron, few synapses
 AVHL	ABalapaaaaa	Neuron, mainly postsynaptic in ventral cord and presynaptic in the ring
 AVHR	ABalappapaa	Neuron, mainly postsynaptic in ventral cord and presynaptic in the ring
@@ -88,7 +87,6 @@ BAGL	ABalppappap	Neuron, ciliated ending in head, no supporting cells, associate
 BAGR	ABarappppap	Neuron, ciliated ending in head, no supporting cells, associated with ILso
 BDUL	ABarppaappp	Neuron, process runs along excretory canal and into ring, unique darkly staining synaptic vesicles
 BDUR	ABarpppappp	Neuron, process runs along excretory canal and into ring, unique darkly staining synaptic vesicles
-C	P0.ppa	Embryonic founder cell
 CA1	P3.aapa	ABplappaaaaapa or ABprappaaaaapa. Male specific cell, not reconstructed
 CA2	P4aapa	ABprappaaaaapa or ABplappaaaaapa. Male specific cell, not reconstructed
 CA3	P5.aapa	ABplappaapaapa or ABprappaapaapa. Male specific cell, not reconstructed
@@ -126,7 +124,6 @@ CP6	P8.aapp	ABprappappaapp or ABplappappaapp. Male specific motor neuron in vent
 CP7	P9.aapp	ABplapapapaapp or ABprapapapaapp. Male specific motor neuron in ventral cord
 CP8	P10.aapp	ABprapapapaapp or ABplapapapaapp. Male specific interneuron, project into preanal ganglion
 CP9	P11.aapp	ABplapappaaapp. Male specific interneuron, project into preanal ganglion
-D	P0.pppa	Embryonic founder cell
 DA1	ABprppapaap	Ventral cord motor neurons, innervate dorsal muscles
 DA2	ABplppapapa	Ventral cord motor neurons, innervate dorsal muscles
 DA3	ABprppapapa	Ventral cord motor neurons, innervate dorsal muscles
@@ -136,9 +133,9 @@ DA6	ABplpppaaap	Ventral cord motor neurons, innervate dorsal muscles
 DA7	ABprpppaaap	Ventral cord motor neurons, innervate dorsal muscles
 DA8	ABprpapappp	Ventral cord motor neurons, innervate dorsal muscles
 DA9	ABplpppaaaa	Ventral cord motor neurons, innervate dorsal muscles
-DB1	ABplpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
+DB1/3	ABplpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
 DB2	ABarappappa	Ventral cord motor neurons, innervate dorsal muscles
-DB3	ABprpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
+DB3/1	ABprpaaaapp	Ventral cord motor neurons, innervate dorsal muscles
 DB4	ABprpappapp	Ventral cord motor neurons, innervate dorsal muscles
 DB5	ABplpapappp	Ventral cord motor neurons, innervate dorsal muscles
 DB6	ABplppaappp	Ventral cord motor neurons, innervate dorsal muscles
@@ -154,15 +151,14 @@ DVB	K.p	ABplpapppaap. Ring interneuron, cell body in dorsorectal ganglion, inerv
 DVC	Caapaa	Ring interneurons, cell bodies in dorsorectal ganglion
 DVE	B.ppap	ABprppppapappap. Male specific neuron, cell body in dorsorectal ganglion
 DVF	B.ppppa	ABprppppapappppa. Male specific neuron, cell body in dorsorectal ganglion
-DX1	F.lvda	ABplppppapplvda. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
-DX2	F.rvda	ABplppppapprvda. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
-DX3	U.laa	ABplppppapalaa. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
-DX4	U.raa	ABplppppaparaa. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
-E	P0.pap	Embryonic founder cell
-EF1	F.lvdp	Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
-EF2	F.rvdp	Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
-EF3	U.lap	ABplppppapalap. Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
-EF4	U.rap	ABplppppaparap. Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
+DX1/2	F.lvda	ABplppppapplvda. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
+DX1/2	F.rvda	ABplppppapprvda. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
+DX3/4	U.laa	ABplppppapalaa. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
+DX3/4	U.raa	ABplppppaparaa. Male specific neuron, darkly staining cell body in pre- anal ganglion, process penetrate basement membrane and contact muscles
+EF1/2	F.lvdp	Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
+EF1/2	F.rvdp	Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
+EF3/4	U.lap	ABplppppapalap. Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
+EF3/4	U.rap	ABplppppaparap. Male specific neuron, large cell body in preanal ganglion, synaptic inputs from ray neurons.
 F	ABplppppapp	Rectal cell, blast cell in male
 FLPL	ABplapaaapad	Neuron, ciliated ending in head, no supporting cells, associated with ILso
 FLPR	ABprapaaapad	Neuron, ciliated ending in head, no supporting cells, associated with ILso
@@ -234,7 +230,6 @@ M5	MSpaaapap	Pharyngeal motorneurons
 MCL	ABalpaaappp	Pharyngeal neurons that synapse onto marginal cells
 MCR	ABarapaappp	Pharyngeal neurons that synapse onto marginal cells
 MI	ABaraappaaa	Pharyngeal motor neuron/interneuron
-MS	P0.paa	Embryonic founder cell
 NSML	ABaraapapaav	Pharyngeal neurosecretory motorneuron, contain serotonin
 NSMR	ABaraapppaav	Pharyngeal neurosecretory motorneuron, contain serotonin
 OLLL	ABalppppapaa	Lateral outer labial neurons
@@ -255,17 +250,16 @@ OLQsoDL	ABarpaaaaal	Quadrant outer labial socket
 OLQsoDR	ABarpaaaaar	Quadrant outer labial socket
 OLQsoVL	ABalppaaapp	Quadrant outer labial socket
 OLQsoVR	ABalaappapp	Quadrant outer labial socket
-P0	Z	Single cell zygote
-P1	ABplapaapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P2	ABprapaapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P3	ABplappaaa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P4	ABprappaaa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P5	ABplappaap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P6	ABprappaap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P7	ABplappapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P8	ABprappapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P9	ABplapapap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
-P10	ABprapapap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P1/2L	ABplapaapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P1/2R	ABprapaapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P3/4L	ABplappaaa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P3/4R	ABprappaaa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P5/6L	ABplappaap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P5/6R	ABprappaap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P7/8L	ABplappapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P7/8R	ABprappapp	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P9/10L	ABplapapap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
+P9/10R	ABprapapap	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
 P11	ABplapappa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
 P12	ABprapappa	Postembryonic blast cells for ventral cord motorneurons, ventral hypodermis, vulva, male preanal ganglion; ventral hypodermis in L1
 PCAL	Y.plppd	ABprpppaaaaplppd. Sensory neuron of postcloacal sensilla in male
@@ -293,7 +287,7 @@ PGA	P11.papp	ABplapappapapp. Male specific interneuron, preanal ganglion
 PHAL	ABplpppaapp	Phasmid neurons, probably chemosensory
 PHAR	ABprpppaapp	Phasmid neurons, probably chemosensory
 PHBL	ABplapppappp	Phasmid neurons, probably chemosensory
-PHBR	ABprapppappp	Phasmid neurons, probably chemosensory
+PHRB	ABprapppappp	Phasmid neurons, probably chemosensory
 PHCL	TL.pppaa	ABplappppppppaa. Neuron, striated rootlet in male, possibly sensory in tail spike
 PHCR	TR.pppaa	ABprappppppppaa. Neuron, striated rootlet in male, possibly sensory in tail spike
 PHshL	ABplpppapaa	Phasmid sheath
@@ -318,7 +312,7 @@ PVPL	ABplppppaaa	Interneuron, cell body in lumbar ganglion, projects along ventr
 PVPR	ABprppppaaa	Interneuron, cell body in lumbar ganglion, projects along ventral cord to nerve ring
 PVQL	ABplapppaaa	Interneuron, projects along ventral cord to ring
 PVQR	ABprapppaaa	Interneuron, projects along ventral cord to ring
-PVR	Caappv	Interneuron, projects along ventral cord to ring
+PVR	Caappa	Interneuron, projects along ventral cord to ring
 PVT	ABplpappppa	Interneuron, projects along ventral cord to ring
 PVV	P11.paaa	ABplapappapaaa. Male specific motor neuron, ventral cord
 PVWL	TL.ppa	ABplapppppppa. Interneuron, posterior ventral cord, few synapses
@@ -397,7 +391,7 @@ RIH	ABprpappaaa	Ring interneuron
 RIML	ABplppaapap	Ring motor neuron
 RIMR	ABprppaapap	Ring motor neuron
 RIPL	ABalpapaaaa	Ring/pharynx interneuron, only direct connection between pharynx and ring
-RIPR	ABarappaaaa	Ring/pharynx interneuron, only direct connection between pharynx and ring
+RIPR	ABprappaaaa	Ring/pharynx interneuron, only direct connection between pharynx and ring
 RIR	ABprpapppaa	Ring interneuron
 RIS	ABprpappapa	Ring interneuron
 RIVL	ABplpaapaaa	Ring interneuron
@@ -535,8 +529,6 @@ XXXL	ABplaaapaa	Embryonic head hypodermal cell
 XXXR	ABarpappaa	Embryonic head hypodermal cell
 Y	ABprpppaaaa	Rectal cell at hatching, becomes PDA in hermaphrodite, postembryonic blast cell in male
 Z1	MSpppaap	Somatic gonad precursor cell
-Z2	P0.ppppp	Germ line precursor cell
-Z3	P0.ppppa	Germ line precursor cell
 Z4	MSappaap	Somatic gonad precursor cell
 Anterior_arcade_DR	ABaraaapppa	Interface between pharynx and hypodermis, form anterior part of the buccal cavity
 Anterior_arcade_DL	ABalpaappaa	Interface between pharynx and hypodermis, form anterior part of the buccal cavity
@@ -601,8 +593,8 @@ hyp7	ABarppaapa	Embryonic large hypodermal syncytium
 hyp7	ABarpppapa	Embryonic large hypodermal syncytium
 hyp7	ABplaapppa	Embryonic large hypodermal syncytium
 hyp7	ABplaapppp	Embryonic large hypodermal syncytium
-hyp7	AB.plappppa	Embryonic large hypodermal syncytium
-hyp7	AB.praapppa	Embryonic large hypodermal syncytium
+hyp7	ABplappppa	Embryonic large hypodermal syncytium
+hyp7	ABpraapppa	Embryonic large hypodermal syncytium
 hyp7	ABpraapppp	Embryonic large hypodermal syncytium
 hyp7	ABprappppa	Embryonic large hypodermal syncytium
 hyp7	Caaaaa	Embryonic large hypodermal syncytium
@@ -617,36 +609,36 @@ hyp7	Cpaapp	Embryonic large hypodermal syncytium
 hyp7	Cpapaa	Embryonic large hypodermal syncytium
 hyp7	Cpapap	Embryonic large hypodermal syncytium
 hyp7	Cpappd	Embryonic large hypodermal syncytium
-hyp8	ABplpppapap	Tail ventral hypodermis
-hyp9	ABprpppapap	Tail ventral hypodermis
+hyp8/9	ABplpppapap	Tail ventral hypodermis
+hyp8/9	ABprpppapap	Tail ventral hypodermis
 hyp10	ABplppppppp	Tail ventral hypodermis
 hyp10	ABprppppppp	Tail ventral hypodermis
-hyp11	Cpappv	Tail dorsal hypodermis
+hyp11	Cpappa	Tail dorsal hypodermis
 hyp12	P12.pa	Preanal hypodermis
 hyp_hook	P10.papp	Hook
 hyp_hook	P11.ppaa	Hypodermis associated with hook sensillum of male
 hyp_hook	P11.ppap	Hypodermis associated with hook sensillum of male
 hyp_hook	P11.ppp	Hypodermis associated with hook sensillum of male
-int1dl	Ealaad	Intestinal cell
-int1vl	Ealaav	Intestinal cell
-int3v	Ealap	Intestinal cell
-int2v	Ealpa	Intestinal cell
-int5l	Ealpp	Intestinal cell
-int1dr	Earaad	Intestinal cell
-int1vr	Earaav	Intestinal cell
-int3d	Earap	Intestinal cell
-int2d	Earpa	Intestinal cell
-int5r	Earpp	Intestinal cell
-int4v	Eplaa	Intestinal cell
-int6l	Eplap	Intestinal cell
-int7l	Eplpa	Intestinal cell
-int8l	Eplppa	Intestinal cell
-int9l	Eplppp	Intestinal cell
-int4d	Epraa	Intestinal cell
-int6r	Eprap	Intestinal cell
-int7r	Eprpa	Intestinal cell
-int8r	Eprppa	Intestinal cell
-int9r	Eprppp	Intestinal cell
+int	Ealaad	Intestinal cell
+int	Ealaav	Intestinal cell
+int	Ealap	Intestinal cell
+int	Ealpa	Intestinal cell
+int	Ealpp	Intestinal cell
+int	Earaad	Intestinal cell
+int	Earaav	Intestinal cell
+int	Earap	Intestinal cell
+int	Earpa	Intestinal cell
+int	Earpp	Intestinal cell
+int	Eplaa	Intestinal cell
+int	Eplap	Intestinal cell
+int	Eplpa	Intestinal cell
+int	Eplppa	Intestinal cell
+int	Eplppp	Intestinal cell
+int	Epraa	Intestinal cell
+int	Eprap	Intestinal cell
+int	Eprpa	Intestinal cell
+int	Eprppa	Intestinal cell
+int	Eprppp	Intestinal cell
 int	In.a	Postembryonic intestinal cell
 int	In.p	Postembryonic intestinal cell
 linker_killer	U.lp or U.rp	One of these cells, sometimes fused with U.l/ra, phagocytoses the male linker cell
@@ -696,88 +688,88 @@ mc2V	ABarapapppa	Pharyngeal marginal cell
 mc3DL	MSaaapapa	Pharyngeal marginal cell
 mc3DR	MSpaapapa	Pharyngeal marginal cell
 mc3V	ABalpappapp	Pharyngeal marginal cell
-mu_anal	ABplpppppap	Anal depressor muscle
-VR20_VBW_muscle	ABprpppppaa	Body wall muscle
-VL9_VBW_muscle	Capaaaa	Body wall muscle
-VL11_VBW_muscle	Capaaap	Body wall muscle
-VL13_VBW_muscle	Capaapa	Body wall muscle
-VL15_VBW_muscle	Capaapp	Body wall muscle
-DL13_DBW_muscle	Capapaa	Body wall muscle
-DL17_DBW_muscle	Capapap	Body wall muscle
-VL20_VBW_muscle	Capappa	Body wall muscle
-VL22_VBW_muscle	Capappp	Body wall muscle
-DL11_DBW_muscle	Cappaaa	Body wall muscle
-DL18_DBW_muscle	Cappaap	Body wall muscle
-DL19_DBW_muscle	Cappapa	Body wall muscle
-DL23_DBW_muscle	Cappapp	Body wall muscle
-DL20_DBW_muscle	Capppaa	Body wall muscle
-DL22_DBW_muscle	Capppap	Body wall muscle
-DL24_DBW_muscle	Cappppd	Body wall muscle
-VL23_VBW_muscle	Cappppv	Body wall muscle
-VR9_VBW_muscle	Cppaaaa	Body wall muscle
-VR11_VBW_muscle	Cppaaap	Body wall muscle
-VR13_VBW_muscle	Cppaapa	Body wall muscle
-VR15_VBW_muscle	Cppaapp	Body wall muscle
-DR13_DBW_muscle	Cppapaa	Body wall muscle
-DR17_DBW_muscle	Cppapap	Body wall muscle
-VR19_VBW_muscle	Cppappa	Body wall muscle
-VR22_VBW_muscle	Cppappp	Body wall muscle
-DR11_DBW_muscle	Cpppaaa	Body wall muscle
-DR18_DBW_muscle	Cpppaap	Body wall muscle
-DR19_DBW_muscle	Cpppapa	Body wall muscle
-DR23_DBW_muscle	Cpppapp	Body wall muscle
-DR20_DBW_muscle	Cppppaa	Body wall muscle
-DR22_DBW_muscle	Cppppap	Body wall muscle
-DR24_DBW_muscle	Cpppppd	Body wall muscle
-VR24_VBW_muscle	Cpppppv	Body wall muscle
-VL5_VBW_muscle	Daaaa	Body wall muscle
-DL7_DBW_muscle	Daaap	Body wall muscle
-VL4_VBW_muscle	Daapa	Body wall muscle
-VL6_VBW_muscle	Daapp	Body wall muscle
-body_wall_muscle	Dapaa	Body wall muscle
-body_wall_muscle	Dapap	Body wall muscle
-DL8_DBW_muscle	Dappaa	Body wall muscle
-DL10_DBW_muscle	Dappap	Body wall muscle
-DL12_DBW_muscle	Dapppa	Body wall muscle
-DL14_DBW_muscle	Dapppp	Body wall muscle
-VR5_VBW_muscle	Dpaaa	Body wall muscle
-DR7_DBW_muscle	Dpaap	Body wall muscle
-VR4_VBW_muscle	Dpapa	Body wall muscle
-VR6_VBW_muscle	Dpapp	Body wall muscle
-VR7_VBW_muscle	Dppaa	Body wall muscle
-DR9_DBW_muscle	Dppap	Body wall muscle
-DR8_DBW_muscle	Dpppaa	Body wall muscle
-DR10_DBW_muscle	Dpppap	Body wall muscle
-DR12_DBW_muscle	Dppppa	Body wall muscle
-DR14_DBW_muscle	Dppppp	Body wall muscle
-VL8_VBW_muscle	MSaapppaa	Body wall muscle
-VL10_VBW_muscle	MSaapppap	Body wall muscle
-VL12_VBW_muscle	MSaappppa	Body wall muscle
-VL14_VBW_muscle	MSaappppp	Body wall muscle
-DL1_DBW_muscle	MSapaaap	Body wall muscle
-VL1_VBW_muscle	MSapapap	Body wall muscle
-DL2_DBW_muscle	MSapappa	Body wall muscle
-DL3_DBW_muscle	MSapappp	Body wall muscle
-VL2_VBW_muscle	MSappapp	Body wall muscle
-VL3_VBW_muscle	MSapppaa	Body wall muscle
-DL5_DBW_muscle	MSapppap	Body wall muscle
-DL4_DBW_muscle	MSappppa	Body wall muscle
-DL6_DBW_muscle	MSappppp	Body wall muscle
-VL16_VBW_muscle	MSpappaa	Body wall muscle
-VR16_VBW_muscle	MSpappap	Body wall muscle
-VR8_VBW_muscle	MSpapppaa	Body wall muscle
-VR10_VBW_muscle	MSpapppap	Body wall muscle
-VR12_VBW_muscle	MSpappppa	Body wall muscle
-VR14_VBW_muscle	MSpappppp	Body wall muscle
-DR1_DBW_muscle	MSppaaap	Body wall muscle
-VR1_VBW_muscle	MSppapap	Body wall muscle
-DR2_DBW_muscle	MSppappa	Body wall muscle
-DR3_DBW_muscle	MSppappp	Body wall muscle
-VR2_VBW_muscle	MSpppapp	Body wall muscle
-VR3_VBW_muscle	MSppppaa	Body wall muscle
-DR5_DBW_muscle	MSppppap	Body wall muscle
-DR4_DBW_muscle	MSpppppa	Body wall muscle
-DR6_DBW_muscle	MSpppppp	Body wall muscle
+DL01_DBW_Muscle	MSapappa	Body wall muscle
+DL02_DBW_Muscle	MSapaaap	 Body wall muscle
+DL03_DBW_Muscle	MSappppa	Body wall muscle
+DL04_DBW_Muscle	MSapappp	 Body wall muscle
+DL05_DBW_Muscle	MSappppp	Body wall muscle
+DL06_DBW_Muscle	MSapppap	 Body wall muscle
+DL07_DBW_Muscle	Dappaa	 Body wall muscle
+DL08_DBW_Muscle	Daaap	Body wall muscle
+DL09_DBW_Muscle	Dappap	 Body wall muscle
+DL10_DBW_Muscle	Dapap	 Body wall muscle
+DL11_DBW_Muscle	Dapppa	 Body wall muscle
+DL12_DBW_Muscle	Cappaaa	 Body wall muscle
+DL13_DBW_Muscle	Dapppp	 Body wall muscle
+DL14_DBW_Muscle	Capapaa	 Body wall muscle
+DL17_DBW_Muscle	Cappaap	 Body wall muscle
+DL18_DBW_Muscle	Capapap	Body wall muscle
+DL19_DBW_Muscle	Capppaa	Body wall muscle
+DL20_DBW_Muscle	Cappapa	Body wall muscle
+DL21_DBW_Muscle	Capppap	 Body wall muscle
+DL23_DBW_Muscle	Cappppd	Body wall muscle
+DL24_DBW_Muscle	Cappapp	 Body wall muscle
+DR01_DBW_Muscle	MSppappa	Body wall muscle
+DR02_DBW_Muscle	MSppaaap	Body wall muscle
+DR03_DBW_Muscle	MSpppppa	 Body wall muscle
+DR04_DBW_Muscle	MSppappp	 Body wall muscle
+DR05_DBW_Muscle	MSpppppp	 Body wall muscle
+DR06_DBW_Muscle	MSppppap	 Body wall muscle
+DR07_DBW_Muscle	Dpppaa	 Body wall muscle
+DR08_DBW_Muscle	Dpaap	 Body wall muscle
+DR09_DBW_Muscle	Dpppap	 Body wall muscle
+DR10_DBW_Muscle	Dppap	Body wall muscle
+DR11_DBW_Muscle	Dppppa	Body wall muscle
+DR12_DBW_Muscle	Cpppaaa	 Body wall muscle
+DR13_DBW_Muscle	Dppppp	Body wall muscle
+DR14_DBW_Muscle	Cppapaa	Body wall muscle
+DR17_DBW_Muscle	Cpppaap	Body wall muscle
+DR18_DBW_Muscle	Cppapap	 Body wall muscle
+DR19_DBW_Muscle	Cppppaa	 Body wall muscle
+DR20_DBW_Muscle	Cpppapa	 Body wall muscle
+DR21_DBW_Muscle	Cppppap	Body wall muscle
+DR23_DBW_Muscle	Cpppppd	 Body wall muscle
+DR24_DBW_Muscle	Cpppapp	Body wall muscle
+mu_anal	ABplpppppap	Anal
+VL01_VBW_Muscle	MSappapp	 Body wall muscle
+VL02_VBW_Muscle	MSapapap	Body wall muscle
+VL03_VBW_Muscle	Daapa	Body wall muscle
+VL04_VBW_Muscle	MSapppaa	 Body wall muscle
+VL05_VBW_Muscle	Daapp	Body wall muscle
+VL06_VBW_Muscle	Daaaa	 Body wall muscle
+VL07_VBW_Muscle	MSaapppaa	 Body wall muscle
+VL08_VBW_Muscle	Dapaa	 Body wall muscle
+VL09_VBW_Muscle	MSaapppap	Body wall muscle
+VL10_VBW_Muscle	Capaaaa	 Body wall muscle
+VL11_VBW_Muscle	MSaappppa	 Body wall muscle
+VL12_VBW_Muscle	Capaaap	Body wall muscle
+VL13_VBW_Muscle	MSaappppp	Body wall muscle
+VL14_VBW_Muscle	Capaapa	Body wall muscle
+VL15_VBW_Muscle	MSpappaa	Body wall muscle
+VL16_VBW_Muscle	Capaapp	 Body wall muscle
+VL19_VBW_Muscle	Capappa	Body wall muscle
+VL22_VBW_Muscle	Capappp	Body wall muscle
+VL23_VBW_Muscle	Cappppv	 Body wall muscle
+VR01_VBW_Muscle	MSpppapp	 Body wall muscle
+VR02_VBW_Muscle	MSppapap	Body wall muscle
+VR03_VBW_Muscle	Dpapa	Body wall muscle
+VR04_VBW_Muscle	MSppppaa	 Body wall muscle
+VR05_VBW_Muscle	Dpapp	Body wall muscle
+VR06_VBW_Muscle	Dpaaa	 Body wall muscle
+VR07_VBW_Muscle	MSpapppaa	 Body wall muscle
+VR08_VBW_Muscle	Dppaa	 Body wall muscle
+VR09_VBW_Muscle	MSpapppap	 Body wall muscle
+VR10_VBW_Muscle	Cppaaaa	 Body wall muscle
+VR11_VBW_Muscle	MSpappppa	 Body wall muscle
+VR12_VBW_Muscle	Cppaaap	 Body wall muscle
+VR13_VBW_Muscle	MSpappppp	Body wall muscle
+VR14_VBW_Muscle	Cppaapa	Body wall muscle
+VR15_VBW_Muscle	MSpappap	Body wall muscle
+VR16_VBW_Muscle	Cppaapp	Body wall muscle
+VR19_VBW_Muscle	ABprpppppaa	 Body wall muscle
+VR20_VBW_Muscle	Cppappa	Body wall muscle
+VR21_VBW_Muscle	Cppappp	Body wall muscle
+VR24_VBW_Muscle	Cpppppv	 Body wall muscle
 mu_int_L	ABplpppppaa	Intestinal muscles, attach to intestine and body wall anterior to anus
 mu_int_R	MSppaapp	Intestinal muscles, attach to intestine and body wall anterior to anus
 mu_sph	ABprpppppap	Sphincter muscle of intestino-rectal valve
