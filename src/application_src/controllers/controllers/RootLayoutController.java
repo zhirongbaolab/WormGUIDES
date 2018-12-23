@@ -804,8 +804,15 @@ public class RootLayoutController extends BorderPane implements Initializable {
             }
         });
 
-        // initial start at movie end (builds subscene automatically)
-        timeProperty.set(endTime);
+
+            // initial start at movie end (builds subscene automatically)
+            timeProperty.set(endTime);
+    }
+
+    public void setTimePropertyValue(int time) {
+        if (time > 0 && time <= lineageData.getNumberOfTimePoints()) {
+            timeProperty.set(time);
+        }
     }
 
     public void setStage(final Stage stage) {
@@ -1210,7 +1217,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
             startTime = productionInfo.getDefaultStartTime();
             movieTimeOffset = productionInfo.getMovieTimeOffset();
         } else {
-            startTime = 1;
+            startTime =  1;
             movieTimeOffset = 0;
         }
 

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.time.Instant;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -28,7 +29,7 @@ import static application_src.application_model.loaders.IconImageLoader.loadImag
 /**
  * Driver class for the WormGUIDES desktop application
  */
-public class MainApp extends Application {
+public class MainApp extends Application implements Observe {
 
     private static Stage primaryStage;
 
@@ -38,7 +39,7 @@ public class MainApp extends Application {
 
     private BorderPane rootLayout;
 
-    private RootLayoutController controller;
+    private static RootLayoutController controller;
 
     public static void startProgramatically(final String[] args, final NucleiMgrAdapterResource nmar) {
         nucleiMgrAdapterResource = nmar;
@@ -85,7 +86,6 @@ public class MainApp extends Application {
             loader.setResources(nucleiMgrAdapterResource);
             setImplicitExit(false);
         }
-
         controller = new RootLayoutController();
         controller.setStage(primaryStage);
         loader.setController(controller);
@@ -107,6 +107,15 @@ public class MainApp extends Application {
         } catch (IOException e) {
             System.out.println("Could not initialize root layout");
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void updateTime(int time) {
+        if (nucleiMgrAdapterResource != null) {
+            if (controller != null) {
+                Platform.runLater(() -> controller.setTimePropertyValue(time));
+            }
         }
     }
 }
