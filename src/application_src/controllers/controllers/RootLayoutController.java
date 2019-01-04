@@ -85,6 +85,7 @@ import application_src.views.popups.SulstonTreePane;
 import application_src.views.url_window.URLLoadWarningDialog;
 import application_src.views.url_window.URLLoadWindow;
 import application_src.views.url_window.URLShareWindow;
+import sun.applet.Main;
 
 import static java.lang.System.lineSeparator;
 import static java.time.Duration.between;
@@ -733,6 +734,10 @@ public class RootLayoutController extends BorderPane implements Initializable {
         System.exit(0);
     }
 
+    public void showMainStage() {
+        mainStage.show();
+    }
+
     private void initWindow3DController() {
         final double[] xyzScale = lineageData.getXYZScale();
         window3DController = new Window3DController(
@@ -804,9 +809,15 @@ public class RootLayoutController extends BorderPane implements Initializable {
             }
         });
 
-
+        if (defaultEmbryoFlag) {
             // initial start at movie end (builds subscene automatically)
             timeProperty.set(endTime);
+        } else if (MainApp.externallySetStartTime != -1) {
+            timeProperty.set(MainApp.externallySetStartTime);
+        } else {
+            timeProperty.set(1);
+        }
+
     }
 
     public void setTimePropertyValue(int time) {
@@ -951,7 +962,12 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 timeLabel.setText("~" + newValue.intValue() + " min");
             }
         });
-        timeLabel.setText("~" + (timeProperty.get() + movieTimeOffset) + " min p.f.c.");
+
+        if (defaultEmbryoFlag) {
+            timeLabel.setText("~" + (timeProperty.get() + movieTimeOffset) + " min p.f.c.");
+        } else {
+            timeLabel.setText("~" + timeProperty.get()  + " min");
+        }
         timeLabel.toFront();
 
         totalNucleiProperty.addListener((observable, oldValue, newValue) -> {
@@ -1172,6 +1188,10 @@ public class RootLayoutController extends BorderPane implements Initializable {
         mainTabPane.getTabs().add(storiesTab);
         mainTabPane.getTabs().add(colorAndDisplayTab);
         mainTabPane.toFront();
+    }
+
+    public IntegerProperty getTimeProperty() {
+        return this.timeProperty;
     }
 
     @Override

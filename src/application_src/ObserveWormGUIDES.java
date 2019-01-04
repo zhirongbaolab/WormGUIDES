@@ -1,5 +1,5 @@
 package application_src;
 
-public interface Observe {
+public interface ObserveWormGUIDES {
     void updateTime(int time);
 }

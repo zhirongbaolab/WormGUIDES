@@ -9,6 +9,8 @@ import java.time.Instant;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -29,7 +31,7 @@ import static application_src.application_model.loaders.IconImageLoader.loadImag
 /**
  * Driver class for the WormGUIDES desktop application
  */
-public class MainApp extends Application implements Observe {
+public class MainApp extends Application implements ObserveWormGUIDES {
 
     private static Stage primaryStage;
 
@@ -39,7 +41,11 @@ public class MainApp extends Application implements Observe {
 
     private BorderPane rootLayout;
 
-    private static RootLayoutController controller;
+
+    public static RootLayoutController controller;
+    public static int externallySetStartTime = -1;
+    public static IntegerProperty timePropertyMainApp = new SimpleIntegerProperty(1);
+
 
     public static void startProgramatically(final String[] args, final NucleiMgrAdapterResource nmar) {
         nucleiMgrAdapterResource = nmar;
@@ -74,6 +80,10 @@ public class MainApp extends Application implements Observe {
             if (controller != null) {
                 controller.initCloseApplication();
             }
+        });
+
+        controller.getTimeProperty().addListener((observable, oldValue, newValue) -> {
+            timePropertyMainApp.set(newValue.intValue());
         });
     }
 
@@ -117,5 +127,18 @@ public class MainApp extends Application implements Observe {
                 Platform.runLater(() -> controller.setTimePropertyValue(time));
             }
         }
+    }
+
+    public void showMainStage() {
+        if (controller != null) {
+            Platform.runLater(() -> controller.showMainStage());
+        }
+    }
+
+    public IntegerProperty grabTimeProperty() {
+        if (controller != null) {
+            return controller.getTimeProperty();
+        }
+        return null;
     }
 }
