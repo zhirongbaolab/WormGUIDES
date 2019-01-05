@@ -129,6 +129,12 @@ public class MainApp extends Application implements ObserveWormGUIDES {
         }
     }
 
+    public void flipPlayButtonIcon() {
+        if (controller != null) {
+            Platform.runLater(() -> controller.flipPlayButtonIcon());
+        }
+    }
+
     public void showMainStage() {
         if (controller != null) {
             Platform.runLater(() -> controller.showMainStage());

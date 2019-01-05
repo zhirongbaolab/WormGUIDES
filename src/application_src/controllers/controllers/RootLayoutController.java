@@ -136,8 +136,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
     // Subscene controls
     @FXML
     private Button backwardButton,
-            forwardButton,
-            playButton;
+            forwardButton;
+    @FXML public Button playButton;
+
     @FXML
     private Label timeLabel,
             totalNucleiLabel;
@@ -1001,6 +1002,14 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 playButton.setGraphic(playIcon);
             }
         });
+    }
+
+    public void flipPlayButtonIcon() {
+        if (playButton.getGraphic().equals(pauseIcon)) {
+            playButton.setGraphic(playIcon);
+        } else if (playButton.getGraphic().equals(playIcon)) {
+            playButton.setGraphic(pauseIcon);
+        }
     }
 
     private void setSlidersProperties() {
