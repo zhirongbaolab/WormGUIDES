@@ -50,7 +50,7 @@ public class SulstonLineage {
     private static final TreeItem<String> P4 = new TreeItem<String>("P4");
     private static final TreeItem<String> Z3 = new TreeItem<String>("Z3");
     private static final TreeItem<String> Z2 = new TreeItem<String>("Z2");
-    private static final String[] specialCasesAsStringArray = {"P0", "AB", "P1", "P2", "EMS", "E", "MS", "C", "P3", "D", "P4", "Z3", "Z2"};
+    private static final String[] specialCasesAsLowerCaseStringArray = {"p0", "ab", "p1", "p1", "ems", "e", "ms", "c", "p3", "d", "p4", "z3", "z2"};
 
     public static void init() {
         // initialize the special cases tree
@@ -77,7 +77,7 @@ public class SulstonLineage {
         return P0_root;
     }
 
-    public static String[] getSpecialCasesAsStringArray() {
-        return specialCasesAsStringArray;
+    public static String[] getSpecialCasesAsLowerCaseStringArray() {
+        return specialCasesAsLowerCaseStringArray;
     }
 }

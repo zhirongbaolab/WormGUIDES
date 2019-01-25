@@ -47,6 +47,7 @@ import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -689,6 +690,24 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
     }
 
+    public void enableTimeControls() {
+        this.playButton.setDisable(false);
+        this.backwardButton.setDisable(false);
+        this.forwardButton.setDisable(false);
+        this.timeSlider.setDisable(false);
+    }
+
+    public void disableTimeControls() {
+        this.playButton.setDisable(true);
+        this.backwardButton.setDisable(true);
+        this.forwardButton.setDisable(true);
+        this.timeSlider.setDisable(true);
+    }
+
+    public boolean isTimeSliderPressed() {
+        return this.timeSlider.isPressed();
+    }
+
     public void initCloseApplication() {
         // check if there is an active story to prompt save dialog
         if (storiesLayer.getActiveStory() != null) {
@@ -802,6 +821,13 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 playingMovieFlag.set(false);
             }
         });
+
+        // in case AceTree has opened WormGUIDES, update the time property in MainApp when the slider is let go because
+        // AceTree doesn't update dynamically with the time slider for optimization purposes
+        timeSlider.setOnMouseReleased(e -> {
+            MainApp.timePropertyMainApp.set(timeProperty.get());
+        });
+
         timeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             final int value = newValue.intValue();
             if (value != oldValue.intValue()) {
@@ -1155,6 +1181,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
         timelineStage.setTitle("Timeline");
         timelineStage.setScene(TimelineChart.initialize(storiesLayer, productionInfo));
     }
+
+    public BooleanProperty getPlayingMovieFlag() { return this.playingMovieFlag; }
 
     /**
      * Replaces all application tabs with dockable ones

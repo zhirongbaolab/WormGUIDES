@@ -9,7 +9,9 @@ import java.time.Instant;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -45,6 +47,7 @@ public class MainApp extends Application implements ObserveWormGUIDES {
     public static RootLayoutController controller;
     public static int externallySetStartTime = -1;
     public static IntegerProperty timePropertyMainApp = new SimpleIntegerProperty(1);
+    public static BooleanProperty isPlayButtonEnabled = new SimpleBooleanProperty(false);
 
 
     public static void startProgramatically(final String[] args, final NucleiMgrAdapterResource nmar) {
@@ -83,8 +86,16 @@ public class MainApp extends Application implements ObserveWormGUIDES {
         });
 
         controller.getTimeProperty().addListener((observable, oldValue, newValue) -> {
-            timePropertyMainApp.set(newValue.intValue());
+            if (!controller.isTimeSliderPressed()) { // wait until the time slider is release to update the time
+                timePropertyMainApp.set(newValue.intValue());
+            }
         });
+
+        controller.getPlayingMovieFlag().addListener((observable, oldValue, newValue) -> {
+            isPlayButtonEnabled.set(newValue);
+        });
+
+
     }
 
     public void initRootLayout() {
@@ -141,10 +152,15 @@ public class MainApp extends Application implements ObserveWormGUIDES {
         }
     }
 
-    public IntegerProperty grabTimeProperty() {
+    public void enableTimeControls() {
         if (controller != null) {
-            return controller.getTimeProperty();
+            Platform.runLater(() -> controller.enableTimeControls());
         }
-        return null;
+    }
+
+    public void disableTimeControls() {
+        if (controller != null) {
+            Platform.runLater(() -> controller.disableTimeControls());
+        }
     }
 }
