@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.time.Instant;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -28,7 +33,7 @@ import static application_src.application_model.loaders.IconImageLoader.loadImag
 /**
  * Driver class for the WormGUIDES desktop application
  */
-public class MainApp extends Application {
+public class MainApp extends Application implements ObserveWormGUIDES {
 
     private static Stage primaryStage;
 
@@ -38,7 +43,12 @@ public class MainApp extends Application {
 
     private BorderPane rootLayout;
 
-    private RootLayoutController controller;
+
+    public static RootLayoutController controller;
+    public static int externallySetStartTime = -1;
+    public static IntegerProperty timePropertyMainApp = new SimpleIntegerProperty(1);
+    public static BooleanProperty isPlayButtonEnabled = new SimpleBooleanProperty(false);
+
 
     public static void startProgramatically(final String[] args, final NucleiMgrAdapterResource nmar) {
         nucleiMgrAdapterResource = nmar;
@@ -74,6 +84,18 @@ public class MainApp extends Application {
                 controller.initCloseApplication();
             }
         });
+
+        controller.getTimeProperty().addListener((observable, oldValue, newValue) -> {
+            if (!controller.isTimeSliderPressed()) { // wait until the time slider is release to update the time
+                timePropertyMainApp.set(newValue.intValue());
+            }
+        });
+
+        controller.getPlayingMovieFlag().addListener((observable, oldValue, newValue) -> {
+            isPlayButtonEnabled.set(newValue);
+        });
+
+
     }
 
     public void initRootLayout() {
@@ -85,7 +107,6 @@ public class MainApp extends Application {
             loader.setResources(nucleiMgrAdapterResource);
             setImplicitExit(false);
         }
-
         controller = new RootLayoutController();
         controller.setStage(primaryStage);
         loader.setController(controller);
@@ -107,6 +128,39 @@ public class MainApp extends Application {
         } catch (IOException e) {
             System.out.println("Could not initialize root layout");
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void updateTime(int time) {
+        if (nucleiMgrAdapterResource != null) {
+            if (controller != null) {
+                Platform.runLater(() -> controller.setTimePropertyValue(time));
+            }
+        }
+    }
+
+    public void flipPlayButtonIcon() {
+        if (controller != null) {
+            Platform.runLater(() -> controller.flipPlayButtonIcon());
+        }
+    }
+
+    public void showMainStage() {
+        if (controller != null) {
+            Platform.runLater(() -> controller.showMainStage());
+        }
+    }
+
+    public void enableTimeControls() {
+        if (controller != null) {
+            Platform.runLater(() -> controller.enableTimeControls());
+        }
+    }
+
+    public void disableTimeControls() {
+        if (controller != null) {
+            Platform.runLater(() -> controller.disableTimeControls());
         }
     }
 }

@@ -47,6 +47,7 @@ import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -85,6 +86,7 @@ import application_src.views.popups.SulstonTreePane;
 import application_src.views.url_window.URLLoadWarningDialog;
 import application_src.views.url_window.URLLoadWindow;
 import application_src.views.url_window.URLShareWindow;
+import sun.applet.Main;
 
 import static java.lang.System.lineSeparator;
 import static java.time.Duration.between;
@@ -135,8 +137,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
     // Subscene controls
     @FXML
     private Button backwardButton,
-            forwardButton,
-            playButton;
+            forwardButton;
+    @FXML public Button playButton;
+
     @FXML
     private Label timeLabel,
             totalNucleiLabel;
@@ -687,6 +690,24 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
     }
 
+    public void enableTimeControls() {
+        this.playButton.setDisable(false);
+        this.backwardButton.setDisable(false);
+        this.forwardButton.setDisable(false);
+        this.timeSlider.setDisable(false);
+    }
+
+    public void disableTimeControls() {
+        this.playButton.setDisable(true);
+        this.backwardButton.setDisable(true);
+        this.forwardButton.setDisable(true);
+        this.timeSlider.setDisable(true);
+    }
+
+    public boolean isTimeSliderPressed() {
+        return this.timeSlider.isPressed();
+    }
+
     public void initCloseApplication() {
         // check if there is an active story to prompt save dialog
         if (storiesLayer.getActiveStory() != null) {
@@ -731,6 +752,10 @@ public class RootLayoutController extends BorderPane implements Initializable {
             return;
         }
         System.exit(0);
+    }
+
+    public void showMainStage() {
+        mainStage.show();
     }
 
     private void initWindow3DController() {
@@ -796,6 +821,13 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 playingMovieFlag.set(false);
             }
         });
+
+        // in case AceTree has opened WormGUIDES, update the time property in MainApp when the slider is let go because
+        // AceTree doesn't update dynamically with the time slider for optimization purposes
+        timeSlider.setOnMouseReleased(e -> {
+            MainApp.timePropertyMainApp.set(timeProperty.get());
+        });
+
         timeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
             final int value = newValue.intValue();
             if (value != oldValue.intValue()) {
@@ -804,8 +836,21 @@ public class RootLayoutController extends BorderPane implements Initializable {
             }
         });
 
-        // initial start at movie end (builds subscene automatically)
-        timeProperty.set(endTime);
+        if (defaultEmbryoFlag) {
+            // initial start at movie end (builds subscene automatically)
+            timeProperty.set(endTime);
+        } else if (MainApp.externallySetStartTime != -1) {
+            timeProperty.set(MainApp.externallySetStartTime);
+        } else {
+            timeProperty.set(1);
+        }
+
+    }
+
+    public void setTimePropertyValue(int time) {
+        if (time > 0 && time <= lineageData.getNumberOfTimePoints()) {
+            timeProperty.set(time);
+        }
     }
 
     public void setStage(final Stage stage) {
@@ -944,7 +989,12 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 timeLabel.setText("~" + newValue.intValue() + " min");
             }
         });
-        timeLabel.setText("~" + (timeProperty.get() + movieTimeOffset) + " min p.f.c.");
+
+        if (defaultEmbryoFlag) {
+            timeLabel.setText("~" + (timeProperty.get() + movieTimeOffset) + " min p.f.c.");
+        } else {
+            timeLabel.setText("~" + timeProperty.get()  + " min");
+        }
         timeLabel.toFront();
 
         totalNucleiProperty.addListener((observable, oldValue, newValue) -> {
@@ -978,6 +1028,14 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 playButton.setGraphic(playIcon);
             }
         });
+    }
+
+    public void flipPlayButtonIcon() {
+        if (playButton.getGraphic().equals(pauseIcon)) {
+            playButton.setGraphic(playIcon);
+        } else if (playButton.getGraphic().equals(playIcon)) {
+            playButton.setGraphic(pauseIcon);
+        }
     }
 
     private void setSlidersProperties() {
@@ -1124,6 +1182,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
         timelineStage.setScene(TimelineChart.initialize(storiesLayer, productionInfo));
     }
 
+    public BooleanProperty getPlayingMovieFlag() { return this.playingMovieFlag; }
+
     /**
      * Replaces all application tabs with dockable ones
      *
@@ -1165,6 +1225,10 @@ public class RootLayoutController extends BorderPane implements Initializable {
         mainTabPane.getTabs().add(storiesTab);
         mainTabPane.getTabs().add(colorAndDisplayTab);
         mainTabPane.toFront();
+    }
+
+    public IntegerProperty getTimeProperty() {
+        return this.timeProperty;
     }
 
     @Override
@@ -1210,7 +1274,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
             startTime = productionInfo.getDefaultStartTime();
             movieTimeOffset = productionInfo.getMovieTimeOffset();
         } else {
-            startTime = 1;
+            startTime =  1;
             movieTimeOffset = 0;
         }
 

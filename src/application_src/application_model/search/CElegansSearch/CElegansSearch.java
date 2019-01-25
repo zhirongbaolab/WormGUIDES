@@ -64,7 +64,7 @@ public class CElegansSearch implements OrganismSearch {
 
         // check in the special cases of the sulston lineage
         if (!found) {
-            String[] specialCasesAsStringArray = SulstonLineage.getSpecialCasesAsStringArray();
+            String[] specialCasesAsStringArray = SulstonLineage.getSpecialCasesAsLowerCaseStringArray();
             for (String s : specialCasesAsStringArray) {
                 if (s.toLowerCase().equals(searchString.toLowerCase())) {
                     strMatch = s;
@@ -101,11 +101,11 @@ public class CElegansSearch implements OrganismSearch {
              * with each variation of the string, check if it is a special case in the
              * sulston lineage
              */
-            String[] specialCasesAsStringArray = SulstonLineage.getSpecialCasesAsStringArray();
+            String[] specialCasesAsStringArray = SulstonLineage.getSpecialCasesAsLowerCaseStringArray();
 
             for (int i = searchString.length(); i >= 0; i--) {
                 String substr = searchString.substring(0, i);
-                if (Arrays.asList(specialCasesAsStringArray).contains(substr)) {
+                if (Arrays.asList(specialCasesAsStringArray).contains(substr.toLowerCase())) {
                     results.add(substr);
                     results.addAll(addSpecialCasesAncestors(substr));
                     break;
@@ -118,7 +118,7 @@ public class CElegansSearch implements OrganismSearch {
 
         if (includeDescendants) {
             // first check if this is a special case
-            if (Arrays.asList(SulstonLineage.getSpecialCasesAsStringArray()).contains(searchString)) {
+            if (Arrays.asList(SulstonLineage.getSpecialCasesAsLowerCaseStringArray()).contains(searchString.toLowerCase())) {
                 // add all descendants in the special case tree. When a node with no leaf is reached, add all
                 // of its descendants using the regular lineage naming paradigm
                 TreeItem<String> matchTreeItem = findTreeItem(searchString, SulstonLineage.getP0_root());
@@ -139,7 +139,7 @@ public class CElegansSearch implements OrganismSearch {
         }
 
         // add the search string itself if it's a special case
-        String[] spCases = SulstonLineage.getSpecialCasesAsStringArray();
+        String[] spCases = SulstonLineage.getSpecialCasesAsLowerCaseStringArray();
         for (String s : spCases) {
             if (s.toLowerCase().equals(searchString.toLowerCase())) {
                 results.add(s);
@@ -927,7 +927,7 @@ public class CElegansSearch implements OrganismSearch {
 
         // check in the special cases of the sulston lineage
         if (!found) {
-            String[] specialCasesAsStringArray = SulstonLineage.getSpecialCasesAsStringArray();
+            String[] specialCasesAsStringArray = SulstonLineage.getSpecialCasesAsLowerCaseStringArray();
             for (String s : specialCasesAsStringArray) {
                 if (s.toLowerCase().equals(searchString.toLowerCase())) {
                     return true;
