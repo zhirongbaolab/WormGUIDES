@@ -163,4 +163,10 @@ public class MainApp extends Application implements ObserveWormGUIDES {
             Platform.runLater(() -> controller.disableTimeControls());
         }
     }
+
+    public void buildScene() {
+        if (controller != null) {
+            controller.buildScene();
+        }
+    }
 }

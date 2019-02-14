@@ -1231,6 +1231,17 @@ public class RootLayoutController extends BorderPane implements Initializable {
         return this.timeProperty;
     }
 
+    /**
+     * Used to control the 3D window from an external source. Acts as a passthrough for apps that
+     * extend MainApp
+     */
+    public void buildScene() {
+        if (window3DController != null) {
+            window3DController.buildScene();
+        }
+    }
+
+
     @Override
     public void initialize(URL url, ResourceBundle bundle) {
         // initialize the static C Elegans data
