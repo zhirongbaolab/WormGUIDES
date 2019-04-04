@@ -1622,7 +1622,7 @@ public class Window3DController {
      * Calls the service to retrieve subscene data at current timeProperty point then render entities, notes, and
      * labels
      */
-    private void buildScene() {
+    public void buildScene() {
         // Spool thread for actual rendering to subscene
         renderService.restart();
     }
