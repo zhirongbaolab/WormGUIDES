@@ -11,6 +11,9 @@ import javafx.scene.paint.Color;
 public class ColorComparator implements Comparator<Color> {
 	@Override
 	public int compare(Color c1, Color c2) {
-		return c1.toString().compareTo(c2.toString());
+		// start at the 5th character so that only the RGB components are used in the sort
+		// format is 0xAARRGGBB
+		System.out.println(c1.toString());
+		return c1.toString().substring(0, 8).compareTo(c2.toString().substring(0, 8));
 	}
 }

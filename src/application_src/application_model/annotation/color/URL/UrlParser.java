@@ -242,8 +242,8 @@ public class UrlParser {
 //                }
 
             } catch (StringIndexOutOfBoundsException e) {
-                System.out.println("Invalid color rule format");
-                e.printStackTrace();
+                System.out.println("Invalid color rule format: " + ruleString);
+                //e.printStackTrace();
             }
         }
     }
