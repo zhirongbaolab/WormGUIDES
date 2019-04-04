@@ -73,7 +73,7 @@ public class MainApp extends Application implements ObserveWormGUIDES {
         final Instant end = now();
         System.out.println("Root layout initialized in "
                 + between(start, end).toMillis()
-                + "ms");
+                + "ms");s
 
         primaryStage.setResizable(true);
         primaryStage.show();

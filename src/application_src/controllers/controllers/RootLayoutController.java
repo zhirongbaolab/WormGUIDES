@@ -1243,7 +1243,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
         // now set up the Search pipeline for the static C Elegans data
         cElegansSearchPipeline = new CElegansSearch();
-        geneSearchManager = new GeneSearchManager(cElegansSearchPipeline);
+        geneSearchManager = new GesneSearchManager(cElegansSearchPipeline);
 
         // transition to model and program specific data initialization
         Parameters.init();

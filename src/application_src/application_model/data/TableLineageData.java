@@ -187,7 +187,7 @@ public class TableLineageData implements LineageData {
         return false;
     }
 
-    /** {@inheritDoc} */
+    /** {@inheritDoc} */s
     @Override
     public boolean isSulstonMode() {
         return isSulston; //default embryo
