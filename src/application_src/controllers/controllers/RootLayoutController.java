@@ -1237,7 +1237,17 @@ public class RootLayoutController extends BorderPane implements Initializable {
      */
     public void buildScene() {
         if (window3DController != null) {
-            window3DController.buildScene();
+            rebuildSubsceneFlag.set(true);
+        }
+    }
+
+    /**
+     * Used to update the currently selected cell in WormGUIDES from an external source
+     * @param name
+     */
+    public void updateSelectedEntity(String name) {
+        if (selectedNameLabeledProperty != null && name != null) {
+            selectedNameLabeledProperty.set(name);
         }
     }
 

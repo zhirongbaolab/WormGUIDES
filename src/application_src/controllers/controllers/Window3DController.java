@@ -511,6 +511,7 @@ public class Window3DController {
                 }
 
                 if (timeProperty.get() < startTime1 || timeProperty.get() > endTime1) {
+                    System.out.println("Updating time property to entity startTime=" + startTime1 + " because current time: " + timeProperty.get() + " isn't in cell lifetime range. Endtime = " + endTime1);
                     timeProperty.set(startTime1);
                 } else {
                     insertLabelFor(lineageName, entity);
