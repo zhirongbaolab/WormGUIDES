@@ -1920,7 +1920,7 @@ public class Window3DController {
                         }
                     }
                 }
-                material = colorHash.getMaterial(colors);
+
                 if (colors.isEmpty()) {
                     // do not render this "other" cell if visibility is under the cutoff
                     // remove this cell from scene data at current time point
@@ -1937,6 +1937,9 @@ public class Window3DController {
                             sphere.setDisable(true);
                         }
                     }
+                } else {
+                    colors.sort(colorComparator);
+                    material = colorHash.getMaterial(colors);
                 }
             }
             sphere.setMaterial(material);

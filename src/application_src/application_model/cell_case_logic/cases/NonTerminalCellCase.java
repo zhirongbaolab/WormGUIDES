@@ -42,9 +42,10 @@ public class NonTerminalCellCase extends CellCase {
 
         super(lineageName, nuclearProductionInfo, cellShapeProductionInfo);
 
+
+
         // reference embryonic analogues cells db for homology
         this.embryonicHomology = CElegansSearch.findEmbryonicHomology(getLineageName());
-
         this.terminalDescendants = buildTerminalDescendants();
 
         addLink(buildWormatlasLink());
