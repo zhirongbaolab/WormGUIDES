@@ -140,6 +140,15 @@ public class MainApp extends Application implements ObserveWormGUIDES {
         }
     }
 
+    @Override
+    public void updateSelectedEntity(String name) {
+        if (nucleiMgrAdapterResource != null) {
+            if (controller != null) {
+                Platform.runLater(() -> controller.updateSelectedEntity(name));
+            }
+        }
+    }
+
     public void flipPlayButtonIcon() {
         if (controller != null) {
             Platform.runLater(() -> controller.flipPlayButtonIcon());
@@ -169,4 +178,14 @@ public class MainApp extends Application implements ObserveWormGUIDES {
             controller.buildScene();
         }
     }
+<<<<<<< HEAD
 }
+=======
+
+    public boolean isClosed() {
+        if (primaryStage == null) return true;
+
+        return !primaryStage.isShowing();
+    }
+}
+>>>>>>> 88aff3d845325dd8432066a4a7f394ed6f5f382e
