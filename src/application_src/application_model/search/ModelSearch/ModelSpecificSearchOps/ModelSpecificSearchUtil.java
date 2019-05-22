@@ -29,8 +29,7 @@ public class ModelSpecificSearchUtil {
      * @return
      */
     public static List<String> nonSulstonLineageSearch(final String cellName, boolean includeAncestors, boolean includeDescendants) {
-        List<String> nonSulstonLineageSearchResults = new ArrayList<String>();
-        
+        List<String> nonSulstonLineageSearchResults = new ArrayList<>();
 
         for (String entityName : lineageData.getAllCellNames()) {
             if (cellName.toLowerCase().equals(entityName.toLowerCase())) { // exact match

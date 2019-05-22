@@ -427,6 +427,7 @@ public class SulstonTreePane extends ScrollPane {
             }
 
             contextMenuController.setColorButtonListener(event -> {
+                System.out.println("Pressed color button");
                 List<SearchOption> options = new ArrayList<>();
                 options.add(CELL_NUCLEUS);
                 final Rule rule = annotationManager.addColorRule(
