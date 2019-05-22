@@ -4,6 +4,9 @@ import application_src.application_model.data.LineageData;
 import application_src.application_model.threeD.subscenegeometry.SceneElement;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ModelSpecificSearchUtil {
     private static LineageData lineageData;
     private static SceneElementsList sceneElementsList;
@@ -12,6 +15,39 @@ public class ModelSpecificSearchUtil {
         lineageData = ld;
         sceneElementsList = sel;
     }
+
+    /**
+     * A model specific non-sulston lineage search. This is used as a fallthrough mode in
+     * a non-sulston embryo when the static lineage search returns no results. First, we
+     * determine if the cellName has an exact match, then we do a crude ancestor and descendant
+     * search by checking if there is an exact match using a starting prefix checkk. This
+     * crude search assumes that non-sulston entities will be named according to a similar
+     * strategy to the sulston names i.e. appending characters to names as divisions occur
+     * @param cellName
+     * @param includeAncestors
+     * @param includeDescendants
+     * @return
+     */
+    public static List<String> nonSulstonLineageSearch(final String cellName, boolean includeAncestors, boolean includeDescendants) {
+        List<String> nonSulstonLineageSearchResults = new ArrayList<String>();
+        
+
+        for (String entityName : lineageData.getAllCellNames()) {
+            if (cellName.toLowerCase().equals(entityName.toLowerCase())) { // exact match
+                nonSulstonLineageSearchResults.add(entityName);
+            } else { // not exact match, see if ancestor or descendant
+                if (includeAncestors && cellName.toLowerCase().startsWith(entityName.toLowerCase())) { // ancestor match
+                    nonSulstonLineageSearchResults.add(entityName);
+                }
+                if (includeDescendants && entityName.toLowerCase().startsWith(cellName.toLowerCase())) {
+                    nonSulstonLineageSearchResults.add(entityName);
+                }
+            }
+        }
+
+        return nonSulstonLineageSearchResults;
+    }
+
 
 
     /**

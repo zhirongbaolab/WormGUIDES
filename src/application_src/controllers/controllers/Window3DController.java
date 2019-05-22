@@ -20,6 +20,7 @@ import java.util.Vector;
 
 
 //import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
+import application_src.MainApp;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -2154,6 +2155,9 @@ public class Window3DController {
         spritesPane.getChildren().add(text);
 
         alignTextWithEntity(text, entity, null);
+
+        // set the name in MainApp so that other apps opening WormGUIDES can catch this event
+        MainApp.seletedEntityLabelMainApp.set(name);
     }
 
     private void highlightActiveCellLabel(Shape3D entity) {

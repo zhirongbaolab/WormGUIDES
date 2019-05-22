@@ -13,6 +13,7 @@ import application_src.application_model.data.OrganismDataType;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import application_src.application_model.search.CElegansSearch.CElegansSearchResults;
 import application_src.application_model.search.ModelSearch.EstablishCorrespondence;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.ModelSpecificSearchUtil;
 import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.NeighborsSearch;
 import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
 import javafx.beans.property.BooleanProperty;
@@ -351,6 +352,17 @@ public class SearchLayer {
                             cElegansSearchPipeline.executeLineageSearch(searchedTerm,
                                     areAncestorsFetched,
                                     areDescendantsFetched));
+
+                    /** The lineage type has a fallthrough method which does a strict
+                     * string matching search if there are no static results. That way,
+                     * in the event of a non-sulston embryo, you can search directly for
+                     * the names of specific entities */
+                    if (!cElegansDataSearchResults.hasResults()) {
+                        modelDataSearchResults = ModelSpecificSearchUtil.nonSulstonLineageSearch(searchedTerm,
+                                                                                                areAncestorsFetched,
+                                                                                                areDescendantsFetched);
+                    }
+
                     break;
                 case FUNCTIONAL: // C Elegans data
                     cElegansDataSearchResults = new CElegansSearchResults(
