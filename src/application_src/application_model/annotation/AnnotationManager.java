@@ -80,8 +80,6 @@ public class AnnotationManager {
             options.add(CELL_NUCLEUS);
         }
 
-
-
         Rule rule = new Rule(
                 rebuildSubsceneFlag,
                 createRuleLabel(searched, searchType),
@@ -89,7 +87,10 @@ public class AnnotationManager {
                 searchType,
                 options,
                 cElegansSearch);
-        rule.setCells(searchResults);
+        if (rule.getCells().isEmpty()) {
+            rule.setCells(searchResults);
+        }
+
         rulesList.add(rule);
         return rule;
     }

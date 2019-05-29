@@ -11,6 +11,8 @@ import java.util.Objects;
 
 import application_src.application_model.data.OrganismDataType;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
+import application_src.application_model.search.CElegansSearch.CElegansSearchResults;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.ModelSpecificSearchUtil;
 import application_src.application_model.search.SearchConfiguration.SearchOption;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -129,7 +131,25 @@ public class Rule {
                 if (prevAnc != currAnc || prevDes != currDes) {
                     switch (searchType) {
                         case LINEAGE:
-                            setCells(cElegansSearch.executeLineageSearch(searched, currAnc, currDes).getValue());
+                            List<String> cells = new ArrayList<>();
+                            CElegansSearchResults cElegansDataSearchResults = new CElegansSearchResults(
+                                    cElegansSearch.executeLineageSearch(searched,
+                                            currAnc,
+                                            currDes));
+                            cells.addAll(cElegansDataSearchResults.getSearchResults());
+
+                            /** The lineage type has a fallthrough method which does a strict
+                             * string matching search if there are no static results. That way,
+                             * in the event of a non-sulston embryo, you can search directly for
+                             * the names of specific entities */
+                            if (cells.isEmpty()) {
+                                cells.addAll(ModelSpecificSearchUtil.nonSulstonLineageSearch(searched,
+                                        currAnc,
+                                        currDes));
+
+                            }
+
+                            setCells(cells);
                             break;
                         case FUNCTIONAL:
                             setCells(cElegansSearch.executeFunctionalSearch(searched.substring(searched.indexOf("'")+1, searched.lastIndexOf("'")), currAnc, currDes, OrganismDataType.LINEAGE).getValue());
@@ -303,12 +323,11 @@ public class Rule {
     }
 
     /**
-     * Called by the {@link SearchLayer} class to set the baseline list of cells that the rule affects. Multicellular
+     * Called by the {@link SearchLayer} class to set the list of cells that the rule affects. Multicellular
      * structure rule cells are never set since they are queried by name only.
      *
      * @param list
-     *         baseline cell names that should be affected by this rule. The list only contains immediate cells, not
-     *         the ancestor or descendant cells.
+     *
      */
     public void setCells(final List<String> list) {
         if (list != null) {
@@ -443,16 +462,19 @@ public class Rule {
 
         name = name.trim();
         if (currentOptions.contains(CELL_NUCLEUS) && cells.contains(name)) {
+            //System.out.println("Cells contains: " + name);
             return true;
         }
-        for (String cell : cells) {
-            if (currentOptions.contains(ANCESTOR) && isAncestor(name, cell)) {
-                return true;
-            }
-            if (currentOptions.contains(DESCENDANT) && isDescendant(name, cell)) {
-                return true;
-            }
-        }
+//        for (String cell : cells) {
+//            if (currentOptions.contains(ANCESTOR) && isAncestor(name, cell)) {
+//                System.out.println("isAncestor: " + cell);
+//                return true;
+//            }
+//            if (currentOptions.contains(DESCENDANT) && isDescendant(name, cell)) {
+//                System.out.println("isDescendant: " + cell);
+//                return true;
+//            }
+//        }
         return false;
     }
 
@@ -501,12 +523,12 @@ public class Rule {
             if (cell.equalsIgnoreCase(name)) {
                 return true;
             }
-            if (currentOptions.contains(DESCENDANT) && isDescendant(name, cell)) {
-                return true;
-            }
-            if (currentOptions.contains(ANCESTOR) && isAncestor(name, cell)) {
-                return true;
-            }
+//            if (currentOptions.contains(DESCENDANT) && isDescendant(name, cell)) {
+//                return true;
+//            }
+//            if (currentOptions.contains(ANCESTOR) && isAncestor(name, cell)) {
+//                return true;
+//            }
         }
         return false;
     }

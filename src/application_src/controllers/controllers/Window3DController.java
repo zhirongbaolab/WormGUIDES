@@ -20,6 +20,7 @@ import java.util.Vector;
 
 
 //import com.interactivemesh.jfx.importer.obj.ObjModelImporter;
+import application_src.MainApp;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -511,6 +512,7 @@ public class Window3DController {
                 }
 
                 if (timeProperty.get() < startTime1 || timeProperty.get() > endTime1) {
+                    System.out.println("Updating time property to entity startTime=" + startTime1 + " because current time: " + timeProperty.get() + " isn't in cell lifetime range. Endtime = " + endTime1);
                     timeProperty.set(startTime1);
                 } else {
                     insertLabelFor(lineageName, entity);
@@ -1622,7 +1624,7 @@ public class Window3DController {
      * Calls the service to retrieve subscene data at current timeProperty point then render entities, notes, and
      * labels
      */
-    private void buildScene() {
+    public void buildScene() {
         // Spool thread for actual rendering to subscene
         renderService.restart();
     }
@@ -1919,7 +1921,7 @@ public class Window3DController {
                         }
                     }
                 }
-                material = colorHash.getMaterial(colors);
+
                 if (colors.isEmpty()) {
                     // do not render this "other" cell if visibility is under the cutoff
                     // remove this cell from scene data at current time point
@@ -1936,6 +1938,9 @@ public class Window3DController {
                             sphere.setDisable(true);
                         }
                     }
+                } else {
+                    colors.sort(colorComparator);
+                    material = colorHash.getMaterial(colors);
                 }
             }
             sphere.setMaterial(material);
@@ -2150,6 +2155,9 @@ public class Window3DController {
         spritesPane.getChildren().add(text);
 
         alignTextWithEntity(text, entity, null);
+
+        // set the name in MainApp so that other apps opening WormGUIDES can catch this event
+        MainApp.seletedEntityLabelMainApp.set(name);
     }
 
     private void highlightActiveCellLabel(Shape3D entity) {

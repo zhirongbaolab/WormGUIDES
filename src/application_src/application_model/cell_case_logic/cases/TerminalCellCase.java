@@ -83,20 +83,11 @@ public class TerminalCellCase extends CellCase {
             List<String> cellShapeProductionInfo) {
         super(lineageName, nuclearProductionInfo, cellShapeProductionInfo);
 
+        // LOCAL DATA
         this.functionalName = functionalName;
         this.externalInfo = this.functionalName + " (" + lineageName + ")";
 
         this.partsListDescription = getDescriptionByLineageName(lineageName);
-
-        if (isDigit(functionalName.charAt(functionalName.length() - 1))) {
-            this.imageURL = GRAPHIC_URL + functionalName.toUpperCase() + JPG_EXT;
-        } else {
-            this.imageURL = GRAPHIC_URL + functionalName.toLowerCase() + JPG_EXT;
-        }
-
-        //parse wormatlas for the "Function" field, also set image field
-        this.functionWORMATLAS = setFunctionFromWORMATLAS();
-
         //set the wiring partners from connectome
         this.presynapticPartners = presynapticPartners;
         this.postsynapticPartners = postsynapticPartners;
@@ -109,7 +100,23 @@ public class TerminalCellCase extends CellCase {
         }
 
         this.homologues = setHomologues();
+        // ******* END LOCAL DATA
 
+        // EXTERNAL DATA
+        if (isDigit(functionalName.charAt(functionalName.length() - 1))) {
+            this.imageURL = GRAPHIC_URL + functionalName.toUpperCase() + JPG_EXT;
+        } else {
+            this.imageURL = GRAPHIC_URL + functionalName.toLowerCase() + JPG_EXT;
+        }
+
+        //parse wormatlas for the "Function" field, also set image field
+        this.functionWORMATLAS = setFunctionFromWORMATLAS();
+        // ******* END EXTERNAL DATA
+
+
+
+
+        // ******************************************************* TODO later
         //generate and add the wormwiring link
         //addLink(addWormWiringLink());
 

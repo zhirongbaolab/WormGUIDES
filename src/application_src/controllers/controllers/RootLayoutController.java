@@ -1231,6 +1231,27 @@ public class RootLayoutController extends BorderPane implements Initializable {
         return this.timeProperty;
     }
 
+    /**
+     * Used to control the 3D window from an external source. Acts as a passthrough for apps that
+     * extend MainApp
+     */
+    public void buildScene() {
+        if (window3DController != null) {
+            rebuildSubsceneFlag.set(true);
+        }
+    }
+
+    /**
+     * Used to update the currently selected cell in WormGUIDES from an external source
+     * @param name
+     */
+    public void updateSelectedEntity(String name) {
+        if (selectedNameLabeledProperty != null && name != null) {
+            selectedNameLabeledProperty.set(name);
+        }
+    }
+
+
     @Override
     public void initialize(URL url, ResourceBundle bundle) {
         // initialize the static C Elegans data

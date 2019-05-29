@@ -3,16 +3,13 @@
  */
 
 package application_src;
-
+  
 import java.io.IOException;
 import java.time.Instant;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.*;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -48,6 +45,8 @@ public class MainApp extends Application implements ObserveWormGUIDES {
     public static int externallySetStartTime = -1;
     public static IntegerProperty timePropertyMainApp = new SimpleIntegerProperty(1);
     public static BooleanProperty isPlayButtonEnabled = new SimpleBooleanProperty(false);
+    public static StringProperty seletedEntityLabelMainApp = new SimpleStringProperty("");
+
 
 
     public static void startProgramatically(final String[] args, final NucleiMgrAdapterResource nmar) {
@@ -162,5 +161,17 @@ public class MainApp extends Application implements ObserveWormGUIDES {
         if (controller != null) {
             Platform.runLater(() -> controller.disableTimeControls());
         }
+    }
+
+    public void buildScene() {
+        if (controller != null) {
+            controller.buildScene();
+        }
+    }
+
+    public boolean isClosed() {
+        if (primaryStage == null) return true;
+
+        return !primaryStage.isShowing();
     }
 }

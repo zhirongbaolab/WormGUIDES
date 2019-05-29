@@ -63,15 +63,9 @@ public abstract class CellCase {
             List<String> nuclearProductionInfo,
             List<String> cellShapeProductionInfo) {
 
+        // LOCAL DATA
         this.lineageName = lineageName;
 
-        //initialize and populate links data structure
-        buildLinks();
-
-        //initialize and populate gene expression data structure
-        setExpressionsFromWORMBASE();
-
-        setReferences();
 
         this.nuclearProductionInfo = nuclearProductionInfo;
         this.cellShapeProductionInfo = cellShapeProductionInfo;
@@ -85,6 +79,16 @@ public abstract class CellCase {
         if (this.cellShapeProductionInfo.size() == 0) {
             this.cellShapeProductionInfo.add("Unknown - non-default embryo");
         }
+        // ******* END LOCAL DATA
+
+        // EXTERNAL DATA
+        //initialize and populate links data structure
+        buildLinks();
+
+        //initialize and populate gene expression data structure
+        setExpressionsFromWORMBASE();
+        setReferences();
+        // *********** END EXTERNAL DATA
     }
 
     /** Adds gene expressions from the wormbase page corresponding to this cell case to the class' 'list' variable */

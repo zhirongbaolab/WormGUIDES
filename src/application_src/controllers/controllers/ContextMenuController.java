@@ -14,7 +14,9 @@ import application_src.application_model.annotation.color.Rule;
 import application_src.application_model.data.CElegansData.Gene.GeneSearchManager;
 import application_src.application_model.data.OrganismDataType;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
+import application_src.application_model.search.CElegansSearch.CElegansSearchResults;
 import application_src.application_model.search.ModelSearch.EstablishCorrespondence;
+import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.ModelSpecificSearchUtil;
 import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.NeighborsSearch;
 import application_src.application_model.search.SearchConfiguration.SearchOption;
 import application_src.views.info_window.InfoWindow;
@@ -318,7 +320,7 @@ public class ContextMenuController extends AnchorPane implements Initializable {
     }
 
     /**
-     * Sets the linage name (cell/cellbody scope) of the context menu
+     * Sets the lineage name (cell/cellbody scope) of the context menu
      *
      * @param name lineage name of cell/cell body that the context menu is for
      */
@@ -620,7 +622,26 @@ public class ContextMenuController extends AnchorPane implements Initializable {
             } else {
                 ArrayList<SearchOption> options = new ArrayList<>();
                 options.add(CELL_NUCLEUS);
-                final Rule rule = annotationManager.addColorRule(LINEAGE, cellName, DEFAULT_COLOR, new ArrayList<>(),  options);
+
+                List<String> cells = new ArrayList<String>();
+                CElegansSearchResults cElegansDataSearchResults = new CElegansSearchResults(
+                        cElegansSearchPipeline.executeLineageSearch(cellName,
+                                false,
+                                false));
+                cells.addAll(cElegansDataSearchResults.getSearchResults());
+
+                /** The lineage type has a fallthrough method which does a strict
+                 * string matching search if there are no static results. That way,
+                 * in the event of a non-sulston embryo, you can search directly for
+                 * the names of specific entities */
+                if (!cElegansDataSearchResults.hasResults()) {
+                    cells.addAll(ModelSpecificSearchUtil.nonSulstonLineageSearch(cellName,
+                            false,
+                            false));
+
+                }
+
+                final Rule rule = annotationManager.addColorRule(LINEAGE, cellName, DEFAULT_COLOR, cells,  options);
                 rule.showEditStage(parentStage);
             }
             ownStage.hide();
