@@ -7,7 +7,7 @@ This application uses JRE 1.8 version 77+. Source built using JRE 1.8 version 77
 The documentation for the shared URL paramters can be found in URLDocumentation.txt.
 <br><br><br>
 
-
+**NOTE instructions for setting up IDE projects etc for each of the Bao lab software packages can be found in the top level git repository Developer Documentation. 
 
 ####About
 
