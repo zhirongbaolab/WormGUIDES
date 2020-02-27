@@ -203,6 +203,10 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private Button clearAllLabelsButton;
     @FXML
     private Slider opacitySlider;
+    @FXML
+    private Slider prevSlider;
+    @FXML
+    private Label prevValue;
 
     // Structures tab
     private StructuresLayer structuresLayer;
@@ -320,6 +324,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private DoubleProperty translateYProperty;
     private DoubleProperty zoomProperty;
     private DoubleProperty othersOpacityProperty;
+    private DoubleProperty numPrev;
 
     // Other shared variables
     private ObservableList<Rule> rulesList;
@@ -787,6 +792,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 clearAllLabelsButton,
                 searchField,
                 opacitySlider,
+                prevSlider,
+                prevValue,
                 uniformSizeCheckBox,
                 cellNucleusCheckBox,
                 cellBodyCheckBox,
@@ -797,6 +804,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 totalNucleiProperty,
                 zoomProperty,
                 othersOpacityProperty,
+                numPrev,
                 rotateXAngleProperty,
                 rotateYAngleProperty,
                 rotateZAngleProperty,
@@ -1044,6 +1052,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
         opacitySlider.setMin(0);
         opacitySlider.setMax(100);
+
+        prevSlider.setMin(1);
+        prevSlider.setMax(lineageData.getNumberOfTimePoints() - 1);
     }
 
     private void initSearchLayer() {
@@ -1347,6 +1358,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
         totalNucleiProperty = new SimpleIntegerProperty(0);
 
         othersOpacityProperty = new SimpleDoubleProperty(1.0);
+        numPrev = new SimpleDoubleProperty(1.0);
         rotateXAngleProperty = new SimpleDoubleProperty();
         rotateYAngleProperty = new SimpleDoubleProperty();
         rotateZAngleProperty = new SimpleDoubleProperty();

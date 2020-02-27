@@ -299,13 +299,13 @@
                                                                                             </children>
                                                                                         </HBox>
                                                                                         <HBox prefHeight="11.0" prefWidth="298.0" VBox.vgrow="NEVER">
-                                                                     <children>
+                                                                                            <children>
                                                                                               <Label maxHeight="-Infinity" minHeight="-Infinity" prefHeight="22.0" text="Include:">
                                                                                                   <font>
                                                                                                       <Font size="14.0" />
                                                                                                   </font>
                                                                                               </Label>
-                                                                     </children>
+                                                                                            </children>
                                                                                         </HBox>
                                                                                         <HBox maxWidth="-Infinity" minWidth="-Infinity" prefWidth="230.0">
                                                                                             <children>
@@ -321,7 +321,7 @@
                                                                                         </HBox>
                                                                                         <HBox maxWidth="-Infinity" minWidth="-Infinity" prefWidth="230.0">
                                                                                             <children>
-                                                                        <Region maxWidth="-Infinity" minWidth="-Infinity" prefHeight="22.0" prefWidth="18.0" />
+                                                                                                <Region maxWidth="-Infinity" minWidth="-Infinity" prefHeight="22.0" prefWidth="18.0" />
                                                                                                 <Label fx:id="descendantLabel" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="22.0" prefWidth="121.0" text="Descendants">
                                                                                                     <font>
                                                                                                         <Font size="14.0" />
@@ -338,13 +338,13 @@
                                                                                         </HBox>
                                                                                           <ColorPicker fx:id="colorPicker" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="51.0" prefWidth="306.0" />
                                                                                         <HBox maxWidth="1.7976931348623157E308" VBox.vgrow="NEVER">
-                                                                     <children>
+                                                                                            <children>
                                                                                                 <Label maxHeight="-Infinity" minHeight="-Infinity" prefHeight="22.0" text="Color Applies To:">
                                                                                                     <font>
                                                                                                         <Font size="14.0" />
                                                                                                     </font>
                                                                                                 </Label>
-                                                                     </children>
+                                                                                            </children>
                                                                                         </HBox>
                                                                                         <HBox maxWidth="-Infinity" minWidth="-Infinity" prefWidth="230.0">
                                                                                             <children>
@@ -494,6 +494,21 @@
                                                                             </font>
                                                                         </Label>
                                                                         <Slider fx:id="opacitySlider" minorTickCount="5" value="25.0" VBox.vgrow="ALWAYS" />
+                                                                        <Label maxHeight="-Infinity" minHeight="-Infinity" prefHeight="22.0" text="Show Previous Time Points:">
+                                                                            <font>
+                                                                                <Font size="14.0" />
+                                                                            </font>
+                                                                        </Label>
+                                                                        <HBox prefHeight="32.0" prefWidth="317.0">
+                                                                            <children>
+                                                                                <Slider fx:id="prevSlider" prefWidth="290.0" majorTickUnit="60" showTickMarks="true" showTickLabels="true" value="1.0" VBox.vgrow="ALWAYS" />
+                                                                                <Label fx:id="prevValue" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="14.0" text="1.0">
+                                                                                    <font>
+                                                                                        <Font size="10.0" />
+                                                                                    </font>
+                                                                                </Label>
+                                                                            </children>
+                                                                        </HBox>
                                                                         <Label maxHeight="-Infinity" minHeight="-Infinity" prefHeight="22.0" text="Coloring Layers:">
                                                                             <font>
                                                                                 <Font size="14.0" />
