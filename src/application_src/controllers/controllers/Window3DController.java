@@ -45,12 +45,7 @@ import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.SubScene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeItem;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
@@ -220,6 +215,9 @@ public class Window3DController {
     private final Comparator<Shape3D> opacityComparator;
     // opacity value for "other" cells (with no rule attached)
     private final DoubleProperty othersOpacityProperty;
+    private final DoubleProperty numPrev;
+    private final Slider prevSlider;
+    private final Label prevValue;
     private final double nonSelectableOpacity = 0.25;
     private final List<String> otherCells;
     private final Vector<JavaPicture> javaPictures;
@@ -385,6 +383,8 @@ public class Window3DController {
             final Button clearAllLabelsButton,
             final TextField searchField,
             final Slider opacitySlider,
+            final Slider prevSlider,
+            final Label prevValue,
             final CheckBox uniformSizeCheckBox,
             final CheckBox cellNucleusCheckBox,
             final CheckBox cellBodyCheckBox,
@@ -395,6 +395,7 @@ public class Window3DController {
             final IntegerProperty totalNucleiProperty,
             final DoubleProperty zoomProperty,
             final DoubleProperty othersOpacityProperty,
+            final DoubleProperty numPrev,
             final DoubleProperty rotateXAngleProperty,
             final DoubleProperty rotateYAngleProperty,
             final DoubleProperty rotateZAngleProperty,
@@ -730,6 +731,35 @@ public class Window3DController {
 
         }
 
+        this.numPrev = requireNonNull(numPrev);
+        this.prevValue = requireNonNull(prevValue);
+        this.prevSlider = requireNonNull(prevSlider);
+        requireNonNull(prevSlider).valueProperty().addListener((observable, oldValue, newValue) -> {
+            final double newRounded = round(newValue.doubleValue());
+            final double oldRounded = round(oldValue.doubleValue());
+            if (newRounded != oldRounded) {
+                numPrev.set(newRounded);
+                prevValue.setText(String.valueOf(newRounded));
+                buildScene();
+            }
+        });
+        this.numPrev.addListener((observable, oldValue, newValue) -> {
+            final double newVal = newValue.doubleValue();
+            final double oldVal = oldValue.doubleValue();
+            if (newVal != oldVal && newVal >= 1 && newVal <= timeProperty.get()) {
+                prevSlider.setValue(newVal);
+            }
+        });
+        if (defaultEmbryoFlag) {
+            this.numPrev.setValue(1);
+        } else {
+            /*
+             * if a non-default model has been loaded, set the opacity cutoff at the level where labels will
+             * appear by default
+             */
+            this.numPrev.set(1);
+
+        }
 
         uniformSizeCheckBox.setSelected(true);
         uniformSize = true;
@@ -1775,6 +1805,31 @@ public class Window3DController {
         // End search stuff
     }
 
+    //Only get the cell scene data to provide faster rendering speed for the previous time point feature
+    private void getCellSceneData(int time) {
+        final int requestedTime = time;
+        cellNames = new LinkedList<>(asList(lineageData.getNames(requestedTime)));
+        positions = new LinkedList<>();
+        for (double[] position : lineageData.getPositions(requestedTime)) {
+            positions.add(new Double[]{
+                    position[0],
+                    position[1],
+                    position[2]
+            });
+        }
+        diameters = new LinkedList<>();
+        for (double diameter : lineageData.getDiameters(requestedTime)) {
+            diameters.add(diameter);
+        }
+
+        totalNucleiProperty.set(cellNames.size());
+
+        //spheres = new LinkedList<>();
+        if (defaultEmbryoFlag) {
+            meshes = new LinkedList<>();
+        }
+    }
+
     // TODO -> this should tap the annotation manager which has just been populated with these results
     private void updateLocalSearchResults() {
         if (searchResultsList == null) {
@@ -1857,6 +1912,15 @@ public class Window3DController {
         rootEntitiesGroup.setScaleZ(rootEntitiesGroup.getScaleZ() * getModelScaleFactor());
 
         repositionNotes();
+    }
+
+    //For Adding previous time points graphics of cells that exitst in the ruleslist
+    //For previous time points feature
+    private void addEntitiesNoNotesWithColorRule() {
+        List<Shape3D> entities = new ArrayList();
+        this.addColoredGeometries(entities);
+        entities.sort(this.opacityComparator);
+        this.rootEntitiesGroup.getChildren().addAll(entities);
     }
 
     /**
@@ -2082,6 +2146,76 @@ public class Window3DController {
                     meshView.setDisable(true);
                 }
                 entities.add(meshView);
+            }
+        }
+    }
+
+    /**
+     * only add cells that are on the ruleslist without any interactive functions for faster rendering speed.
+     * does not add any extra graphic to the entities when in search mode
+     *
+     * @param entities
+     *         list of subscene entities
+     */
+    private void addColoredGeometries(final List<Shape3D> entities) {
+        final Material othersMaterial = colorHash.getOthersMaterial(othersOpacityProperty.get());
+        final ListIterator<String> iter = cellNames.listIterator();
+        int index = -1;
+        boolean needRender = false;
+        while (iter.hasNext()) {
+            final String cellName = iter.next();
+            index++;
+            needRender = false;
+
+            // create the color material
+            Material material;
+            // if in search, skip rendering previous time point
+            if (isInSearchMode) {
+                break;
+            } else {
+                // if not in search (flashlight mode), consult active list of rules
+                // check if a cell is in the rulelist
+                final List<Color> colors = new ArrayList<>();
+                for (Rule rule : rulesList) {
+                    if (rule.appliesToCellNucleus(cellName) && rule.getColor().getOpacity() > getSelectabilityVisibilityCutoff()) {
+                        colors.add(web(rule.getColor().toString()));
+                        needRender = true;
+                    }
+                }
+
+                if (needRender) { //render the cell if conditions are met
+                    // size the sphere
+                    double radius;
+                    if (!uniformSize) {
+                        radius = getSizeScale() * diameters.get(index) / 2;
+                    } else {
+                        radius = getSizeScale() * getUniformRadius();
+                    }
+                    final Sphere sphere = new Sphere(radius);
+
+                    colors.sort(colorComparator);
+                    material = colorHash.getMaterial(colors);
+
+                    sphere.setMaterial(material);
+
+                    // transform and add sphere to list
+                    sphere.getTransforms().addAll(rotateX, rotateY, rotateZ);
+                    final Double[] position = positions.get(index);
+                    sphere.getTransforms().add(new Translate(
+                            position[X_COR_INDEX] * xScale,
+                            position[Y_COR_INDEX] * yScale,
+                            position[Z_COR_INDEX] * zScale));
+
+                    //spheres.add(sphere);
+
+                    entities.add(sphere);
+                } else { // remove this cell from scene data at current time point
+                    iter.remove();
+                    positions.remove(index);
+                    diameters.remove(index);
+                    index--;
+                    continue;
+                }
             }
         }
     }
@@ -2997,6 +3131,8 @@ public class Window3DController {
      * 2) clears the notes, labels, and entities in the subscene
      * <p>
      * 3) adds the current notes, labels, and entities to the subscene
+     * <p>
+     * 4) adds previous time points if requested.
      */
     private final class RenderService extends Service<Void> {
         @Override
@@ -3006,6 +3142,16 @@ public class Window3DController {
                 protected Void call() throws Exception {
                     runLater(() -> {
                         refreshScene();
+
+                        //render previous time points
+                        int loop = (int)numPrev.get();
+
+                        for(int i = timeProperty.get() - 1; i > timeProperty.get() - loop; --i) {
+                            getCellSceneData(i);
+                            addEntitiesNoNotesWithColorRule();//testing
+                        }
+
+                        //render current time point
                         getSceneData();
                         addEntitiesAndNotes();
                     });
@@ -3014,6 +3160,7 @@ public class Window3DController {
             };
         }
     }
+
 
     /**
      * This JavaFX {@link Service} of type Void spools a thread to play the subscene movie. It waits the timeProperty
