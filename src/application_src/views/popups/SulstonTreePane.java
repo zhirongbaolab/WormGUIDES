@@ -23,6 +23,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -32,6 +33,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -47,6 +49,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.FontWeight;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
@@ -90,12 +93,16 @@ import static application_src.application_model.search.SearchConfiguration.Searc
 import static application_src.application_model.loaders.IconImageLoader.getMinusIcon;
 import static application_src.application_model.loaders.IconImageLoader.getPlusIcon;
 import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
+import static application_src.application_model.data.CElegansData.SulstonLineage.LineageTree.getNodeWithName;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNamesByFunctionalName;
 
 public class SulstonTreePane extends ScrollPane {
     //TODO decouple rendering as separate class from WG app specific interaction -as
     // gui stuff
     private static final int TIME_LABEL_OFFSET_X = 20;
     private static final int ZOOM_BUTTON_SIZE = 30;
+    private static final int SEARCH_BOX_HEIGHT = 30;
+    private static final int SEARCH_BOX_WIDTH = 250;
     private static final double DEFAULT_WINDOW_HEIGHT = 820;
     private static final double DEFAULT_WINDOW_WIDTH = 775;
     private static final Color ZOOM_BUTTONS_SHADOW_COLOR = web("AAAAAA");
@@ -137,10 +144,12 @@ public class SulstonTreePane extends ScrollPane {
     private int xsc = 5;
     // left margin
     private int iXmax = 30;
-    private int iYmin = 19;
+    private int iYmin = 30;  //testing 19
 
     private boolean defaultEmbryoFlag;
     private AnnotationManager annotationManager;
+
+    private ArrayList<String> currMatchCellNames;
 
     public SulstonTreePane(
             final Stage ownStage,
@@ -161,6 +170,7 @@ public class SulstonTreePane extends ScrollPane {
 
         this.searchLayer = requireNonNull(searchLayer);
         this.defaultEmbryoFlag = requireNonNull(defaultEmbryoFlag);
+        currMatchCellNames = new ArrayList<>();
 
         hiddenNodes = new ArrayList<>();
 
@@ -186,7 +196,7 @@ public class SulstonTreePane extends ScrollPane {
                     } else {
                         // reset the name to activate navigate3d in 3d cell window
                         resetSelectedNameLabeled(sourceName);
-                        timeProperty.set(((int) round(event.getY())) - movieTimeOffset);
+                        timeProperty.set(((int) round(event.getY())) - movieTimeOffset - 11); //11 ot offset the increase on iymin
                     }
                 }
             }
@@ -280,12 +290,39 @@ public class SulstonTreePane extends ScrollPane {
             scaleTransform.setY(scaleTransform.getY() * .75);
         });
 
+        //search box
+        final TextField searchField = new TextField();
+        searchField.setPrefSize(SEARCH_BOX_WIDTH, SEARCH_BOX_HEIGHT);
+        searchField.setMaxSize(SEARCH_BOX_WIDTH, SEARCH_BOX_HEIGHT);
+        searchField.setMinSize(SEARCH_BOX_WIDTH, SEARCH_BOX_HEIGHT);
+        searchField.setEffect(shadow);
+        searchField.setPromptText("search here");
+
+        contentGroup.getChildren().add(searchField);
+        searchField.getTransforms().add(new Translate(100, 5));
+
+        EventHandler<ActionEvent> event = e -> {
+            String currsearchtext = searchField.getText();
+            if (!currsearchtext.equals("")) {
+                System.out.println("searching " + currsearchtext + "...");
+                searchNameNode(currsearchtext);
+            } else {
+                System.out.println("search string cannot be empty string");
+            }
+        };
+
+        // when enter is pressed
+        searchField.setOnAction(event);
+
+        //end search box
+
         final Pane yetanotherlevel = new Pane();
         yetanotherlevel.getChildren().add(contentGroup);
         setContent(yetanotherlevel);
 
-        bindLocation(plusButton, this, yetanotherlevel);
-        bindLocation(minusButton, this, yetanotherlevel);
+        bindLocationButton(plusButton, this, yetanotherlevel);
+        bindLocationButton(minusButton, this, yetanotherlevel);
+        bindLocationTextField(searchField, this, yetanotherlevel);
 
         this.contextMenuController = requireNonNull(contextMenuController);
         this.contextMenuStage = requireNonNull(contextMenuStage);
@@ -370,48 +407,11 @@ public class SulstonTreePane extends ScrollPane {
      */
     private void setUpDefaultView() {
         // empty lines indicate a different level of the lineage tree
-        hiddenNodes.add("ABalaa");
-        hiddenNodes.add("ABalap");
-        hiddenNodes.add("ABalpa");
-        hiddenNodes.add("ABalpp");
-        hiddenNodes.add("ABaraa");
-        hiddenNodes.add("ABarap");
-        hiddenNodes.add("ABarpa");
-        hiddenNodes.add("ABarpp");
-        hiddenNodes.add("ABplaa");
-        hiddenNodes.add("ABplap");
-        hiddenNodes.add("ABplpa");
 
-        hiddenNodes.add("ABplppaa");
-        hiddenNodes.add("ABplpppp");
-
-        hiddenNodes.add("ABpraa");
-        hiddenNodes.add("ABprap");
-
-        hiddenNodes.add("ABprpaaa");
-        hiddenNodes.add("ABprppaa");
-
-        hiddenNodes.add("ABprpapaa");
-
-        hiddenNodes.add("Abprppaa");
-
-        hiddenNodes.add("ABprppp");
-
-        hiddenNodes.add("MSaa");
-        hiddenNodes.add("MSap");
-        hiddenNodes.add("MSpa");
-        hiddenNodes.add("MSpp");
-
-        hiddenNodes.add("Ea");
-        hiddenNodes.add("Ep");
-
-        hiddenNodes.add("Caa");
-        hiddenNodes.add("Cap");
-        hiddenNodes.add("Cpa");
-        hiddenNodes.add("Cpp");
-
-        hiddenNodes.add("D");
-        hiddenNodes.add("P4");
+        //testing add all cell into hiddenNodes
+        for (String cellName:lineageData.getAllCellNames()) {
+            hiddenNodes.add(cellName);
+        }
     }
 
     private void showContextMenu(final String name, final double sceneX, final double sceneY) {
@@ -461,6 +461,46 @@ public class SulstonTreePane extends ScrollPane {
         }
     }
 
+    //search function
+    //currently on works with sulston cell name
+    private void searchNameNode(String name) {
+        //clear current match cell names from previous search
+        currMatchCellNames.clear();
+        //check if a match exist
+        //check by lineage name
+        TreeItem<String> targetnode = getNodeWithName(name);
+        //check by function name
+        List<String> cellnamesbyfunc = getLineageNamesByFunctionalName(name);
+        if (targetnode != null) {
+            //set current match cell name for highlighting
+            currMatchCellNames.add(targetnode.getValue());
+            //show the cell and its ancestors
+            TreeItem<String> currnode = targetnode.getParent();
+            while (currnode != null) {
+                if (hiddenNodes.contains(currnode.getValue())) {
+                    hiddenNodes.remove(currnode.getValue());
+                }
+                currnode = currnode.getParent();
+            }
+        } else if (cellnamesbyfunc.size() > 0){
+            for (String cname:cellnamesbyfunc) {
+                //add current match cell name for highlighting
+                if (getNodeWithName(cname) != null) {
+                    currMatchCellNames.add(cname);
+                    //show the cell and its ancestors
+                    TreeItem<String> currnode = getNodeWithName(cname).getParent();
+                    while (currnode != null) {
+                        if (hiddenNodes.contains(currnode.getValue())) {
+                            hiddenNodes.remove(currnode.getValue());
+                        }
+                        currnode = currnode.getParent();
+                    }
+                }
+            }
+        }
+        updateDrawing();
+    }
+
     private void repositionTimeLine() {
         timeIndicatorBar.setEndY(iYmin + timeProperty.getValue());
         timeIndicatorBar.setStartY(iYmin + timeProperty.getValue());
@@ -472,7 +512,7 @@ public class SulstonTreePane extends ScrollPane {
         }
     }
 
-    private void bindLocation(Button plus, ScrollPane s, Pane scontent) {
+    private void bindLocationButton (Button plus, ScrollPane s, Pane scontent) {
         plus.layoutYProperty().bind(
                 // to vertical scroll shift (which ranges from 0 to 1)
                 s.vvalueProperty()
@@ -485,6 +525,20 @@ public class SulstonTreePane extends ScrollPane {
                         // multiplied by (scrollableAreaHeight - visibleViewportHeight)
                         .multiply(scontent.widthProperty().subtract(new ScrollPaneViewPortWidthBinding(s))));
 
+    }
+
+    private void bindLocationTextField (TextField field, ScrollPane s, Pane scontent) {
+        field.layoutYProperty().bind(
+                // to vertical scroll shift (which ranges from 0 to 1)
+                s.vvalueProperty()
+                        // multiplied by (scrollableAreaHeight - visibleViewportHeight)
+                        .multiply(scontent.heightProperty().subtract(new ScrollPaneViewPortHeightBinding(s))));
+
+        field.layoutXProperty().bind(
+                // to vertical scroll shift (which ranges from 0 to 1)
+                s.hvalueProperty()
+                        // multiplied by (scrollableAreaHeight - visibleViewportHeight)
+                        .multiply(scontent.widthProperty().subtract(new ScrollPaneViewPortWidthBinding(s))));
     }
 
     private void updateDrawing() {
@@ -682,6 +736,14 @@ public class SulstonTreePane extends ScrollPane {
             final Text cellnametext = new Text(x - offsetx, yStartUse + length + offsety, cellNameTextString);
             cellnametext.getTransforms().add(new Rotate(90, x - offsetx, yStartUse + length + offsety));
             cellnametext.setFont(new Font(5));
+            //highlight cell name for search function result
+            if (currMatchCellNames.contains(cellName)) {
+                cellnametext.setFont(Font.font("Verdana", FontWeight.BOLD, 5));
+                cellnametext.setFill(Color.RED);
+
+                resetSelectedNameLabeled(cellName);
+                timeProperty.set(endTime);
+            }
 
             mainPane.getChildren().add(cellnametext);
             nameXUseMap.put(cellName, x);

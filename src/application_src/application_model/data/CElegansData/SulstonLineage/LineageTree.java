@@ -156,6 +156,20 @@ public class LineageTree {
     }
 
     /**
+     * @param name
+     *         the name to check
+     *
+     * @return null or the node associate with the name
+     */
+    public static TreeItem<String> getNodeWithName(String name) {
+        name = name.toLowerCase();
+        if (nameNodeHash.get(name) == null) {
+            return null;
+        }
+        return nameNodeHash.get(name);
+    }
+
+    /**
      * @param ancestor
      *         the cell name to check
      * @param descendant
