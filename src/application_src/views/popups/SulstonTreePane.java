@@ -95,6 +95,7 @@ import static application_src.application_model.loaders.IconImageLoader.getPlusI
 import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
 import static application_src.application_model.data.CElegansData.SulstonLineage.LineageTree.getNodeWithName;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNamesByFunctionalName;
+import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNamesByDescription;
 
 public class SulstonTreePane extends ScrollPane {
     //TODO decouple rendering as separate class from WG app specific interaction -as
@@ -407,11 +408,55 @@ public class SulstonTreePane extends ScrollPane {
      */
     private void setUpDefaultView() {
         // empty lines indicate a different level of the lineage tree
+        hiddenNodes.add("ABalaa");
+        hiddenNodes.add("ABalap");
+        hiddenNodes.add("ABalpa");
+        hiddenNodes.add("ABalpp");
+        hiddenNodes.add("ABaraa");
+        hiddenNodes.add("ABarap");
+        hiddenNodes.add("ABarpa");
+        hiddenNodes.add("ABarpp");
+        hiddenNodes.add("ABplaa");
+        hiddenNodes.add("ABplap");
+        hiddenNodes.add("ABplpa");
+
+        hiddenNodes.add("ABplppaa");
+        hiddenNodes.add("ABplpppp");
+
+        hiddenNodes.add("ABpraa");
+        hiddenNodes.add("ABprap");
+
+        hiddenNodes.add("ABprpaaa");
+        hiddenNodes.add("ABprppaa");
+
+        hiddenNodes.add("ABprpapaa");
+
+        hiddenNodes.add("Abprppaa");
+
+        hiddenNodes.add("ABprppp");
+
+        hiddenNodes.add("MSaa");
+        hiddenNodes.add("MSap");
+        hiddenNodes.add("MSpa");
+        hiddenNodes.add("MSpp");
+
+        hiddenNodes.add("Ea");
+        hiddenNodes.add("Ep");
+
+        hiddenNodes.add("Caa");
+        hiddenNodes.add("Cap");
+        hiddenNodes.add("Cpa");
+        hiddenNodes.add("Cpp");
+
+        hiddenNodes.add("D");
+        hiddenNodes.add("P4");
 
         //testing add all cell into hiddenNodes
+        /*
         for (String cellName:lineageData.getAllCellNames()) {
             hiddenNodes.add(cellName);
         }
+        */
     }
 
     private void showContextMenu(final String name, final double sceneX, final double sceneY) {
@@ -471,10 +516,16 @@ public class SulstonTreePane extends ScrollPane {
         TreeItem<String> targetnode = getNodeWithName(name);
         //check by function name
         List<String> cellnamesbyfunc = getLineageNamesByFunctionalName(name);
+        //check by description
+        List<String> cellnamesbyDescip = getLineageNamesByDescription(name);
         if (targetnode != null) {
+            System.out.println("Searched by lineage name.");
             //set current match cell name for highlighting
             currMatchCellNames.add(targetnode.getValue());
             //show the cell and its ancestors
+            if(!hiddenNodes.contains(targetnode.getValue())) {
+                hiddenNodes.add(targetnode.getValue());
+            }
             TreeItem<String> currnode = targetnode.getParent();
             while (currnode != null) {
                 if (hiddenNodes.contains(currnode.getValue())) {
@@ -483,6 +534,7 @@ public class SulstonTreePane extends ScrollPane {
                 currnode = currnode.getParent();
             }
         } else if (cellnamesbyfunc.size() > 0){
+            System.out.println("Searched by function name.");
             for (String cname:cellnamesbyfunc) {
                 //add current match cell name for highlighting
                 if (getNodeWithName(cname) != null) {
@@ -497,6 +549,24 @@ public class SulstonTreePane extends ScrollPane {
                     }
                 }
             }
+        } else if (cellnamesbyDescip.size() > 0) {
+            System.out.println("Searched by cell description.");
+            for (String cname:cellnamesbyDescip) {
+                //add current match cell name for highlighting
+                if (getNodeWithName(cname) != null) {
+                    currMatchCellNames.add(cname);
+                    //show the cell and its ancestors
+                    TreeItem<String> currnode = getNodeWithName(cname).getParent();
+                    while (currnode != null) {
+                        if (hiddenNodes.contains(currnode.getValue())) {
+                            hiddenNodes.remove(currnode.getValue());
+                        }
+                        currnode = currnode.getParent();
+                    }
+                }
+            }
+        } else {
+            System.out.println("No result found.");
         }
         updateDrawing();
     }
