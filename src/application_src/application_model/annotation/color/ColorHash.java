@@ -16,7 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 
-import application_src.views.popups.SulstonTreePane;
+import application_src.views.popups.LineageTreePane;
 
 import static java.lang.Integer.toHexString;
 import static java.lang.Math.round;
@@ -29,7 +29,7 @@ import static javafx.scene.paint.Color.web;
 
 /**
  * ColorHash is a number of combinations of Colors mapped to a {@link Material}. {@link
- * wormguides.controllers.Window3DController} and {@link SulstonTreePane} query this class to find the appropriate
+ * wormguides.controllers.Window3DController} and {@link LineageTreePane} query this class to find the appropriate
  * color striping to apply to a cell/its lineage. This class also contains a map of the material to the opacity
  * (0.0->1.0) of the least opaque color in a Material. This is used so that the "most opaque" materials can be
  * rendered first, followed by sheerer ones.

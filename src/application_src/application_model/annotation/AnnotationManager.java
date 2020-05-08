@@ -9,7 +9,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import java.util.*;
-import static application_src.application_model.data.CElegansData.SulstonLineage.LineageTree.getCaseSensitiveName;
+import static application_src.application_model.data.GenericData.GenericLineageTree.getCaseSensitiveName;
 import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
 import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;
 import static application_src.application_model.search.SearchConfiguration.SearchType.*;
