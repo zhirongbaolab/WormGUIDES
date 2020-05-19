@@ -230,6 +230,27 @@ public class PartsList {
     }
 
     /**
+     * Retrieves the lineage names of cells with a description. No duplicates are returned and results are sorted.
+     *
+     * @param queriedDescription
+     *         the lineage name
+     *
+     * @return lineage name for that description
+     */
+    public static List<String> getLineageNamesByDescription(String queriedDescription) {
+        queriedDescription = queriedDescription.toLowerCase();
+        final Set<String> lineageNamesSet = new HashSet<>();
+        for (int i = 0; i < descriptions.size(); i++) {
+            if (descriptions.get(i).toLowerCase().contains(queriedDescription)) {
+                lineageNamesSet.add(getLineageNameByIndex(i));
+            }
+        }
+        final List<String> lineageNamesList = new ArrayList<>(lineageNamesSet);
+        sort(lineageNamesList);
+        return lineageNamesList;
+    }
+
+    /**
      * @return copy of the list of lineage names
      */
     public static List<String> getLineageNames() {

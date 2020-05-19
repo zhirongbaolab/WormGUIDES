@@ -32,7 +32,6 @@ import application_src.controllers.controllers.RuleEditorController;
 import application_src.controllers.layers.SearchLayer;
 import application_src.views.graphical_representations.RuleGraphic;
 
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
@@ -43,11 +42,8 @@ import static javafx.stage.Modality.NONE;
 
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.isLineageName;
-import static application_src.application_model.search.SearchConfiguration.SearchType.GENE;
 import static application_src.application_model.search.SearchConfiguration.SearchType.STRUCTURES_BY_HEADING;
 import static application_src.application_model.search.SearchConfiguration.SearchType.STRUCTURE_BY_SCENE_NAME;
-import static application_src.application_model.data.CElegansData.SulstonLineage.LineageTree.isAncestor;
-import static application_src.application_model.data.CElegansData.SulstonLineage.LineageTree.isDescendant;
 import static application_src.application_model.search.SearchConfiguration.SearchOption.ANCESTOR;
 import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_BODY;
 import static application_src.application_model.search.SearchConfiguration.SearchOption.CELL_NUCLEUS;

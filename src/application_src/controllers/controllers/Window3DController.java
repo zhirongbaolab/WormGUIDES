@@ -3146,9 +3146,15 @@ public class Window3DController {
                         //render previous time points
                         int loop = (int)numPrev.get();
 
-                        for(int i = timeProperty.get() - 1; i > timeProperty.get() - loop; --i) {
+                        //avoid index out of bound
+                        int loop_end = timeProperty.get() - loop;
+                        if (loop_end < 0) {
+                            loop_end = 0;
+                        }
+
+                        for(int i = timeProperty.get() - 1; i > loop_end; --i) {
                             getCellSceneData(i);
-                            addEntitiesNoNotesWithColorRule();//testing
+                            addEntitiesNoNotesWithColorRule();
                         }
 
                         //render current time point

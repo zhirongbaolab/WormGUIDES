@@ -18,11 +18,14 @@ import application_src.application_model.data.CElegansData.AnalogousCells.Embryo
 import application_src.application_model.data.CElegansData.Anatomy.Anatomy;
 import application_src.application_model.data.CElegansData.Gene.GeneSearchManager;
 import application_src.application_model.data.CElegansData.SulstonLineage.SulstonLineage;
+import application_src.application_model.data.CElegansData.SulstonLineage.SulstonLineageTree;
+import application_src.application_model.data.GenericData.GenericLineageTree;
 import application_src.application_model.search.CElegansSearch.CElegansSearch;
 import application_src.application_model.search.ModelSearch.EstablishCorrespondence;
 import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.ModelSpecificSearchUtil;
 import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.NeighborsSearch;
 import application_src.application_model.search.ModelSearch.ModelSpecificSearchOps.StructuresSearch;
+import application_src.views.popups.LineageTreePane;
 import application_src.views.popups.TimelineChart;
 
 import javafx.beans.property.BooleanProperty;
@@ -34,7 +37,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Service;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -47,7 +49,6 @@ import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -68,7 +69,6 @@ import application_src.controllers.layers.SearchLayer;
 import application_src.controllers.layers.StoriesLayer;
 import application_src.controllers.layers.StructuresLayer;
 import application_src.application_model.loaders.IconImageLoader;
-import application_src.application_model.data.CElegansData.SulstonLineage.LineageTree;
 import application_src.application_model.cell_case_logic.CasesLists;
 import application_src.application_model.annotation.color.Rule;
 import application_src.application_model.threeD.subscenegeometry.SceneElementsList;
@@ -82,11 +82,9 @@ import application_src.views.DraggableTab;
 import application_src.views.info_window.InfoWindow;
 import application_src.views.popups.AboutPane;
 import application_src.views.popups.StorySavePane;
-import application_src.views.popups.SulstonTreePane;
 import application_src.views.url_window.URLLoadWarningDialog;
 import application_src.views.url_window.URLLoadWindow;
 import application_src.views.url_window.URLShareWindow;
-import sun.applet.Main;
 
 import static java.lang.System.lineSeparator;
 import static java.time.Duration.between;
@@ -376,33 +374,31 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
     @FXML
     public void viewTreeAction() {
-        if (lineageData.isSulstonMode()) {
-            if (sulstonTreeStage == null) {
-                sulstonTreeStage = new Stage();
-                final SulstonTreePane treePane = new SulstonTreePane(
-                        sulstonTreeStage,
-                        searchLayer,
-                        lineageData,
-                        movieTimeOffset,
-                        lineageTreeRoot,
-                        colorHash,
-                        timeProperty,
-                        contextMenuStage,
-                        contextMenuController,
-                        selectedNameLabeledProperty,
-                        rebuildSubsceneFlag,
-                        defaultEmbryoFlag,
-                        annotationManager);
-                sulstonTreeStage.setScene(new Scene(treePane));
-                sulstonTreeStage.setTitle("LineageTree");
-                sulstonTreeStage.initModality(NONE);
-                sulstonTreeStage.show();
-                treePane.addDrawing();
-                mainStage.show();
-            } else {
-                sulstonTreeStage.show();
-                runLater(() -> ((Stage) sulstonTreeStage.getScene().getWindow()).toFront());
-            }
+        if (sulstonTreeStage == null) {
+            sulstonTreeStage = new Stage();
+            final LineageTreePane treePane = new LineageTreePane(
+                    sulstonTreeStage,
+                    searchLayer,
+                    lineageData,
+                    movieTimeOffset,
+                    lineageTreeRoot,
+                    colorHash,
+                    timeProperty,
+                    contextMenuStage,
+                    contextMenuController,
+                    selectedNameLabeledProperty,
+                    rebuildSubsceneFlag,
+                    defaultEmbryoFlag,
+                    annotationManager);
+            sulstonTreeStage.setScene(new Scene(treePane));
+            sulstonTreeStage.setTitle("LineageTree");
+            sulstonTreeStage.initModality(NONE);
+            sulstonTreeStage.show();
+            treePane.addDrawing();
+            mainStage.show();
+        } else {
+            sulstonTreeStage.show();
+            runLater(() -> ((Stage) sulstonTreeStage.getScene().getWindow()).toFront());
         }
     }
 
@@ -1095,6 +1091,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
     }
 
     private void initLineageTree(final List<String> allCellNames) {
+        /*
+        //this is unnecessary since names will be checked during building process in LineageTree.java
         if (!defaultEmbryoFlag) {
             // remove unlineaged cells
             for (int i = 0; i < allCellNames.size(); i++) {
@@ -1104,9 +1102,18 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 }
             }
         }
-        final LineageTree lineageTree = new LineageTree(
-                allCellNames.toArray(new String[allCellNames.size()]),
-                lineageData.isSulstonMode());
+         */
+        final GenericLineageTree lineageTree;
+        if (lineageData.isSulstonMode()) {
+            lineageTree = new SulstonLineageTree(
+                    allCellNames.toArray(new String[allCellNames.size()]),
+                    lineageData.isSulstonMode());
+        } else {
+            lineageTree = new GenericLineageTree(
+                    allCellNames.toArray(new String[allCellNames.size()]),
+                    lineageData.getNames(startTime),
+                    lineageData.isSulstonMode());
+        }
         lineageTreeRoot = lineageTree.getRoot();
     }
 
