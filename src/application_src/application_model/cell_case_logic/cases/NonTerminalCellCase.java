@@ -13,13 +13,14 @@ import java.util.List;
 
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getDescriptionByLineageName;
 
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.WORMATLAS_URL_EXT;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.WORMATLAS_URL;
+
 
 /**
  * A non-terminal cell object which contains the information for the info window
  */
 public class NonTerminalCellCase extends CellCase {
-
-    private final static String WORMATLAS_URL_EXT = "mainframe.htm";
 
     private String embryonicHomology;
 

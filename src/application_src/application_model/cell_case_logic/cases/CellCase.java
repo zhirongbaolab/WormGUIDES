@@ -20,6 +20,15 @@ import static java.lang.Character.isDigit;
 
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
 
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.WORMATLAS_URL;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.WORMBASE_URL;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.WORMBASE_EXT;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.GOOGLE_URL;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.GOOGLE_WORMATLAS_URL;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.TEXTPRESSO_URL;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.TEXTPRESSO_URL_EXT;
+
+
 /**
  * The cell case in the info window which corresponds to a terminal or non-terminal cell. Subcases are specified by
  * {@link TerminalCellCase} and {@link NonTerminalCellCase}. This class defines the characteristics shared between
@@ -27,23 +36,6 @@ import static application_src.application_model.data.CElegansData.PartsList.Part
  */
 public abstract class CellCase {
 
-    protected static final String WORMATLAS_URL = "http://www.wormatlas.org/neurons/Individual%20Neurons/";
-
-    private static final String WORMBASE_URL = "https://www.wormbase.org/db/get?name=";
-    private static final String WORMBASE_EXT = ";class=Anatomy_term";
-
-    private static final String GOOGLE_URL = "https://www.google.com/#q=";
-    private static final String GOOGLE_WORMATLAS_URL = "https://www.google.com/#q=site:wormatlas.org+";
-
-    private static final String TEXTPRESSO_URL = "http://textpresso-www.cacr.caltech"
-            + ".edu/cgi-bin/celegans/search?searchstring=";
-    private static final String TEXTPRESSO_URL_EXT = ";cat1=Select%20category%201%20from%20list%20above;"
-            + "cat2=Select%20category%202%20from%20list%20above;cat3=Select%20category%203%20from%20list%20above;"
-            + "cat4=Select%20category%204%20from%20list%20above;cat5=Select%20category%205%20from%20list%20above;"
-            + "search=SearchLayer!;exactmatch=on;searchsynonyms=on;literature=C.%20elegans;target=abstract;target=body;"
-            + "target=title;target=introduction;target=materials;target=results;target=discussion;target=conclusion;"
-            + "target=acknowledgments;target=references;sentencerange=sentence;sort=score%20(hits);mode=boolean;"
-            + "authorfilter=;journalfilter=;yearfilter=;docidfilter=;";
     private static final String TEXTPRESSO_TITLE = "Title: </span>";
     private static final String TEXTPRESSO_AUTHORS = "Authors: </span>";
     private static final String TEXTPRESSO_YEAR = "Year: </span>";
@@ -103,7 +95,7 @@ public abstract class CellCase {
             url.append(WORMBASE_URL).append(functionalName).append(WORMBASE_EXT);
         } else {
             //non terminal cell case
-            url.append(WORMATLAS_URL).append(lineageName).append(WORMBASE_EXT);
+            url.append(WORMBASE_URL).append(lineageName).append(WORMBASE_EXT);
         }
         final String urlString = url.toString();
 
@@ -118,7 +110,7 @@ public abstract class CellCase {
             scanner.close();
         } catch (Exception e) {
             //e.printStackTrace();
-            //a page wasn't found on wormatlas
+            //a page wasn't found on wormbase
             System.out.println(this.lineageName + " page not found on Wormbase");
             return;
         }
@@ -206,7 +198,7 @@ public abstract class CellCase {
             scanner.close();
 
         } catch (Exception e) {
-            //a page wasn't found on wormatlas
+            //a page wasn't found on Textpresso
             System.out.println(lineageName + " page not found on Textpresso");
             return;
         }

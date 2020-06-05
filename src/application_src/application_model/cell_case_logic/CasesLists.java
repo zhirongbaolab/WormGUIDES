@@ -5,6 +5,7 @@
 package application_src.application_model.cell_case_logic;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import application_src.application_model.cell_case_logic.cases.CellCase;
@@ -230,9 +231,16 @@ public class CasesLists {
         }
         for (String cell : cells) {
             if (containsCellCase(cell)) {
-                cellCases.stream()
-                        .filter(cellCase -> cellCase.getLineageName().toLowerCase().equals(cell.toLowerCase()))
-                        .forEach(cellCases::remove);
+                //use Iterator to avoid concurrent modification exception
+                Iterator<CellCase> it = cellCases.iterator();
+                while(it.hasNext()) {
+                    CellCase cc = it.next();
+                    System.out.println(cc.getLineageName());
+                    System.out.println(cell);
+                    if (cc.getLineageName().equalsIgnoreCase((cell))) {
+                        cellCases.remove(cc);
+                    }
+                }
             }
             if (containsAnatomyTermCase(cellName)) {
                 for (int i = 0; i < anatomyTermCases.size(); i++) {
