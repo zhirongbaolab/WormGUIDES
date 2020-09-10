@@ -951,6 +951,17 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 displayedDescription.setText("Cell Death");
             }
         }
+
+        //Terminal Descendants
+        final List<String> terminalDescendants = CElegansSearch.findTerminalDescendants(name);
+        if (terminalDescendants.size() > 1 && terminalDescendants.size() < 4) {
+            String outString = "Terminal Descendants: ";
+            for (String descendants:terminalDescendants) {
+                outString += (PartsList.getFunctionalNameByLineageName(descendants) + ", ");
+            }
+            outString = outString.substring(0,outString.length()-2);
+            displayedDescription.setText(outString);
+        }
     }
 
     /**
