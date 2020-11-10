@@ -325,6 +325,10 @@ public class InfoWindow {
             showLoadingService.cancel();
             setInfoWindowTitle();
         });
+        addNameService.setOnFailed(event -> {
+            showLoadingService.cancel();
+            setInfoWindowTitle();
+        });
         showLoadingService.setOnCancelled(event -> {
             showWindow();
             setInfoWindowTitle();

@@ -62,6 +62,7 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.shape.Shape3D;
 import javafx.scene.shape.Sphere;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
@@ -2709,11 +2710,15 @@ public class Window3DController {
         Node node = null;
         if (note.getTagDisplay() != null) {
             switch (note.getTagDisplay()) {
-                case CALLOUT_UPPER_LEFT: // fall to sprite case
-
-                case CALLOUT_UPPER_RIGHT: // fall to sprite case
+                case CALLOUT_UPPER_LEFT: // fall to callout_lower_left case
 
                 case CALLOUT_LOWER_LEFT: // fall to sprite case
+                    Text t = makeNoteSpriteText(title);
+                    t.setTextAlignment(TextAlignment.RIGHT); // make the text right aligned for left side callouts
+                    node = t;
+                    break;
+
+                case CALLOUT_UPPER_RIGHT: // fall to sprite case
 
                 case CALLOUT_LOWER_RIGHT: // fall to sprite case
 

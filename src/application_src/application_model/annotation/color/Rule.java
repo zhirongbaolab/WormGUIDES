@@ -108,6 +108,15 @@ public class Rule {
 
         this.rebuildSubsceneFlag = requireNonNull(rebuildSubsceneFlag);
 
+        //fetch the search term from the 'searched' parameter
+        String searchTemp = "";
+        if (searched.contains("'")) {
+            searchTemp = searched.substring(searched.indexOf("'")+1, searched.lastIndexOf("'"));
+        } else {
+            searchTemp = searched;
+        }
+        final String searchTerm = searchTemp;
+
         searchType = type;
         setOptions(options);
 
@@ -129,7 +138,7 @@ public class Rule {
                         case LINEAGE:
                             List<String> cells = new ArrayList<>();
                             CElegansSearchResults cElegansDataSearchResults = new CElegansSearchResults(
-                                    cElegansSearch.executeLineageSearch(searched,
+                                    cElegansSearch.executeLineageSearch(searchTerm,
                                             currAnc,
                                             currDes));
                             cells.addAll(cElegansDataSearchResults.getSearchResults());
@@ -139,7 +148,7 @@ public class Rule {
                              * in the event of a non-sulston embryo, you can search directly for
                              * the names of specific entities */
                             if (cells.isEmpty()) {
-                                cells.addAll(ModelSpecificSearchUtil.nonSulstonLineageSearch(searched,
+                                cells.addAll(ModelSpecificSearchUtil.nonSulstonLineageSearch(searchTerm,
                                         currAnc,
                                         currDes));
 
@@ -148,10 +157,10 @@ public class Rule {
                             setCells(cells);
                             break;
                         case FUNCTIONAL:
-                            setCells(cElegansSearch.executeFunctionalSearch(searched.substring(searched.indexOf("'")+1, searched.lastIndexOf("'")), currAnc, currDes, OrganismDataType.LINEAGE).getValue());
+                            setCells(cElegansSearch.executeFunctionalSearch(searchTerm, currAnc, currDes, OrganismDataType.LINEAGE).getValue());
                             break;
                         case DESCRIPTION:
-                            setCells(cElegansSearch.executeDescriptionSearch(searched.substring(searched.indexOf("'")+1, searched.lastIndexOf("'")), currAnc, currDes, OrganismDataType.LINEAGE).getValue());
+                            setCells(cElegansSearch.executeDescriptionSearch(searchTerm, currAnc, currDes, OrganismDataType.LINEAGE).getValue());
                             break;
                         case GENE:
                             System.out.println("Updating gene rule from RuleEditorController is currently not supported.\nPlease delete the rule and run an updated search from the Find Cells tab. (07/2018)");
@@ -173,7 +182,7 @@ public class Rule {
                             if (text.contains("neuro")) {
                                 neuro = true;
                             }
-                            setCells(cElegansSearch.executeConnectomeSearch(searched.substring(searched.indexOf("'")+1, searched.lastIndexOf("'")), currAnc, currDes, pre, post, elec, neuro, OrganismDataType.LINEAGE).getValue());
+                            setCells(cElegansSearch.executeConnectomeSearch(searchTerm, currAnc, currDes, pre, post, elec, neuro, OrganismDataType.LINEAGE).getValue());
                             break;
                     }
                 }

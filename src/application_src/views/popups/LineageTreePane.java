@@ -459,9 +459,16 @@ public class LineageTreePane extends ScrollPane {
             //comment out the following snippet to show all cells by default
             List<String> allCellNames = lineageData.getAllCellNames();
             int numCells = allCellNames.size();
+            int numDefaultHiddenNodes = 0;
+            //set a max limit of 2000 on number of default hidden nodes to avoid unnecessary overhead
+            if (numCells < 10000) {
+                numDefaultHiddenNodes = numCells / 5;
+            } else {
+                numDefaultHiddenNodes = 2000;
+            }
             Random r = new Random();
 
-            for (int i = 0; i < numCells / 5; i++) {
+            for (int i = 0; i < numDefaultHiddenNodes; i++) {
                 int randomIndex = r.nextInt(numCells);
                 String nextCellName = allCellNames.get(randomIndex);
                 if (!hiddenNodes.contains(nextCellName)) {

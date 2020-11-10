@@ -23,19 +23,20 @@ import static application_src.application_model.data.CElegansData.PartsList.Part
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getFunctionalNameByLineageName;
 import static application_src.application_model.data.CElegansData.PartsList.PartsList.getLineageNames;
 
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.GRAPHIC_URL;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.GRAPHIC_URL_RANGE;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.WORMATLAS_URL_EXT;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.WORMWIRING_BASE_URL;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.WORMWIRING_N_2_UEXT;
+import static application_src.application_model.cell_case_logic.cases.ExternalLink.WORMATLAS_URL;
+
+
 /**
  * Cell case for a terminal cell. The case contains information for the info window
  */
 public class TerminalCellCase extends CellCase {
 
-    private static final String GRAPHIC_URL = "http://www.wormatlas.org/neurons/Images/";
-    private static final String GRAPHIC_URL_RANGE = "http://www.wormatlas.org/neurons/Images/";
-
     private static final String JPG_EXT = ".jpg";
-
-    private static final String WORMATLAS_URL_EXT = "mainframe.htm";
-    private static final String WORMWIRING_BASE_URL = "http://wormwiring.hpc.einstein.yu.edu/data/neuronData.php?name=";
-    private static final String WORMWIRING_N_2_UEXT = "&db=N2U";
 
     private String functionalName;
     private String externalInfo;
@@ -269,7 +270,7 @@ public class TerminalCellCase extends CellCase {
 
                     //see if both images are for the same cell
                     if (imageName.toLowerCase().startsWith(baseName.toLowerCase()) && imageName2.toLowerCase()
-                            .startsWith(baseName.toLowerCase())) {
+                            .startsWith(baseName.toLowerCase()) && !imageName2.contains("-")) {
                         //find the range formed by the two images
                         int lowerBound = Character.getNumericValue(imageName.charAt(imageName.length() - 1));
                         int upperBound = Character.getNumericValue(imageName2.charAt(imageName2.length() - 1));
