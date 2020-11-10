@@ -32,8 +32,6 @@ import application_src.controllers.controllers.RuleEditorController;
 import application_src.controllers.layers.SearchLayer;
 import application_src.views.graphical_representations.RuleGraphic;
 
-import javax.management.remote.rmi._RMIConnection_Stub;
-
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
