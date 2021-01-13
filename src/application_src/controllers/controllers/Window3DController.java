@@ -302,6 +302,7 @@ public class Window3DController {
     private boolean[] isMeshSearchedFlags;
     private LinkedList<Double[]> positions;
     private LinkedList<Double> diameters;
+    private LinkedList<Integer> rweights;
     private List<SceneElement> sceneElementsAtCurrentTime;
     private List<SceneElementMeshView> currentSceneElementMeshes;
 //    private List<MeshView> currentSceneElementMeshes;
@@ -474,6 +475,7 @@ public class Window3DController {
         meshNames = new LinkedList<>();
         positions = new LinkedList<>();
         diameters = new LinkedList<>();
+        rweights = new LinkedList<>();
         isCellSearchedFlags = new boolean[1];
         isMeshSearchedFlags = new boolean[1];
 
@@ -1675,6 +1677,10 @@ public class Window3DController {
         for (double diameter : lineageData.getDiameters(requestedTime)) {
             diameters.add(diameter);
         }
+        rweights = new LinkedList<>();
+        for (int rweight : lineageData.getRweights(requestedTime)) {
+            rweights.add(rweight);
+        }
         otherCells.clear();
 
         totalNucleiProperty.set(cellNames.size());
@@ -1821,6 +1827,10 @@ public class Window3DController {
         diameters = new LinkedList<>();
         for (double diameter : lineageData.getDiameters(requestedTime)) {
             diameters.add(diameter);
+        }
+        rweights = new LinkedList<>();
+        for (int rweight : lineageData.getRweights(requestedTime)) {
+            rweights.add(rweight);
         }
 
         totalNucleiProperty.set(cellNames.size());
@@ -1998,7 +2008,13 @@ public class Window3DController {
                         index--;
                         continue;
                     } else {
-                        material = othersMaterial;
+                        // experimental feature
+                        if (rweights.size() > index && rweights.get(index) > 0) {
+                            material = colorHash.getExpressionMaterial(opacity);
+                        } else {
+                            material = othersMaterial;
+                        }
+
                         if (opacity <= getSelectabilityVisibilityCutoff()) {
                             sphere.setDisable(true);
                         }

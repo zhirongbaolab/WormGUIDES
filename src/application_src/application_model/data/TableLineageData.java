@@ -89,6 +89,13 @@ public class TableLineageData implements LineageData {
 
     /** {@inheritDoc} */
     @Override
+    public int[] getRweights(final int time) {
+        //to be implemented
+        return new int[1];
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public int getNumberOfTimePoints() {
         return timeFrames.size();
     }

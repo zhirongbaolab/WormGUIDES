@@ -19,6 +19,7 @@ import javafx.scene.paint.PhongMaterial;
 import application_src.views.popups.LineageTreePane;
 
 import static java.lang.Integer.toHexString;
+import static java.lang.Math.exp;
 import static java.lang.Math.round;
 import static java.lang.System.arraycopy;
 
@@ -44,6 +45,7 @@ public class ColorHash {
     private final Material highlightMaterial;
     private final Material translucentMaterial;
     private final Material noteMaterial;
+    private final Map<Double, Material> expressionMaterialHash; //experimental feature
 
     // Used for 'others' opacity
     private final HashMap<Double, Material> opacityMaterialHash;
@@ -59,10 +61,22 @@ public class ColorHash {
         translucentMaterial = makeMaterial(web("#555555", 0.40));
         makeMaterial(WHITE);
         noteMaterial = makeMaterial(web("#749bc9"));
+        expressionMaterialHash = new HashMap<>(); //experimental feature
+
     }
 
     public Material getNoteSceneElementMaterial() {
         return noteMaterial;
+    }
+
+    //make material base on expression value cut-off
+    //experimental feature
+    public Material getExpressionMaterial(double opacity) {
+        if (expressionMaterialHash.get(opacity) == null) {
+            final Material material = makeMaterial(web("ff0000", opacity));
+            expressionMaterialHash.put(opacity, material);
+        }
+        return expressionMaterialHash.get(opacity);
     }
 
     public Material getOthersMaterial(double opacity) {
