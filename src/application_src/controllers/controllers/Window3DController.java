@@ -216,7 +216,7 @@ public class Window3DController {
     private final Comparator<Shape3D> opacityComparator;
     // opacity value for "other" cells (with no rule attached)
     private final DoubleProperty othersOpacityProperty;
-    private final DoubleProperty numPrev;
+    private final DoubleProperty numPrevProperty;
     private final Slider prevSlider;
     private final Label prevValue;
     private final double nonSelectableOpacity = 0.25;
@@ -227,6 +227,16 @@ public class Window3DController {
     private final LineageData lineageData;
     private final SubScene subscene;
     private final TextField searchField;
+
+    //expression stuff
+    private final IntegerProperty exprUpperProperty;
+    private final Slider exprUpperSlider;
+    private final TextField exprUpperField;
+    private final IntegerProperty exprLowerProperty;
+    private final Slider exprLowerSlider;
+    private final TextField exprLowerField;
+    private boolean expressionOn;
+
 
     // housekeeping stuff
     private final BooleanProperty rebuildSubsceneFlag;
@@ -387,6 +397,11 @@ public class Window3DController {
             final Slider opacitySlider,
             final Slider prevSlider,
             final Label prevValue,
+            final CheckBox expressionOnCheckBox,
+            final Slider exprUpperSlider,
+            final TextField exprUpperField,
+            final Slider exprLowerSlider,
+            final TextField exprLowerField,
             final CheckBox uniformSizeCheckBox,
             final CheckBox cellNucleusCheckBox,
             final CheckBox cellBodyCheckBox,
@@ -397,7 +412,9 @@ public class Window3DController {
             final IntegerProperty totalNucleiProperty,
             final DoubleProperty zoomProperty,
             final DoubleProperty othersOpacityProperty,
-            final DoubleProperty numPrev,
+            final DoubleProperty numPrevProperty,
+            final IntegerProperty exprUpperProperty,
+            final IntegerProperty exprLowerProperty,
             final DoubleProperty rotateXAngleProperty,
             final DoubleProperty rotateYAngleProperty,
             final DoubleProperty rotateZAngleProperty,
@@ -734,35 +751,120 @@ public class Window3DController {
 
         }
 
-        this.numPrev = requireNonNull(numPrev);
+        this.numPrevProperty = requireNonNull(numPrevProperty);
         this.prevValue = requireNonNull(prevValue);
         this.prevSlider = requireNonNull(prevSlider);
         requireNonNull(prevSlider).valueProperty().addListener((observable, oldValue, newValue) -> {
             final double newRounded = round(newValue.doubleValue());
             final double oldRounded = round(oldValue.doubleValue());
             if (newRounded != oldRounded) {
-                numPrev.set(newRounded);
+                numPrevProperty.set(newRounded);
                 prevValue.setText(String.valueOf(newRounded));
                 buildScene();
             }
         });
-        this.numPrev.addListener((observable, oldValue, newValue) -> {
+        this.numPrevProperty.addListener((observable, oldValue, newValue) -> {
             final double newVal = newValue.doubleValue();
             final double oldVal = oldValue.doubleValue();
             if (newVal != oldVal && newVal >= 1 && newVal <= timeProperty.get()) {
                 prevSlider.setValue(newVal);
             }
         });
-        if (defaultEmbryoFlag) {
-            this.numPrev.setValue(1);
-        } else {
-            /*
-             * if a non-default model has been loaded, set the opacity cutoff at the level where labels will
-             * appear by default
-             */
-            this.numPrev.set(1);
+        this.numPrevProperty.setValue(1);
 
-        }
+        // expression upper and lower bound sliders
+        this.exprUpperProperty = requireNonNull(exprUpperProperty);
+        this.exprUpperField = requireNonNull(exprUpperField);
+        this.exprUpperSlider = requireNonNull(exprUpperSlider);
+        requireNonNull(exprUpperSlider).valueProperty().addListener((observable, oldValue, newValue) -> {
+            final int newVal = newValue.intValue();
+            final int oldVal = oldValue.intValue();
+            if (newVal != oldVal) {
+                exprUpperProperty.set(newVal);
+                exprUpperField.setText(String.valueOf(newVal));
+                buildScene();
+            }
+        });
+        this.exprUpperField.textProperty().addListener((observable, oldValue, newValue) -> {
+            // allow no entry or "-", but do nothing
+            if (newValue.isEmpty() || newValue.equals("-")) {
+                return;
+            } else {
+                // use try catch to filter out non integer input
+                try {
+                    int newVal = Integer.parseInt(newValue);
+                    if (newVal < exprUpperSlider.getMin()) { // when new value is smaller than min slider value, set it to min
+                        exprUpperSlider.setValue(exprUpperSlider.getMin());
+                        exprUpperField.setText("" + (int)exprUpperSlider.getMin());
+                    } else if (newVal > exprUpperSlider.getMax()) { // when new value is larger than max slider value, set it to max
+                        exprUpperSlider.setValue(exprUpperSlider.getMax());
+                        exprUpperField.setText("" + (int)exprUpperSlider.getMax());
+                    } else {
+                        exprUpperSlider.setValue(newVal);
+                    }
+                } catch (NumberFormatException e) {
+                    exprUpperField.setText(oldValue);
+                }
+            }
+        });
+        this.exprUpperProperty.addListener((observable, oldValue, newValue) -> {
+            final double newVal = newValue.doubleValue();
+            final double oldVal = oldValue.doubleValue();
+            if (newVal != oldVal && newVal >= exprUpperSlider.getMin() && newVal <= exprUpperSlider.getMax()) {
+                exprUpperSlider.setValue(newVal);
+            }
+        });
+        this.exprUpperProperty.setValue(0);
+
+        this.exprLowerProperty = requireNonNull(exprLowerProperty);
+        this.exprLowerField = requireNonNull(exprLowerField);
+        this.exprLowerSlider = requireNonNull(exprLowerSlider);
+        requireNonNull(exprLowerSlider).valueProperty().addListener((observable, oldValue, newValue) -> {
+            final int newVal = newValue.intValue();
+            final int oldVal = oldValue.intValue();
+            if (newVal != oldVal) {
+                exprLowerProperty.set(newVal);
+                exprLowerField.setText(String.valueOf(newVal));
+                buildScene();
+            }
+        });
+        this.exprLowerField.textProperty().addListener((observable, oldValue, newValue) -> {
+            // allow no entry or "-", but do nothing
+            if (newValue.isEmpty() || newValue.equals("-")) {
+                return;
+            } else {
+                // use try catch to filter out non integer input
+                try {
+                    int newVal = Integer.parseInt(newValue);
+                    if (newVal < exprLowerSlider.getMin()) { // when new value is smaller than min slider value, set it to min
+                        exprLowerSlider.setValue(exprLowerSlider.getMin());
+                        exprLowerField.setText("" + (int)exprLowerSlider.getMin());
+                    } else if (newVal > exprLowerSlider.getMax()) { // when new value is larger than max slider value, set it to max
+                        exprLowerSlider.setValue(exprLowerSlider.getMax());
+                        exprLowerField.setText("" + (int)exprLowerSlider.getMax());
+                    } else {
+                        exprLowerSlider.setValue(newVal);
+                    }
+                } catch (NumberFormatException e) {
+                    exprLowerField.setText(oldValue);
+                }
+            }
+        });
+        this.exprLowerProperty.addListener((observable, oldValue, newValue) -> {
+            final double newVal = newValue.doubleValue();
+            final double oldVal = oldValue.doubleValue();
+            if (newVal != oldVal && newVal >= exprLowerSlider.getMin() && newVal <= exprLowerSlider.getMax()) {
+                exprLowerSlider.setValue(newVal);
+            }
+        });
+        this.exprLowerProperty.setValue(0);
+
+        expressionOnCheckBox.setSelected(true);
+        expressionOn = true;
+        requireNonNull(expressionOnCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> {
+            expressionOn = newValue;
+            buildScene();
+        });
 
         uniformSizeCheckBox.setSelected(true);
         uniformSize = true;
@@ -2009,8 +2111,12 @@ public class Window3DController {
                         continue;
                     } else {
                         // experimental feature
-                        if (rweights.size() > index && rweights.get(index) > 0) {
-                            material = colorHash.getExpressionMaterial(opacity);
+                        if (expressionOn) {
+                            if (rweights.size() > index && (rweights.get(index) >= exprLowerProperty.intValue() && rweights.get(index) < exprUpperProperty.intValue())) {
+                                material = colorHash.getExpressionMaterial(opacity, rweights.get(index), exprLowerProperty.intValue(), exprUpperProperty.intValue());
+                            } else {
+                                material = othersMaterial;
+                            }
                         } else {
                             material = othersMaterial;
                         }
@@ -3165,7 +3271,7 @@ public class Window3DController {
                         refreshScene();
 
                         //render previous time points
-                        int loop = (int)numPrev.get();
+                        int loop = (int)numPrevProperty.get();
 
                         //avoid index out of bound
                         int loop_end = timeProperty.get() - loop;

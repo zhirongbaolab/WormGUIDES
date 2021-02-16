@@ -19,7 +19,6 @@ import javafx.scene.paint.PhongMaterial;
 import application_src.views.popups.LineageTreePane;
 
 import static java.lang.Integer.toHexString;
-import static java.lang.Math.exp;
 import static java.lang.Math.round;
 import static java.lang.System.arraycopy;
 
@@ -45,7 +44,7 @@ public class ColorHash {
     private final Material highlightMaterial;
     private final Material translucentMaterial;
     private final Material noteMaterial;
-    private final Map<Double, Material> expressionMaterialHash; //experimental feature
+    private final Map<String, Material> expressionMaterialHash; //experimental feature
 
     // Used for 'others' opacity
     private final HashMap<Double, Material> opacityMaterialHash;
@@ -71,12 +70,63 @@ public class ColorHash {
 
     //make material base on expression value cut-off
     //experimental feature
-    public Material getExpressionMaterial(double opacity) {
-        if (expressionMaterialHash.get(opacity) == null) {
-            final Material material = makeMaterial(web("ff0000", opacity));
-            expressionMaterialHash.put(opacity, material);
+    public Material getExpressionMaterial(double opacity, int value, int lowerBound, int upperBound) {
+        String colorString = makeExpressionColorString(value, lowerBound, upperBound);
+        if (expressionMaterialHash.get(colorString + opacity) == null) {
+            final Material material = makeMaterial(web(colorString, opacity));
+            expressionMaterialHash.put(colorString + opacity, material);
         }
-        return expressionMaterialHash.get(opacity);
+        return expressionMaterialHash.get(colorString + opacity);
+    }
+
+    /**
+     * Creates a expression material
+     *
+     * @param value
+     *         expression value
+     * @param lowerBound
+     *         lower bound of expression value set by user between max and min expression value
+     * @param upperBound
+     *         upper bound of expression value set by user between max and min expression value
+     *
+     * @return color string
+     */
+    private String makeExpressionColorString(int value, int lowerBound, int upperBound) {
+        //default red for max and white for min
+        String colorString = "#ff";
+        int colorIndex = (int)(round(getExprRatio(value, upperBound, lowerBound)*510));
+        int gValue = 0;
+        int bValue = 0;
+        // calculate G and B value
+        if (colorIndex <= 255) {
+            gValue = colorIndex;
+            bValue = 0;
+        } else {
+            gValue = 255;
+            bValue = colorIndex - 255;
+        }
+
+        //construct color string
+        StringBuilder builder = new StringBuilder();
+        builder.append(toHexString(gValue));
+        if (builder.length() < 2) {
+            builder.insert(0, "0");
+        }
+        colorString += builder.toString();
+        builder = new StringBuilder();
+        builder.append(toHexString(bValue));
+        if (builder.length() < 2) {
+            builder.insert(0, "0");
+        }
+        colorString += builder.toString();
+        return colorString;
+    }
+
+    //calculate expression ratio
+    public double getExprRatio(int value, int lowerBound, int upperBound) {
+        double ratio = 0;
+        ratio = (double)(value - lowerBound) / (double)(upperBound - lowerBound);
+        return ratio;
     }
 
     public Material getOthersMaterial(double opacity) {

@@ -53,6 +53,16 @@ public interface LineageData {
     int[] getRweights(final int time);
 
     /**
+     * @return the max expression value of the dataset
+     */
+    int getExprMax();
+
+    /**
+     * @return the min expression value of the dataset
+     */
+    int getExprMin();
+
+    /**
      * @return the x,y,z scaling values for the dataset
      */
     double[] getXYZScale();

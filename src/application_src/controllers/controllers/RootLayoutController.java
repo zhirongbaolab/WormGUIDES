@@ -162,6 +162,8 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private Tab structuresTab;
     @FXML
     private Tab displayTab;
+    @FXML
+    private Tab expressionTab;
 
     // Search stuff
     @FXML
@@ -205,6 +207,19 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private Slider prevSlider;
     @FXML
     private Label prevValue;
+
+    //Expression tab
+    @FXML
+    private CheckBox expressionOnCheckBox;
+    @FXML
+    private Slider exprUpperSlider;
+    @FXML
+    private TextField exprUpperField;
+    @FXML
+    private Slider exprLowerSlider;
+    @FXML
+    private TextField exprLowerField;
+
 
     // Structures tab
     private StructuresLayer structuresLayer;
@@ -322,7 +337,11 @@ public class RootLayoutController extends BorderPane implements Initializable {
     private DoubleProperty translateYProperty;
     private DoubleProperty zoomProperty;
     private DoubleProperty othersOpacityProperty;
-    private DoubleProperty numPrev;
+    private DoubleProperty numPrevProperty;
+
+    // Expression properties
+    private IntegerProperty exprUpperProperty;
+    private IntegerProperty exprLowerProperty;
 
     // Other shared variables
     private ObservableList<Rule> rulesList;
@@ -790,6 +809,11 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 opacitySlider,
                 prevSlider,
                 prevValue,
+                expressionOnCheckBox,
+                exprUpperSlider,
+                exprUpperField,
+                exprLowerSlider,
+                exprLowerField,
                 uniformSizeCheckBox,
                 cellNucleusCheckBox,
                 cellBodyCheckBox,
@@ -800,7 +824,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
                 totalNucleiProperty,
                 zoomProperty,
                 othersOpacityProperty,
-                numPrev,
+                numPrevProperty,
+                exprUpperProperty,
+                exprLowerProperty,
                 rotateXAngleProperty,
                 rotateYAngleProperty,
                 rotateZAngleProperty,
@@ -1062,6 +1088,12 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
         prevSlider.setMin(1);
         prevSlider.setMax(lineageData.getNumberOfTimePoints() - 1);
+
+        exprUpperSlider.setMin(lineageData.getExprMin());
+        exprUpperSlider.setMax(lineageData.getExprMax()+1);
+
+        exprLowerSlider.setMin(lineageData.getExprMin());
+        exprLowerSlider.setMax(lineageData.getExprMax()+1);
     }
 
     private void initSearchLayer() {
@@ -1231,12 +1263,17 @@ public class RootLayoutController extends BorderPane implements Initializable {
         displayDragTab.setCloseable(false);
         displayDragTab.setContent(displayTab.getContent());
 
+        final DraggableTab expressionDragTab = new DraggableTab(expressionTab.getText());
+        expressionDragTab.setCloseable(false);
+        expressionDragTab.setContent(expressionTab.getContent());
+
         colorAndDisplayTabPane.getTabs().clear();
         cellsTab = cellsDragTab;
         structuresTab = structuresDragTab;
         displayTab = displayDragTab;
+        expressionTab = expressionDragTab;
 
-        colorAndDisplayTabPane.getTabs().addAll(cellsTab, structuresTab, displayTab);
+        colorAndDisplayTabPane.getTabs().addAll(cellsTab, structuresTab, displayTab, expressionTab);
         colorAndDisplayTabPane.getSelectionModel().select(displayTab);
 
         final DraggableTab storiesDragTab = new DraggableTab(storiesTab.getText());
@@ -1376,7 +1413,9 @@ public class RootLayoutController extends BorderPane implements Initializable {
         totalNucleiProperty = new SimpleIntegerProperty(0);
 
         othersOpacityProperty = new SimpleDoubleProperty(1.0);
-        numPrev = new SimpleDoubleProperty(1.0);
+        numPrevProperty = new SimpleDoubleProperty(1.0);
+        exprUpperProperty = new SimpleIntegerProperty(0);
+        exprLowerProperty = new SimpleIntegerProperty(0);
         rotateXAngleProperty = new SimpleDoubleProperty();
         rotateYAngleProperty = new SimpleDoubleProperty();
         rotateZAngleProperty = new SimpleDoubleProperty();
