@@ -259,6 +259,7 @@ public class Window3DController {
     private final IntegerProperty selectedIndex;
     private final StringProperty selectedNameProperty;
     private final StringProperty selectedNameLabeledProperty;
+    private boolean externalSelectedFlag;
     private final Stage contextMenuStage;
     private final ContextMenuController contextMenuController;
     private final BooleanProperty cellClickedProperty;
@@ -507,40 +508,30 @@ public class Window3DController {
             }
         });
 
+        externalSelectedFlag = false;
+
         this.selectedNameLabeledProperty = requireNonNull(selectedNameLabeledProperty);
         this.selectedNameLabeledProperty.addListener((observable, oldValue, newValue) -> {
-            if (!newValue.isEmpty()) {
+            if (!newValue.isEmpty() && newValue != selectedNameProperty.getValue()) {
                 String lineageName = newValue;
-
-                this.selectedNameProperty.set(lineageName);
-
-                if (!allLabels.contains(lineageName)) {
-                    allLabels.add(lineageName);
-                }
-
-                final Shape3D entity = getEntityWithName(lineageName);
 
                 // go to labeled name
                 int startTime1;
                 int endTime1;
-
                 startTime1 = getFirstOccurenceOf(lineageName);
                 endTime1 = getLastOccurenceOf(lineageName);
 
                 // do not change scene if entity does not exist at any timeProperty
                 if (startTime1 <= 0 || endTime1 <= 0) {
-                    return;
+                    System.out.println("not exist " + lineageName);
                 }
 
                 if (timeProperty.get() < startTime1 || timeProperty.get() > endTime1) {
-                    System.out.println("Updating time property to entity startTime=" + startTime1 + " because current time: " + timeProperty.get() + " isn't in cell lifetime range. Endtime = " + endTime1);
+                    //System.out.println("Updating time property to entity startTime=" + startTime1 + " because current time: " + timeProperty.get() + " isn't in cell lifetime range. Endtime = " + endTime1);
                     timeProperty.set(startTime1);
-                } else {
-                    insertLabelFor(lineageName, entity);
                 }
-
-                insertLabelFor(lineageName, entity);
-                highlightActiveCellLabel(entity);
+                externalSelectedFlag = true;
+                buildScene();
             }
         });
 
@@ -939,6 +930,54 @@ public class Window3DController {
         return orientationIndicator;
     }
 
+    //handle external selected cell
+    private void handleExternalSelectedCell() {
+        String lineageName = selectedNameLabeledProperty.getValue();
+        this.selectedNameProperty.set(lineageName);
+
+        if (!allLabels.contains(lineageName)) {
+            allLabels.add(lineageName);
+        }
+
+
+        Shape3D entity = getEntityWithName(lineageName);
+
+        // go to labeled name
+        int startTime1;
+        int endTime1;
+
+        startTime1 = getFirstOccurenceOf(lineageName);
+        endTime1 = getLastOccurenceOf(lineageName);
+
+        // do not change scene if entity does not exist at any timeProperty
+        if (startTime1 <= 0 || endTime1 <= 0) {
+            return;
+        }
+
+        if (timeProperty.get() < startTime1 || timeProperty.get() > endTime1) {
+            //System.out.println("Updating time property to entity startTime=" + startTime1 + " because current time: " + timeProperty.get() + " isn't in cell lifetime range. Endtime = " + endTime1);
+            timeProperty.set(startTime1);
+        }
+
+        insertLabelFor(lineageName, entity);
+        highlightActiveCellLabel(entity);
+
+        // set the name in MainApp so that other apps opening WormGUIDES can catch this event
+        MainApp.seletedEntityLabelMainApp.set(lineageName);
+
+        //center the external selected cell
+        Double[] entity_position = positions.get(getIndexByCellName(lineageName));
+        double translateX = entity_position[0];
+        double translateY = entity_position[1];
+        xform.setTranslateX(translateX);
+        xform.setTranslateY(translateY);
+        translateXProperty.set(translateX);
+        translateYProperty.set(translateY);
+        repositionNotes();
+
+        externalSelectedFlag = false;
+    }
+
     private double computeInterpolatedValue(int timevalue, double[] keyFrames, double[] keyValues) {
         if (timevalue <= keyFrames[0]) {
             return keyValues[0];
@@ -1167,6 +1206,8 @@ public class Window3DController {
                         final Shape3D entity = getEntityWithName(name);
                         insertLabelFor(name, entity);
                         highlightActiveCellLabel(entity);
+                        // set the name in MainApp so that other apps opening WormGUIDES can catch this event
+                        MainApp.seletedEntityLabelMainApp.set(name);
                     }
                 }
             }
@@ -1220,6 +1261,8 @@ public class Window3DController {
                             final Shape3D entity = getEntityWithName(name);
                             insertLabelFor(name, entity);
                             highlightActiveCellLabel(entity);
+                            // set the name in MainApp so that other apps opening WormGUIDES can catch this event
+                            MainApp.seletedEntityLabelMainApp.set(name);
                         }
                     }
                     break;
@@ -2013,6 +2056,8 @@ public class Window3DController {
         }
         if (activeEntity != null) {
             highlightActiveCellLabel(activeEntity);
+            // set the name in MainApp so that other apps opening WormGUIDES can catch this event
+            MainApp.seletedEntityLabelMainApp.set(selectedNameProperty.get());
         }
 
         if (!noteGraphics.isEmpty()) {
@@ -2412,9 +2457,6 @@ public class Window3DController {
         spritesPane.getChildren().add(text);
 
         alignTextWithEntity(text, entity, null);
-
-        // set the name in MainApp so that other apps opening WormGUIDES can catch this event
-        MainApp.seletedEntityLabelMainApp.set(name);
     }
 
     private void highlightActiveCellLabel(Shape3D entity) {
@@ -3287,6 +3329,10 @@ public class Window3DController {
                         //render current time point
                         getSceneData();
                         addEntitiesAndNotes();
+
+                        if (externalSelectedFlag) {
+                            handleExternalSelectedCell();
+                        }
                     });
                     return null;
                 }

@@ -875,6 +875,10 @@ public class RootLayoutController extends BorderPane implements Initializable {
             timeProperty.set(1);
         }
 
+        if(MainApp.externallySetStartCell != null) {
+            updateSelectedEntity(MainApp.externallySetStartCell);
+        }
+
     }
 
     public void setTimePropertyValue(int time) {
