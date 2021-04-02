@@ -524,6 +524,8 @@ public class Window3DController {
                 // do not change scene if entity does not exist at any timeProperty
                 if (startTime1 <= 0 || endTime1 <= 0) {
                     System.out.println("not exist " + lineageName);
+                    this.selectedNameProperty.set(null);
+                    return;
                 }
 
                 if (timeProperty.get() < startTime1 || timeProperty.get() > endTime1) {

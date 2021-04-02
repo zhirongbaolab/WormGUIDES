@@ -906,9 +906,7 @@ public class RootLayoutController extends BorderPane implements Initializable {
 
         // selectedName string property that has the name of the clicked sphere
         selectedEntityNameProperty.addListener((observable, oldValue, newValue) -> {
-            if (newValue != null && !newValue.isEmpty()) {
-                setSelectedEntityInfo(selectedEntityNameProperty.get());
-            }
+            setSelectedEntityInfo(selectedEntityNameProperty.get());
         });
 
         // Disable click on structures search results list view
