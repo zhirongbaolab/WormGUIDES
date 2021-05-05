@@ -30,7 +30,7 @@ public interface LineageData {
      *         time to check
      *
      * @return size-3 integer arrays that specify the x-, y-, z-coordinates of the cell positions in 3D space. The i-th
-     * element of the name, positions and diameter arrays are information on the i-th cell at one timepoint.
+     * element of the name, positions, diameter and expression arrays are information on the i-th cell at one timepoint.
      */
     double[][] getPositions(final int time);
 
@@ -38,10 +38,29 @@ public interface LineageData {
      * @param time
      *         time to check
      *
-     * @return diameters at that time.  The i-th element of the name, positions and diameter arrays are information
+     * @return diameters at that time.  The i-th element of the name, positions, diameter and expression arrays are information
      * on the i-th cell at one timepoint.
      */
     double[] getDiameters(final int time);
+
+    /**
+     * @param time
+     *         time to check
+     *
+     * @return expression data at that time.  The i-th element of the name, positions, diameter and expression arrays are information
+     * on the i-th cell at one timepoint.
+     */
+    int[] getRweights(final int time);
+
+    /**
+     * @return the max expression value of the dataset
+     */
+    int getExprMax();
+
+    /**
+     * @return the min expression value of the dataset
+     */
+    int getExprMin();
 
     /**
      * @return the x,y,z scaling values for the dataset

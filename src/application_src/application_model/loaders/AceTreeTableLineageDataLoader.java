@@ -45,7 +45,13 @@ public class AceTreeTableLineageDataLoader {
             YCOR_INDEX = 6,
             ZCOR_INDEX = 7,
             DIAMETER_INDEX = 8,
-            ID_INDEX = 9;
+            ID_INDEX = 9,
+            RWT = 11,
+            RWRAW = 15,
+            RWCORR1 = 16,
+            RWCORR2 = 17,
+            RWCORR3 = 18,
+            RWCORR4 = 19;
 
     private static final String ONE_ZERO_PAD = "0";
 
@@ -240,9 +246,30 @@ public class AceTreeTableLineageDataLoader {
                     parseDouble(tokens[XCOR_INDEX]),
                     parseDouble(tokens[YCOR_INDEX]),
                     parseDouble(tokens[ZCOR_INDEX]),
-                    parseDouble(tokens[DIAMETER_INDEX]));
+                    parseDouble(tokens[DIAMETER_INDEX]),
+                    computeRWeight(tokens, "blot")); //express computation method default as bolt for now
         } catch (NumberFormatException nfe) {
             System.out.println("Incorrect format in nucleus file for time " + time + ".");
         }
+    }
+
+    private static int computeRWeight(final String[] tokens, String method) {
+        if (Integer.parseInt(tokens[RWRAW]) <= 0) return Integer.parseInt(tokens[RWT]);
+        int rweight = Integer.parseInt(tokens[RWRAW]);
+        switch(method) {
+            case "global":
+                rweight -= Integer.parseInt(tokens[RWCORR1]);
+                break;
+            case "local":
+                rweight -= Integer.parseInt(tokens[RWCORR2]);
+                break;
+            case "blot":
+                rweight -= Integer.parseInt(tokens[RWCORR3]);
+                break;
+            case "cross":
+                rweight -= Integer.parseInt(tokens[RWCORR4]);
+                break;
+        }
+        return rweight;
     }
 }

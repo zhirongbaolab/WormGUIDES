@@ -44,6 +44,7 @@ public class ColorHash {
     private final Material highlightMaterial;
     private final Material translucentMaterial;
     private final Material noteMaterial;
+    private final Map<String, Material> expressionMaterialHash; //experimental feature
 
     // Used for 'others' opacity
     private final HashMap<Double, Material> opacityMaterialHash;
@@ -59,10 +60,73 @@ public class ColorHash {
         translucentMaterial = makeMaterial(web("#555555", 0.40));
         makeMaterial(WHITE);
         noteMaterial = makeMaterial(web("#749bc9"));
+        expressionMaterialHash = new HashMap<>(); //experimental feature
+
     }
 
     public Material getNoteSceneElementMaterial() {
         return noteMaterial;
+    }
+
+    //make material base on expression value cut-off
+    //experimental feature
+    public Material getExpressionMaterial(double opacity, int value, int lowerBound, int upperBound) {
+        String colorString = makeExpressionColorString(value, lowerBound, upperBound);
+        if (expressionMaterialHash.get(colorString + opacity) == null) {
+            final Material material = makeMaterial(web(colorString, opacity));
+            expressionMaterialHash.put(colorString + opacity, material);
+        }
+        return expressionMaterialHash.get(colorString + opacity);
+    }
+
+    /**
+     * Creates a expression material
+     *
+     * @param value
+     *         expression value
+     * @param lowerBound
+     *         lower bound of expression value set by user between max and min expression value
+     * @param upperBound
+     *         upper bound of expression value set by user between max and min expression value
+     *
+     * @return color string
+     */
+    private String makeExpressionColorString(int value, int lowerBound, int upperBound) {
+        //default red for max and white for min
+        String colorString = "#ff";
+        int colorIndex = (int)(round(getExprRatio(value, upperBound, lowerBound)*510));
+        int gValue = 0;
+        int bValue = 0;
+        // calculate G and B value
+        if (colorIndex <= 255) {
+            gValue = colorIndex;
+            bValue = 0;
+        } else {
+            gValue = 255;
+            bValue = colorIndex - 255;
+        }
+
+        //construct color string
+        StringBuilder builder = new StringBuilder();
+        builder.append(toHexString(gValue));
+        if (builder.length() < 2) {
+            builder.insert(0, "0");
+        }
+        colorString += builder.toString();
+        builder = new StringBuilder();
+        builder.append(toHexString(bValue));
+        if (builder.length() < 2) {
+            builder.insert(0, "0");
+        }
+        colorString += builder.toString();
+        return colorString;
+    }
+
+    //calculate expression ratio
+    public double getExprRatio(int value, int lowerBound, int upperBound) {
+        double ratio = 0;
+        ratio = (double)(value - lowerBound) / (double)(upperBound - lowerBound);
+        return ratio;
     }
 
     public Material getOthersMaterial(double opacity) {

@@ -216,7 +216,7 @@ public class Window3DController {
     private final Comparator<Shape3D> opacityComparator;
     // opacity value for "other" cells (with no rule attached)
     private final DoubleProperty othersOpacityProperty;
-    private final DoubleProperty numPrev;
+    private final DoubleProperty numPrevProperty;
     private final Slider prevSlider;
     private final Label prevValue;
     private final double nonSelectableOpacity = 0.25;
@@ -227,6 +227,16 @@ public class Window3DController {
     private final LineageData lineageData;
     private final SubScene subscene;
     private final TextField searchField;
+
+    //expression stuff
+    private final IntegerProperty exprUpperProperty;
+    private final Slider exprUpperSlider;
+    private final TextField exprUpperField;
+    private final IntegerProperty exprLowerProperty;
+    private final Slider exprLowerSlider;
+    private final TextField exprLowerField;
+    private boolean expressionOn;
+
 
     // housekeeping stuff
     private final BooleanProperty rebuildSubsceneFlag;
@@ -249,6 +259,7 @@ public class Window3DController {
     private final IntegerProperty selectedIndex;
     private final StringProperty selectedNameProperty;
     private final StringProperty selectedNameLabeledProperty;
+    private boolean externalSelectedFlag;
     private final Stage contextMenuStage;
     private final ContextMenuController contextMenuController;
     private final BooleanProperty cellClickedProperty;
@@ -302,6 +313,7 @@ public class Window3DController {
     private boolean[] isMeshSearchedFlags;
     private LinkedList<Double[]> positions;
     private LinkedList<Double> diameters;
+    private LinkedList<Integer> rweights;
     private List<SceneElement> sceneElementsAtCurrentTime;
     private List<SceneElementMeshView> currentSceneElementMeshes;
 //    private List<MeshView> currentSceneElementMeshes;
@@ -386,6 +398,11 @@ public class Window3DController {
             final Slider opacitySlider,
             final Slider prevSlider,
             final Label prevValue,
+            final CheckBox expressionOnCheckBox,
+            final Slider exprUpperSlider,
+            final TextField exprUpperField,
+            final Slider exprLowerSlider,
+            final TextField exprLowerField,
             final CheckBox uniformSizeCheckBox,
             final CheckBox cellNucleusCheckBox,
             final CheckBox cellBodyCheckBox,
@@ -396,7 +413,9 @@ public class Window3DController {
             final IntegerProperty totalNucleiProperty,
             final DoubleProperty zoomProperty,
             final DoubleProperty othersOpacityProperty,
-            final DoubleProperty numPrev,
+            final DoubleProperty numPrevProperty,
+            final IntegerProperty exprUpperProperty,
+            final IntegerProperty exprLowerProperty,
             final DoubleProperty rotateXAngleProperty,
             final DoubleProperty rotateYAngleProperty,
             final DoubleProperty rotateZAngleProperty,
@@ -474,6 +493,7 @@ public class Window3DController {
         meshNames = new LinkedList<>();
         positions = new LinkedList<>();
         diameters = new LinkedList<>();
+        rweights = new LinkedList<>();
         isCellSearchedFlags = new boolean[1];
         isMeshSearchedFlags = new boolean[1];
 
@@ -488,40 +508,32 @@ public class Window3DController {
             }
         });
 
+        externalSelectedFlag = false;
+
         this.selectedNameLabeledProperty = requireNonNull(selectedNameLabeledProperty);
         this.selectedNameLabeledProperty.addListener((observable, oldValue, newValue) -> {
-            if (!newValue.isEmpty()) {
+            if (!newValue.isEmpty() && newValue != selectedNameProperty.getValue()) {
                 String lineageName = newValue;
-
-                this.selectedNameProperty.set(lineageName);
-
-                if (!allLabels.contains(lineageName)) {
-                    allLabels.add(lineageName);
-                }
-
-                final Shape3D entity = getEntityWithName(lineageName);
 
                 // go to labeled name
                 int startTime1;
                 int endTime1;
-
                 startTime1 = getFirstOccurenceOf(lineageName);
                 endTime1 = getLastOccurenceOf(lineageName);
 
                 // do not change scene if entity does not exist at any timeProperty
                 if (startTime1 <= 0 || endTime1 <= 0) {
+                    System.out.println("not exist " + lineageName);
+                    this.selectedNameProperty.set(null);
                     return;
                 }
 
                 if (timeProperty.get() < startTime1 || timeProperty.get() > endTime1) {
-                    System.out.println("Updating time property to entity startTime=" + startTime1 + " because current time: " + timeProperty.get() + " isn't in cell lifetime range. Endtime = " + endTime1);
+                    //System.out.println("Updating time property to entity startTime=" + startTime1 + " because current time: " + timeProperty.get() + " isn't in cell lifetime range. Endtime = " + endTime1);
                     timeProperty.set(startTime1);
-                } else {
-                    insertLabelFor(lineageName, entity);
                 }
-
-                insertLabelFor(lineageName, entity);
-                highlightActiveCellLabel(entity);
+                externalSelectedFlag = true;
+                buildScene();
             }
         });
 
@@ -732,35 +744,120 @@ public class Window3DController {
 
         }
 
-        this.numPrev = requireNonNull(numPrev);
+        this.numPrevProperty = requireNonNull(numPrevProperty);
         this.prevValue = requireNonNull(prevValue);
         this.prevSlider = requireNonNull(prevSlider);
         requireNonNull(prevSlider).valueProperty().addListener((observable, oldValue, newValue) -> {
             final double newRounded = round(newValue.doubleValue());
             final double oldRounded = round(oldValue.doubleValue());
             if (newRounded != oldRounded) {
-                numPrev.set(newRounded);
+                numPrevProperty.set(newRounded);
                 prevValue.setText(String.valueOf(newRounded));
                 buildScene();
             }
         });
-        this.numPrev.addListener((observable, oldValue, newValue) -> {
+        this.numPrevProperty.addListener((observable, oldValue, newValue) -> {
             final double newVal = newValue.doubleValue();
             final double oldVal = oldValue.doubleValue();
             if (newVal != oldVal && newVal >= 1 && newVal <= timeProperty.get()) {
                 prevSlider.setValue(newVal);
             }
         });
-        if (defaultEmbryoFlag) {
-            this.numPrev.setValue(1);
-        } else {
-            /*
-             * if a non-default model has been loaded, set the opacity cutoff at the level where labels will
-             * appear by default
-             */
-            this.numPrev.set(1);
+        this.numPrevProperty.setValue(1);
 
-        }
+        // expression upper and lower bound sliders
+        this.exprUpperProperty = requireNonNull(exprUpperProperty);
+        this.exprUpperField = requireNonNull(exprUpperField);
+        this.exprUpperSlider = requireNonNull(exprUpperSlider);
+        requireNonNull(exprUpperSlider).valueProperty().addListener((observable, oldValue, newValue) -> {
+            final int newVal = newValue.intValue();
+            final int oldVal = oldValue.intValue();
+            if (newVal != oldVal) {
+                exprUpperProperty.set(newVal);
+                exprUpperField.setText(String.valueOf(newVal));
+                buildScene();
+            }
+        });
+        this.exprUpperField.textProperty().addListener((observable, oldValue, newValue) -> {
+            // allow no entry or "-", but do nothing
+            if (newValue.isEmpty() || newValue.equals("-")) {
+                return;
+            } else {
+                // use try catch to filter out non integer input
+                try {
+                    int newVal = Integer.parseInt(newValue);
+                    if (newVal < exprUpperSlider.getMin()) { // when new value is smaller than min slider value, set it to min
+                        exprUpperSlider.setValue(exprUpperSlider.getMin());
+                        exprUpperField.setText("" + (int)exprUpperSlider.getMin());
+                    } else if (newVal > exprUpperSlider.getMax()) { // when new value is larger than max slider value, set it to max
+                        exprUpperSlider.setValue(exprUpperSlider.getMax());
+                        exprUpperField.setText("" + (int)exprUpperSlider.getMax());
+                    } else {
+                        exprUpperSlider.setValue(newVal);
+                    }
+                } catch (NumberFormatException e) {
+                    exprUpperField.setText(oldValue);
+                }
+            }
+        });
+        this.exprUpperProperty.addListener((observable, oldValue, newValue) -> {
+            final double newVal = newValue.doubleValue();
+            final double oldVal = oldValue.doubleValue();
+            if (newVal != oldVal && newVal >= exprUpperSlider.getMin() && newVal <= exprUpperSlider.getMax()) {
+                exprUpperSlider.setValue(newVal);
+            }
+        });
+        this.exprUpperProperty.setValue(0);
+
+        this.exprLowerProperty = requireNonNull(exprLowerProperty);
+        this.exprLowerField = requireNonNull(exprLowerField);
+        this.exprLowerSlider = requireNonNull(exprLowerSlider);
+        requireNonNull(exprLowerSlider).valueProperty().addListener((observable, oldValue, newValue) -> {
+            final int newVal = newValue.intValue();
+            final int oldVal = oldValue.intValue();
+            if (newVal != oldVal) {
+                exprLowerProperty.set(newVal);
+                exprLowerField.setText(String.valueOf(newVal));
+                buildScene();
+            }
+        });
+        this.exprLowerField.textProperty().addListener((observable, oldValue, newValue) -> {
+            // allow no entry or "-", but do nothing
+            if (newValue.isEmpty() || newValue.equals("-")) {
+                return;
+            } else {
+                // use try catch to filter out non integer input
+                try {
+                    int newVal = Integer.parseInt(newValue);
+                    if (newVal < exprLowerSlider.getMin()) { // when new value is smaller than min slider value, set it to min
+                        exprLowerSlider.setValue(exprLowerSlider.getMin());
+                        exprLowerField.setText("" + (int)exprLowerSlider.getMin());
+                    } else if (newVal > exprLowerSlider.getMax()) { // when new value is larger than max slider value, set it to max
+                        exprLowerSlider.setValue(exprLowerSlider.getMax());
+                        exprLowerField.setText("" + (int)exprLowerSlider.getMax());
+                    } else {
+                        exprLowerSlider.setValue(newVal);
+                    }
+                } catch (NumberFormatException e) {
+                    exprLowerField.setText(oldValue);
+                }
+            }
+        });
+        this.exprLowerProperty.addListener((observable, oldValue, newValue) -> {
+            final double newVal = newValue.doubleValue();
+            final double oldVal = oldValue.doubleValue();
+            if (newVal != oldVal && newVal >= exprLowerSlider.getMin() && newVal <= exprLowerSlider.getMax()) {
+                exprLowerSlider.setValue(newVal);
+            }
+        });
+        this.exprLowerProperty.setValue(0);
+
+        expressionOnCheckBox.setSelected(true);
+        expressionOn = true;
+        requireNonNull(expressionOnCheckBox).selectedProperty().addListener((observable, oldValue, newValue) -> {
+            expressionOn = newValue;
+            buildScene();
+        });
 
         uniformSizeCheckBox.setSelected(true);
         uniformSize = true;
@@ -833,6 +930,54 @@ public class Window3DController {
         middleTransformGroup.getTransforms().add(indicatorRotation);
 
         return orientationIndicator;
+    }
+
+    //handle external selected cell
+    private void handleExternalSelectedCell() {
+        String lineageName = selectedNameLabeledProperty.getValue();
+        this.selectedNameProperty.set(lineageName);
+
+        if (!allLabels.contains(lineageName)) {
+            allLabels.add(lineageName);
+        }
+
+
+        Shape3D entity = getEntityWithName(lineageName);
+
+        // go to labeled name
+        int startTime1;
+        int endTime1;
+
+        startTime1 = getFirstOccurenceOf(lineageName);
+        endTime1 = getLastOccurenceOf(lineageName);
+
+        // do not change scene if entity does not exist at any timeProperty
+        if (startTime1 <= 0 || endTime1 <= 0) {
+            return;
+        }
+
+        if (timeProperty.get() < startTime1 || timeProperty.get() > endTime1) {
+            //System.out.println("Updating time property to entity startTime=" + startTime1 + " because current time: " + timeProperty.get() + " isn't in cell lifetime range. Endtime = " + endTime1);
+            timeProperty.set(startTime1);
+        }
+
+        insertLabelFor(lineageName, entity);
+        highlightActiveCellLabel(entity);
+
+        // set the name in MainApp so that other apps opening WormGUIDES can catch this event
+        MainApp.seletedEntityLabelMainApp.set(lineageName);
+
+        //center the external selected cell
+        Double[] entity_position = positions.get(getIndexByCellName(lineageName));
+        double translateX = entity_position[0];
+        double translateY = entity_position[1];
+        xform.setTranslateX(translateX);
+        xform.setTranslateY(translateY);
+        translateXProperty.set(translateX);
+        translateYProperty.set(translateY);
+        repositionNotes();
+
+        externalSelectedFlag = false;
     }
 
     private double computeInterpolatedValue(int timevalue, double[] keyFrames, double[] keyValues) {
@@ -1063,6 +1208,8 @@ public class Window3DController {
                         final Shape3D entity = getEntityWithName(name);
                         insertLabelFor(name, entity);
                         highlightActiveCellLabel(entity);
+                        // set the name in MainApp so that other apps opening WormGUIDES can catch this event
+                        MainApp.seletedEntityLabelMainApp.set(name);
                     }
                 }
             }
@@ -1116,6 +1263,8 @@ public class Window3DController {
                             final Shape3D entity = getEntityWithName(name);
                             insertLabelFor(name, entity);
                             highlightActiveCellLabel(entity);
+                            // set the name in MainApp so that other apps opening WormGUIDES can catch this event
+                            MainApp.seletedEntityLabelMainApp.set(name);
                         }
                     }
                     break;
@@ -1675,6 +1824,10 @@ public class Window3DController {
         for (double diameter : lineageData.getDiameters(requestedTime)) {
             diameters.add(diameter);
         }
+        rweights = new LinkedList<>();
+        for (int rweight : lineageData.getRweights(requestedTime)) {
+            rweights.add(rweight);
+        }
         otherCells.clear();
 
         totalNucleiProperty.set(cellNames.size());
@@ -1822,6 +1975,10 @@ public class Window3DController {
         for (double diameter : lineageData.getDiameters(requestedTime)) {
             diameters.add(diameter);
         }
+        rweights = new LinkedList<>();
+        for (int rweight : lineageData.getRweights(requestedTime)) {
+            rweights.add(rweight);
+        }
 
         totalNucleiProperty.set(cellNames.size());
 
@@ -1901,6 +2058,8 @@ public class Window3DController {
         }
         if (activeEntity != null) {
             highlightActiveCellLabel(activeEntity);
+            // set the name in MainApp so that other apps opening WormGUIDES can catch this event
+            MainApp.seletedEntityLabelMainApp.set(selectedNameProperty.get());
         }
 
         if (!noteGraphics.isEmpty()) {
@@ -1998,7 +2157,17 @@ public class Window3DController {
                         index--;
                         continue;
                     } else {
-                        material = othersMaterial;
+                        // experimental feature
+                        if (expressionOn) {
+                            if (rweights.size() > index && (rweights.get(index) >= exprLowerProperty.intValue() && rweights.get(index) < exprUpperProperty.intValue())) {
+                                material = colorHash.getExpressionMaterial(opacity, rweights.get(index), exprLowerProperty.intValue(), exprUpperProperty.intValue());
+                            } else {
+                                material = othersMaterial;
+                            }
+                        } else {
+                            material = othersMaterial;
+                        }
+
                         if (opacity <= getSelectabilityVisibilityCutoff()) {
                             sphere.setDisable(true);
                         }
@@ -2290,9 +2459,6 @@ public class Window3DController {
         spritesPane.getChildren().add(text);
 
         alignTextWithEntity(text, entity, null);
-
-        // set the name in MainApp so that other apps opening WormGUIDES can catch this event
-        MainApp.seletedEntityLabelMainApp.set(name);
     }
 
     private void highlightActiveCellLabel(Shape3D entity) {
@@ -3149,7 +3315,7 @@ public class Window3DController {
                         refreshScene();
 
                         //render previous time points
-                        int loop = (int)numPrev.get();
+                        int loop = (int)numPrevProperty.get();
 
                         //avoid index out of bound
                         int loop_end = timeProperty.get() - loop;
@@ -3165,6 +3331,10 @@ public class Window3DController {
                         //render current time point
                         getSceneData();
                         addEntitiesAndNotes();
+
+                        if (externalSelectedFlag) {
+                            handleExternalSelectedCell();
+                        }
                     });
                     return null;
                 }

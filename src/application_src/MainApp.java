@@ -43,6 +43,7 @@ public class MainApp extends Application implements ObserveWormGUIDES {
 
     public static RootLayoutController controller;
     public static int externallySetStartTime = -1;
+    public static String externallySetStartCell = null;
     public static IntegerProperty timePropertyMainApp = new SimpleIntegerProperty(1);
     public static BooleanProperty isPlayButtonEnabled = new SimpleBooleanProperty(false);
     public static StringProperty seletedEntityLabelMainApp = new SimpleStringProperty("");
@@ -135,6 +136,15 @@ public class MainApp extends Application implements ObserveWormGUIDES {
         if (nucleiMgrAdapterResource != null) {
             if (controller != null) {
                 Platform.runLater(() -> controller.setTimePropertyValue(time));
+            }
+        }
+    }
+
+    @Override
+    public void updateSelectedCell(String name) {
+        if (nucleiMgrAdapterResource != null) {
+            if (controller != null) {
+                Platform.runLater(() -> controller.updateSelectedEntity(name));
             }
         }
     }

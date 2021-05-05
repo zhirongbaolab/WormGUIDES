@@ -31,6 +31,10 @@ public class TableLineageData implements LineageData {
     private final double[] xyzScale;
     private boolean isSulston;
 
+    // expression feature
+    private int exprMax;
+    private int exprMin;
+
     public TableLineageData(
             final List<String> allCellNames,
             final double X_SCALE,
@@ -40,6 +44,8 @@ public class TableLineageData implements LineageData {
         this.allCellNames.sort(String::compareTo);
         this.timeFrames = new ArrayList<>();
         this.xyzScale = new double[]{X_SCALE, Y_SCALE, Z_SCALE};
+        this.exprMax = 100;
+        this.exprMin = -100;
     }
 
     /** {@inheritDoc} */
@@ -89,6 +95,28 @@ public class TableLineageData implements LineageData {
 
     /** {@inheritDoc} */
     @Override
+    public int[] getRweights(final int time) {
+        final int internalTimeIndex = time - 1;
+        if (internalTimeIndex >= getNumberOfTimePoints() || internalTimeIndex < 0) {
+            return new int[1];
+        }
+        return timeFrames.get(internalTimeIndex).getRweights();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getExprMax() {
+        return exprMax;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public int getExprMin() {
+        return exprMin;
+    }
+
+    /** {@inheritDoc} */
+    @Override
     public int getNumberOfTimePoints() {
         return timeFrames.size();
     }
@@ -125,7 +153,8 @@ public class TableLineageData implements LineageData {
             final double x,
             final double y,
             final double z,
-            final double diameter) {
+            final double diameter,
+            final int rweight) {
 
         if (time <= getNumberOfTimePoints()) {
             final int index = time - 1;
@@ -134,9 +163,18 @@ public class TableLineageData implements LineageData {
             frame.addName(name);
             frame.addPosition(new Double[]{x, y, z});
             frame.addDiameter(diameter);
+            frame.addRweight(rweight);
 
             if (!allCellNames.contains(name)) {
                 allCellNames.add(name);
+            }
+
+            // update expression min and max
+            if (rweight > exprMax) {
+                exprMax = rweight;
+            }
+            if (rweight < exprMin) {
+                exprMin = rweight;
             }
         }
     }
@@ -223,11 +261,13 @@ public class TableLineageData implements LineageData {
         private List<String> names;
         private List<Double[]> positions;
         private List<Double> diameters;
+        private List<Integer> rweights;
 
         private Frame() {
             names = new ArrayList<>();
             positions = new ArrayList<>();
             diameters = new ArrayList<>();
+            rweights = new ArrayList<>();
         }
 
         private void shiftPositions(final double x, final double y, final double z) {
@@ -249,6 +289,8 @@ public class TableLineageData implements LineageData {
             diameters.add(diameter);
         }
 
+        private void addRweight(Integer rweight) { rweights.add(rweight); }
+
         private String[] getNames() {
             return names.toArray(new String[names.size()]);
         }
@@ -267,6 +309,14 @@ public class TableLineageData implements LineageData {
             final double[] copy = new double[diameters.size()];
             for (int i = 0; i < diameters.size(); i++) {
                 copy[i] = diameters.get(i);
+            }
+            return copy;
+        }
+
+        private int[] getRweights() {
+            final int[] copy = new int[rweights.size()];
+            for (int i = 0; i < rweights.size(); i++) {
+                copy[i] = rweights.get(i);
             }
             return copy;
         }
